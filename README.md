@@ -5,12 +5,21 @@ gene-regulatory-network genomes live in a 2D petri dish of diffusing,
 cross-fed resources, under seasonal cycles and mass-extinction events, for
 hundreds of thousands of generations.
 
-```
+```sh
+# core simulator — stdlib only, no plotting stack, runs on a headless box
 julia --project=. -e 'using Pkg; Pkg.instantiate()'
 julia --project=. -t auto scripts/run.jl --gens 200000 --out runs/first
-julia --project=. scripts/dashboard.jl runs/first
-julia --project=. -t auto scripts/live.jl          # watch one evolve
+
+# charting — separate environment, pulls in Makie
+julia --project=scripts -e 'using Pkg; Pkg.develop(path="."); Pkg.instantiate()'
+julia --project=scripts scripts/dashboard.jl runs/first
+julia --project=scripts -t auto scripts/live.jl     # watch one evolve
 ```
+
+**Two environments on purpose.** The core package depends on nothing but the
+standard library, so a headless machine can run simulations without OpenGL or
+any plotting stack. `scripts/Project.toml` adds Makie for charting and depends
+on the core by path.
 
 ---
 
@@ -145,9 +154,18 @@ Measured on an Apple M5 (10 threads), grid 256, ~30k organisms:
 |---|---|---|---|
 | default settings | ~200 | ~1.4 h | ~65,000 |
 
-Reaching a million *generations* needs roughly 15M ticks — about a day. Run
-that headless with `scripts/run.jl`; the core has no plotting dependency, so it
-runs fine on a machine with no display.
+Reaching a million *generations* needs roughly 15M ticks. Run that headless
+with `scripts/run.jl` — the core has no plotting dependency, so it runs fine on
+a machine with no display. `stats.bin` is flushed as it goes, so a long run can
+be charted (or stopped) at any point without losing what it has done.
+
+Memory scales with dish area, since capacity is derived from it:
+
+| grid | capacity | organism arrays | approx ticks/s |
+|---|---|---|---|
+| 128 | 65,536 | 29 MB | ~250 |
+| 256 | 262,144 | 465 MB | ~50 |
+| 512 | 1,048,576 | 1.8 GB | ~13 |
 
 For scale, the same loop in pure Python measured **440 ns per organism-tick
 versus 8.3 ns** in Julia — and that comparison excluded the diffusion step,
@@ -155,7 +173,7 @@ which Julia also had to do.
 
 ## Development
 
-```
+```sh
 git config core.hooksPath .githooks     # run tests before every commit
 julia --project=. -t auto test/runtests.jl
 ```
