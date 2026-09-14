@@ -15,11 +15,17 @@ Base.@kwdef mutable struct Params
     capacity::Int          = 0
     capacity_per_cell::Int = 4          # headroom; max_per_cell is the real limit
     max_per_cell::Int32  = Int32(8)    # hard local packing limit
-    # Founders, 0 = scale with dish area. A fixed count is a trap: 200 founders
-    # is 0.012/cell at grid 128 but 0.0008/cell at grid 512, 16x sparser, and
-    # sparse founders simply fail to establish. Measured: 3 of 8 grid-256 runs
-    # died inside 90k ticks, two of them inside 27k — establishment failures,
-    # not ecology.
+    # Founders, 0 = scale with dish area. A fixed count is a density trap: 200
+    # founders is 0.012/cell at grid 128 but 0.0008/cell at grid 512, 16x
+    # sparser, which makes runs at different grid sizes incomparable.
+    #
+    # It was ALSO hypothesised to explain the early extinctions seen at grid
+    # 256. It does not: scaling founders moved extinctions only 3/8 -> 2/8 over
+    # 8 seeds, which is nothing at that sample size, and a scaled run still died
+    # at tick 10,986. The actual cause turned out to be famine (8 of 8 deaths
+    # followed one within 24-211 ticks), addressed by dormancy. Keep the
+    # scaling because comparability across grid sizes is worth having on its
+    # own; do not credit it with fixing extinction.
     n_founders::Int      = 0
     seed::Int            = 42
 
