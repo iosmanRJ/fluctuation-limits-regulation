@@ -26,7 +26,7 @@ include("run.jl")
 
 export Params, Sim, Environment, Population, CladeTable,
        step!, run_sim, seed_population!,
-       develop!, inherit!, mutate!, seed_genome!, seed_fast!, channel_cost,
+       develop!, inherit!, mutate!, seed_genome!, seed_fast!, channel_cost, genome_structure,
        StatLog, record!, flush_stats!, read_stats, stat_index, STAT_NAMES,
        snapshot_schedule, write_snapshot, read_snapshot,
        replenish!, diffuse!, total_resource,

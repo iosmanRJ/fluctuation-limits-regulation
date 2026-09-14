@@ -92,6 +92,8 @@ function seed_population!(sim::Sim, n::Int)
             pop.phen[k, i] = sim.phen_scratch[k]
         end
         pop.chan_cost[i] = channel_cost(sim.phen_scratch, p.channel_cost_exp)
+        nz, act, aw = genome_structure(pop.W, pop.bias, i)
+        pop.nzw[i] = nz; pop.active[i] = act; pop.absw[i] = aw
     end
     return nothing
 end
@@ -320,6 +322,8 @@ function settle_births!(sim::Sim)
                     pop.phen[kk, child] = phen[kk]
                 end
                 pop.chan_cost[child] = channel_cost(phen, chan_exp)
+                nz, act, aw = genome_structure(pop.W, pop.bias, child)
+                pop.nzw[child] = nz; pop.active[child] = act; pop.absw[child] = aw
             end
         end
     end

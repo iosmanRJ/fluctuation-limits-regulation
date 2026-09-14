@@ -271,6 +271,38 @@ simplex a fitness minimum rather than a flat ridge.
     c
 end
 
+"""
+    genome_structure(W, bias, i; eps) -> (nonzero_weights, active_genes, mean_abs_weight)
+
+Structural summary of one regulatory network, computed once at birth and cached
+alongside the phenotype.
+
+For an open-ended evolution model this is the headline question — does genomic
+complexity grow, or does the network simplify? — and it is invisible if only
+phenotype outputs are logged. `active_genes` counts nodes with any outgoing
+influence, so gene silencing shows up directly; `nonzero_weights` is the
+network's connectivity.
+"""
+function genome_structure(W::Array{Float32,3}, bias::Matrix{Float32}, i::Int;
+                          eps::Float32 = 1.0f-4)
+    nz = 0
+    active = 0
+    tot = 0.0f0
+    @inbounds for k in 1:NG
+        any_out = false
+        for m in 1:NG
+            w = abs(W[k, m, i])      # outgoing weights of node k
+            tot += w
+            if w > eps
+                nz += 1
+                any_out = true
+            end
+        end
+        any_out && (active += 1)
+    end
+    (Int32(nz), Int32(active), tot / Float32(NG * NG))
+end
+
 """Random founder genome: sparse, weakly connected, mostly quiet."""
 function seed_genome!(W::Array{Float32,3}, bias::Matrix{Float32}, i::Int, rng, density = 0.25f0)
     @inbounds for k in 1:NG, m in 1:NG

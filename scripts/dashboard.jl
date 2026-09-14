@@ -146,7 +146,30 @@ end
 mark_shocks!(ax10)
 axislegend(ax10; position = :lt, nbanks = 2)
 
-for (r, h) in [(0, 26), (1, 18), (2, 220), (3, 220), (4, 220), (5, 220)]
+# --- row 5: the measures that were missing ------------------------------------
+# Top-channel share is the branching measure the README insists on: a mean
+# cannot tell one generalist from two coexisting specialists.
+ax11 = Axis(fig[6, 1:2],
+            title = "Who eats what — share of population by top channel (branching)",
+            xlabel = "tick", ylabel = "share of population")
+for r in 1:NRES
+    (x, y) = xs(M[ix("top_share$(r)"), :])
+    lines!(ax11, x, y; color = P.series[r], linewidth = 2, label = chan_labels[r])
+end
+mark_shocks!(ax11)
+ylims!(ax11, 0, 1)
+axislegend(ax11; position = :lt, nbanks = 2)
+
+# Genome complexity: the headline question for an open-ended model — does the
+# network gain structure or simplify? Two measures, two panels, never one axis.
+ax12 = Axis(fig[6, 3], title = "Genome: network connectivity",
+            xlabel = "tick", ylabel = "non-zero weights (of $(NG*NG))")
+let (x, y) = xs(M[ix("mean_nonzero_w"), :])
+    lines!(ax12, x, y; color = P.series[7], linewidth = 2)
+end
+mark_shocks!(ax12)
+
+for (r, h) in [(0, 26), (1, 18), (2, 220), (3, 220), (4, 220), (5, 220), (6, 220)]
     rowsize!(fig.layout, r, Fixed(h))
 end
 rowgap!(fig.layout, 14)

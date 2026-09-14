@@ -11,7 +11,7 @@
 # million, and a linear schedule wastes all its resolution on the boring end.
 # =============================================================================
 
-const NSTAT = 10 + NRES + 2 * NPHEN    # 50
+const NSTAT = 10 + NRES + 2 * NPHEN + NRES + 3   # 49
 
 const STAT_NAMES = vcat(
     ["gen", "pop", "births", "deaths", "mean_energy", "mean_age",
@@ -19,6 +19,12 @@ const STAT_NAMES = vcat(
     ["res$(r)_total" for r in 1:NRES],
     ["mean_phen$(k)" for k in 1:NPHEN],
     ["std_phen$(k)" for k in 1:NPHEN],
+    # Fraction of the population whose LARGEST uptake allocation is channel r.
+    # This is the branching measure: a mean cannot distinguish one generalist
+    # from two coexisting specialists, but these shares can.
+    ["top_share$(r)" for r in 1:NRES],
+    # Network structure: is the genome gaining or losing complexity?
+    ["mean_nonzero_w", "mean_active_genes", "mean_abs_w"],
 )
 
 mutable struct StatLog
@@ -52,6 +58,8 @@ function record!(sl::StatLog, sim::Sim)
 
     n = 0
     sum_e = 0.0; sum_age = 0.0; sum_load = 0.0; sum_depth = 0.0
+    sum_nzw = 0.0; sum_active = 0.0; sum_absw = 0.0
+    top = ntuple(_ -> 0, NRES)
     mean_phen = zeros(Float64, NPHEN)
     sq_phen   = zeros(Float64, NPHEN)
     counts = sl.counts
@@ -64,6 +72,14 @@ function record!(sl::StatLog, sim::Sim)
         sum_age  += pop.age[i]
         sum_load += pop.load[i]
         sum_depth += pop.depth[i]
+        sum_nzw += pop.nzw[i]; sum_active += pop.active[i]; sum_absw += pop.absw[i]
+        # which channel does this organism allocate the most to?
+        best = 1; bv = pop.phen[1, i]
+        for r in 2:NRES
+            v = pop.phen[r, i]
+            v > bv && (bv = v; best = r)
+        end
+        top = Base.setindex(top, top[best] + 1, best)
         counts[pop.clade[i]] = get(counts, pop.clade[i], 0) + 1
         for k in 1:NPHEN
             v = Float64(pop.phen[k, i])
@@ -107,6 +123,13 @@ function record!(sl::StatLog, sim::Sim)
             B[10 + NRES + k, col]         = m
             B[10 + NRES + NPHEN + k, col] = sqrt(v)
         end
+        off = 10 + NRES + 2 * NPHEN
+        for r in 1:NRES
+            B[off + r, col] = top[r] * invn
+        end
+        B[off + NRES + 1, col] = sum_nzw * invn
+        B[off + NRES + 2, col] = sum_active * invn
+        B[off + NRES + 3, col] = sum_absw * invn
     end
 
     if sl.k == size(B, 2) || time() - sl.last_flush >= sl.flush_after

@@ -628,6 +628,63 @@ end
 end
 
 # =============================================================================
+@testset "stats: top-channel shares and genome structure" begin
+    # top_share is THE branching measure — a mean cannot distinguish one
+    # generalist from two coexisting specialists, these shares can.
+    dir = mktempdir()
+    sim = Sim(Params(grid = 48, capacity = 4000, shock_interval = 0, seed = 61))
+    for _ in 1:500
+        step!(sim)
+    end
+    sl = StatLog(dir); record!(sl, sim); close(sl)
+    M = read_stats(dir)
+
+    shares = [M[stat_index("top_share$(r)"), 1] for r in 1:NRES]
+    @test sum(shares) ≈ 1.0f0 atol=1e-4         # it is a partition
+    @test all(0.0 .<= shares .<= 1.0)
+
+    # cross-check against counting it directly
+    live = [i for i in 1:high_water(sim.pop) if sim.pop.alive[i]]
+    direct = [count(i -> argmax(@view sim.pop.phen[1:NRES, i]) == r, live) / length(live)
+              for r in 1:NRES]
+    for r in 1:NRES
+        @test shares[r] ≈ direct[r] atol=1e-3
+    end
+
+    nz = M[stat_index("mean_nonzero_w"), 1]
+    ag = M[stat_index("mean_active_genes"), 1]
+    @test 0 < nz <= NG * NG                      # connectivity is in range
+    @test 0 < ag <= NG                           # active genes is in range
+    @test M[stat_index("mean_abs_w"), 1] > 0
+end
+
+@testset "genome: structure summary tracks silencing" begin
+    rng = Xoshiro(23)
+    W = zeros(Float32, NG, NG, 1); b = zeros(Float32, NG, 1)
+    seed_genome!(W, b, 1, rng)
+    nz0, act0, aw0 = genome_structure(W, b, 1)
+    @test nz0 > 0 && act0 > 0 && aw0 > 0
+
+    # a fully wired genome has every weight and every gene active
+    fill!(W, 1.0f0)
+    nz1, act1, aw1 = genome_structure(W, b, 1)
+    @test nz1 == NG * NG
+    @test act1 == NG
+    @test aw1 ≈ 1.0f0
+
+    # silencing one gene zeroes its outgoing row and drops the active count
+    p = Params(mut_rate = 0.0f0, p_silence = 1.0f0, p_duplicate = 0.0f0)
+    mutate!(W, b, 1, rng, p, 0.0f0)
+    nz2, act2, _ = genome_structure(W, b, 1)
+    @test act2 == NG - 1
+    @test nz2 == NG * NG - NG
+
+    # an empty genome registers as zero complexity
+    fill!(W, 0.0f0)
+    nz3, act3, aw3 = genome_structure(W, b, 1)
+    @test nz3 == 0 && act3 == 0 && aw3 == 0.0f0
+end
+
 @testset "stats: schedule" begin
     s = snapshot_schedule(1_000_000, 12)
     @test first(s) == 1
