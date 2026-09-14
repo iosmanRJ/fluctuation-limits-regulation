@@ -262,6 +262,22 @@ sums differing in the 8th significant figure. Eventually a 1-ULP difference
 flips a comparison and the runs diverge. Pin the Julia version when a result
 needs to be exactly reproducible.
 
+### A warning from experience
+
+Three separate rounds of this model looked fine and were degenerate. The
+failure mode is always the same shape: some quantity has a benefit with no
+matching cost, or a constraint that was meant to be ecological is actually an
+implementation limit. Symptoms to watch for on the dashboard:
+
+- Traits pinned at exactly 0.0 or 1.0 → that trait has no interior optimum.
+- Population pinned at exactly `capacity` → the array bound has become the
+  selective force, births are being dropped, and selection has gone slack.
+- Trait spread collapsing to zero → the population is monomorphic and nothing
+  further will happen no matter how long you run it.
+
+Charts are the debugger here. Run a few tens of thousands of ticks and look at
+them before committing to a long run.
+
 ## Cross-feeding: how it is modelled, and why
 
 The waste channels exist so organisms can build niches for each other. Getting
@@ -358,19 +374,3 @@ and a diffusion length shorter than the spacing between waste patches.
   [Wiley](https://onlinelibrary.wiley.com/doi/full/10.1111/evo.12485)
 - *Stochastic trade-offs and the emergence of diversification in E. coli
   evolution experiments* — [arXiv:2307.11033](https://arxiv.org/abs/2307.11033)
-
-### A warning from experience
-
-Three separate rounds of this model looked fine and were degenerate. The
-failure mode is always the same shape: some quantity has a benefit with no
-matching cost, or a constraint that was meant to be ecological is actually an
-implementation limit. Symptoms to watch for on the dashboard:
-
-- Traits pinned at exactly 0.0 or 1.0 → that trait has no interior optimum.
-- Population pinned at exactly `capacity` → the array bound has become the
-  selective force, births are being dropped, and selection has gone slack.
-- Trait spread collapsing to zero → the population is monomorphic and nothing
-  further will happen no matter how long you run it.
-
-Charts are the debugger here. Run a few tens of thousands of ticks and look at
-them before committing to a long run.
