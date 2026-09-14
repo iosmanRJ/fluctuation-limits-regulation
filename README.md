@@ -431,34 +431,57 @@ zero, and the singular strategy is degenerate — neutral rather than disruptive
 Adaptive dynamics requires a branching point to be convergence stable *and*
 evolutionarily unstable, i.e. a fitness **minimum**.
 
-**What partly works, and why it is not the default.** `maint_channel` charges a
-concave proteome cost for breadth (`sum(allocation^channel_cost_exp)`), which is
-real biology — every transporter occupies membrane and ribosome capacity whether
-used or not — and it does turn the flat ridge into a minimum. Measured:
+**What partly works — measured properly with a controlled A/B.** Three
+mechanisms together shift the outcome: a concave proteome cost for dietary
+breadth (`maint_channel`), spatial structure (low `diff_rate` plus
+`diff_falloff` so byproducts diffuse slower than the substrate), and enough
+`inflow` to afford the first two.
 
-| inflow | `maint_channel` | non-ch1 specialists |
+The diagnostic that explains why is the **spatial correlation between channel 1
+and total waste**. Niche separation needs them *anti*-correlated. By default
+they are positively correlated, because waste is produced where organisms are
+and organisms are where channel 1 is — so every organism sees the same mixture
+and there is nothing to partition:
+
+| config | non-ch1 specialists | ρ(ch1, waste) |
 |---|---|---|
-| 0.25 (default) | 0.04 | 0–2% |
-| 0.60 | 0.04 | 1.8% |
-| **0.60** | **0.10** | **7.1%** |
-| 1.20 | 0.10 | 3.0% |
-| 0.60 | 0.18 | extinct |
+| baseline | 0.1% | **+0.04** |
+| proteome cost only | 5.4% | −0.05 |
+| all three | 19.8% | **−0.13** |
 
-It cannot simply be turned up: founders start as random generalists and cannot
-afford a large fixed cost before they have had time to specialise, so anything
-above ~0.10 kills the dish within a handful of ticks. And at the best setting
-found, across six seeds the second ecotype was **0% to 16.6% with one extinction**
-— sometimes a real channel-2 ecotype at 12%, sometimes nothing at all.
+Paired A/B, same 12 seeds per arm, grid 128, 150k ticks:
 
-It is **off by default** because measured honestly it costs more than it buys:
-at 0.04 with default inflow, population fell from ~12,700 to ~4,600,
-cross-feeding fell from 0.26–0.30 to 0.22, and one seed in five went extinct —
-in exchange for at most 2% branching.
+| | control | combo |
+|---|---|---|
+| surviving runs | 8/12 | 8/12 |
+| **extinctions** | **4/12** | **4/12** |
+| non-ch1 specialists, median (range) | **0.0%** (0.0–0.1) | **1.7%** (0.3–6.4) |
+| runs ≥5% non-ch1 | **0/8** | **3/8** |
+| runs ≥10% non-ch1 | 0/8 | 0/8 |
+| **clade diversity (Shannon)** | **0.03–1.9** | **4.9–8.2** |
+| generations reached | ~6,500 | ~11,600–15,700 |
+| genome connectivity (of 400) | 380 | 392 |
 
-That contingency is itself consistent with the literature: individual-based work
-finds that whether lineages stay autonomous or split into a metabolic division
-of labour is an *evolutionary contingency* — a "frozen metabolic accident"
-established early that constrains everything after it.
+Read that carefully, because the headline is not the one being aimed at.
+
+**Dietary branching is real but small.** The control is not merely low, it is
+flat zero — eight runs, maximum 0.1%. The combo reaches a median of 1.7% and
+gets three of eight runs past 5%. So the mechanism works and the effect is
+unambiguous, but it never produced a stable co-dominant ecotype: nothing
+cleared 10%.
+
+**It costs nothing in extinction risk** — 4/12 in both arms, identical.
+
+**The large effect is on clade diversity, not diet.** Control runs collapse to
+one lineage (Shannon 0.03–1.9); combo runs sustain many (4.9–8.2). The
+mechanism preserves lineage diversity far more strongly than it partitions
+diets. That was not what it was built for, and it is the more interesting
+result: what these three changes buy is a population that does not collapse to
+a single clone, even while all those clades keep eating much the same thing.
+
+None of this is the default. The combo needs inflow raised 2.4x, which changes
+the energy economy of everything else, and the payoff is a minority ecotype
+rather than a split population.
 
 **Where to go next.** The same work finds cross-feeding lineages emerge only
 under strong spatial structure, self-organising into interleaved patterns, and
@@ -466,11 +489,17 @@ that in well-mixed conditions autonomous mutants take over. The fields here are
 close to uniform (`avail@organisms ≈ avail@global`), which is the real blocker:
 every organism sees the same resource mixture, so there is one optimal strategy
 and nothing to partition. Lowering `diff_rate` raises field heterogeneity
-(CV 0.51 → 0.89) and does lift branching to ~2%, but not further on its own, and
-making motility expensive enough to matter starves the dish. A serious attempt
-probably needs per-channel diffusion rates — waste products are larger molecules
-and should diffuse slower than the primary resource — so that waste forms
-persistent patches a specialist can live in.
+(CV 0.51 → 0.89) and lifts branching to ~2% but no further on its own, and
+making motility expensive enough to matter starves the dish. Per-channel
+diffusion (`diff_falloff`) is now implemented and alone does nothing —
+heterogeneity rises (waste CV 0.125 → 0.302) with branching still at 0%. It
+only pays combined with the proteome cost, as the A/B above shows.
+
+What has *not* been tried: making organisms' offspring disperse less (birth
+placement is currently a neighbouring cell, which is already local), or giving
+the dish a spatial gradient in inflow so that different regions genuinely
+favour different channels rather than relying on the population to generate
+the heterogeneity itself.
 
 ### References
 
