@@ -536,9 +536,41 @@ None of this is the default. The combo needs inflow raised 2.4x, which changes
 the energy economy of everything else, and the payoff is a minority ecotype
 rather than a split population.
 
-### Genome complexity does not grow — measured
+### References
 
-Connectivity saturating at ~392 of 400 weights was originally read here as
+- Marsland et al., *Available energy fluxes drive a transition in the diversity,
+  stability, and functional structure of microbial communities* (MiCRM) —
+  [bioRxiv](https://www.biorxiv.org/content/10.1101/335893v2.full)
+- *Stability and feasibility of the Microbial Consumer-Resource Model* —
+  [arXiv:2607.19982](https://arxiv.org/abs/2607.19982)
+- Doebeli, *A model for the evolutionary dynamics of cross-feeding polymorphisms
+  in microorganisms*, Population Ecology (2002) —
+  [Springer](https://link.springer.com/content/pdf/10.1007/s101440200008.pdf)
+- van Dijk et al., *Contingent evolution of alternative metabolic network
+  topologies determines whether cross-feeding evolves*, Communications Biology —
+  [PMC7391776](https://pmc.ncbi.nlm.nih.gov/articles/PMC7391776/)
+- Pakzad & DeAngelis, *Traveling wave formation enables strain coexistence in a
+  spatial model of bacterial cross-feeding*, Mathematical Biosciences (2026) —
+  [PubMed](https://pubmed.ncbi.nlm.nih.gov/41667035/)
+- Morris et al., *Coexistence of evolving bacteria stabilized by a shared Black
+  Queen function*, Evolution —
+  [Wiley](https://onlinelibrary.wiley.com/doi/full/10.1111/evo.12485)
+- *Stochastic trade-offs and the emergence of diversification in E. coli
+  evolution experiments* — [arXiv:2307.11033](https://arxiv.org/abs/2307.11033)
+- Geritz et al., *Evolutionarily singular strategies and the adaptive growth and
+  branching of the evolutionary tree* —
+  [Springer](https://link.springer.com/article/10.1023/A:1006554906681)
+- *Continuously stable strategies as evolutionary branching points* —
+  [arXiv:1005.3862](https://arxiv.org/pdf/1005.3862)
+- *Shaping of microbial phenotypes by trade-offs* (proteome allocation and the
+  specialist/generalist trade-off) —
+  [Nature Communications](https://www.nature.com/articles/s41467-024-48591-9)
+
+## Genome complexity: does it grow?
+
+It does not, and the experiment that shows it is the cleanest in the project.
+
+Connectivity saturating at ~392 of 400 weights was originally read as
 evidence that complexity had stopped growing. That reading was not available:
 `NG` was a hard cap, so saturation was forced. With genome size now variable the
 question is answerable, and the answer is negative.
@@ -593,33 +625,3 @@ placement is currently a neighbouring cell, which is already local), or giving
 the dish a spatial gradient in inflow so that different regions genuinely
 favour different channels rather than relying on the population to generate
 the heterogeneity itself.
-
-### References
-
-- Marsland et al., *Available energy fluxes drive a transition in the diversity,
-  stability, and functional structure of microbial communities* (MiCRM) —
-  [bioRxiv](https://www.biorxiv.org/content/10.1101/335893v2.full)
-- *Stability and feasibility of the Microbial Consumer-Resource Model* —
-  [arXiv:2607.19982](https://arxiv.org/abs/2607.19982)
-- Doebeli, *A model for the evolutionary dynamics of cross-feeding polymorphisms
-  in microorganisms*, Population Ecology (2002) —
-  [Springer](https://link.springer.com/content/pdf/10.1007/s101440200008.pdf)
-- van Dijk et al., *Contingent evolution of alternative metabolic network
-  topologies determines whether cross-feeding evolves*, Communications Biology —
-  [PMC7391776](https://pmc.ncbi.nlm.nih.gov/articles/PMC7391776/)
-- Pakzad & DeAngelis, *Traveling wave formation enables strain coexistence in a
-  spatial model of bacterial cross-feeding*, Mathematical Biosciences (2026) —
-  [PubMed](https://pubmed.ncbi.nlm.nih.gov/41667035/)
-- Morris et al., *Coexistence of evolving bacteria stabilized by a shared Black
-  Queen function*, Evolution —
-  [Wiley](https://onlinelibrary.wiley.com/doi/full/10.1111/evo.12485)
-- *Stochastic trade-offs and the emergence of diversification in E. coli
-  evolution experiments* — [arXiv:2307.11033](https://arxiv.org/abs/2307.11033)
-- Geritz et al., *Evolutionarily singular strategies and the adaptive growth and
-  branching of the evolutionary tree* —
-  [Springer](https://link.springer.com/article/10.1023/A:1006554906681)
-- *Continuously stable strategies as evolutionary branching points* —
-  [arXiv:1005.3862](https://arxiv.org/pdf/1005.3862)
-- *Shaping of microbial phenotypes by trade-offs* (proteome allocation and the
-  specialist/generalist trade-off) —
-  [Nature Communications](https://www.nature.com/articles/s41467-024-48591-9)
