@@ -54,8 +54,12 @@ function run_sim(; gens::Int,
         if verbose && time() - last_report > 5.0
             el = time() - t0
             eta = el * (gens - g) / g
-            @printf("gen %9d/%d  pop %7d  clades %5d  %.0f gen/s  ETA %s\n",
-                    g, gens, sim.pop.n, nclades(sim.clades), g / el, fmt_dur(eta))
+            @printf("[%s] tick %9d/%d  pop %8d  clades %6d  %.0f tick/s  ETA %s\n",
+                    Dates.format(now(), "HH:MM:SS"), g, gens, sim.pop.n,
+                    nclades(sim.clades), g / el, fmt_dur(eta))
+            # stdout is block-buffered when redirected to a file, so a long
+            # headless run would show no progress at all without this.
+            flush(stdout)
             last_report = time()
         end
     end
@@ -66,9 +70,12 @@ function run_sim(; gens::Int,
     write_shocks(outdir, sim.shock_log)
 
     elapsed = time() - t0
-    verbose && @printf("done: %d gens in %s (%.0f gen/s)%s\n",
-                       sim.gen, fmt_dur(elapsed), sim.gen / elapsed,
-                       extinct_at > 0 ? "  [EXTINCT at $extinct_at]" : "")
+    if verbose
+        @printf("done: %d ticks in %s (%.0f tick/s)%s\n",
+                sim.gen, fmt_dur(elapsed), sim.gen / elapsed,
+                extinct_at > 0 ? "  [EXTINCT at $extinct_at]" : "")
+        flush(stdout)
+    end
 
     if sim.dropped > 0
         @warn "run finished with dropped births; treat its evolutionary results as unreliable" dropped=sim.dropped
