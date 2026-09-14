@@ -54,6 +54,9 @@ more faithful model anyway.
 
 Local resource concentrations feed the first six network nodes, so the same
 genome develops differently in different conditions (phenotypic plasticity).
+The `plasticity` parameter scales that input; `0.0` makes allocation purely
+genetic, which is useful for asking whether plastic responses are masking
+heritable variation (here, they are not).
 
 Mutations are point perturbations of weights, plus gene **silencing** and gene
 **duplication** — the latter is how regulatory networks gain new functions.
@@ -72,6 +75,10 @@ Mutations are point perturbations of weights, plus gene **silencing** and gene
 
 There is deliberately **no** "which byproduct do I emit" trait — see
 [Cross-feeding](#cross-feeding-how-it-is-modelled-and-why).
+
+Dietary breadth can additionally be charged a concave proteome cost via
+`maint_channel` / `channel_cost_exp` (off by default — it costs more than it
+buys; see [Still open](#still-open-coexisting-ecotypes)).
 
 **Every trait that buys something also costs something.** This is not
 decoration — without a cost, evolution pins a trait to 1.0 and the model stops
@@ -292,8 +299,29 @@ implementation limit. Symptoms to watch for on the dashboard:
   channel they had just eaten, which silently disabled the whole waste economy.
   If something is chemistry rather than strategy, do not make it a trait.
 
+### Two ways to measure the wrong thing
+
+Both of these produced confident, completely wrong conclusions here. They are
+general, not specific to cross-feeding.
+
+**A mean cannot tell you whether a population has split.** Mean allocation of
+ch1 0.70 / ch2 0.19 is *identical* whether every organism is a 0.70/0.19
+generalist or 70% are pure-ch1 and 25% are pure-ch2. Standard deviation is not
+much better. For anything that might be bimodal, plot a histogram or count how
+many organisms fall in each category — the trait-spread panel on the dashboard
+is a hint, not an answer.
+
+**Judge a resource by its renewal flux, never by its standing pool.** Computing
+the value of each channel from how much of it was lying around said channels 3
+and 4 were worth ~1.8× channel 1, and an invasion calculation built on that said
+every specialist should sweep. Both were wrong: a waste channel's pool is large
+precisely *because nothing is eating it*, while its renewal flux is several
+leakage steps down the ladder. A specialist on it eats the accumulated pool once
+and then starves.
+
 Charts are the debugger here. Run a few tens of thousands of ticks and look at
-them before committing to a long run.
+them before committing to a long run. The full worked example of both mistakes
+is in [Still open: coexisting ecotypes](#still-open-coexisting-ecotypes).
 
 ## Cross-feeding: how it is modelled, and why
 
