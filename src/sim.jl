@@ -134,7 +134,9 @@ function organism_step!(sim::Sim)
     maint_repair  = p.maint_repair
     maint_crowd   = p.maint_crowd
     maint_load    = p.maint_load
-    excrete_frac  = p.excrete_frac
+    maint_toxic   = p.maint_toxic
+    leak_bonus    = p.leak_rate_bonus
+    leak_min      = p.leak_min
     div_energy    = p.div_energy
     res_cap       = p.res_cap
     e_max         = p.e_max
@@ -148,55 +150,63 @@ function organism_step!(sim::Sim)
         xi = pop.x[i]
         yi = pop.y[i]
 
-        # --- uptake across channels, by evolved allocation --------------------
+        # --- uptake, conversion and leakage ----------------------------------
         gained     = 0.0f0
-        raw_intake = 0.0f0
+        toxic      = 0.0f0
         # Size scales uptake as well as upkeep. Without a benefit, size has
         # only a cost and evolution trivially drives it to zero; with both it
         # has an interior optimum that shifts as conditions change.
         size_gain = 0.5f0 + pop.phen[P_SIZE, i]
+        # Rate/yield trade-off: leaking more lets a cell pull resource in faster
+        # but extract less from each unit of it.
+        leak = leak_min + (1.0f0 - leak_min) * pop.phen[P_LEAK, i]
+        rate_mult = size_gain * (1.0f0 + leak_bonus * leak)
+
         for r in 1:NRES
             aff = pop.phen[r, i]          # allocation share; these sum to 1
             avail = res[r, xi, yi]
+            # waste channels inhibit growth wherever they accumulate
+            r > 1 && (toxic += avail)
+            aff <= 0.0f0 && continue
             # Proportional, not capped: more allocation always captures more,
             # and co-located organisms compete for shares of the same pool.
-            # Raised to uptake_exp so the trade-off is CONVEX — a specialist
-            # out-eats a generalist on its own channel. Under a linear
-            # trade-off spreading costs nothing in aggregate, there is no
-            # disruptive selection, and the population collapses to one
-            # monomorphic generalist whose waste allocation then erodes away.
-            got = avail * uptake_rate * (aff^uptake_exp) * size_gain
-            if got > 0.0f0
-                res[r, xi, yi] = avail - got
-                raw_intake += got
-                gained += got * yields[r]      # lower-quality wastes yield less
-            end
-        end
+            got = avail * uptake_rate * (aff^uptake_exp) * rate_mult
+            got <= 0.0f0 && continue
+            got > avail && (got = avail)
+            res[r, xi, yi] = avail - got
+            gained += got * yields[r] * (1.0f0 - leak)
 
-        # --- excretion: this organism's waste is someone else's niche --------
-        if raw_intake > 0.0f0
-            waste = raw_intake * excrete_frac
-            for r in 1:NRES
-                frac = pop.phen[NRES + r, i]
-                if frac > 0.0f0
-                    v = res[r, xi, yi] + waste * frac
-                    res[r, xi, yi] = v > res_cap ? res_cap : v
-                end
+            # --- the conversion ladder ---------------------------------------
+            # Channel r's byproduct is channel r+1, always. A resource is never
+            # converted back into itself or into anything upstream: that is the
+            # excluded diagonal of the metabolic matrix, and the reason is
+            # thermodynamic — you cannot climb back up the energy ladder. The
+            # last channel's byproduct leaves the system entirely.
+            if r < NRES
+                v = res[r + 1, xi, yi] + got * leak
+                res[r + 1, xi, yi] = v > res_cap ? res_cap : v
             end
         end
 
         # --- maintenance: broad diets and good repair both cost energy -------
         crowd = Float32(occ[xi, yi] - Int32(1))     # neighbours sharing this cell
         sz = pop.phen[P_SIZE, i]
+        st = pop.phen[P_STRESS, i]
         upkeep = maint_base +
                  maint_size   * sz * sz +             # quadratic: bounds the size arms race
                  maint_motil  * pop.phen[P_MOTIL, i] +
-                 maint_stress * pop.phen[P_STRESS, i] +
+                 maint_stress * st * st +            # quadratic, like size: a linear
+                                                       # cost gives tolerance no interior optimum
+
                  maint_repair * pop.phen[P_REPAIR, i] +
                  maint_crowd  * crowd +
-                 maint_load   * Float32(pop.load[i])   # genetic deterioration bites here
+                 maint_load   * Float32(pop.load[i]) +  # genetic deterioration bites here
+                 # Waste toxicity, which stress tolerance buys protection from.
+                 # This is what makes eating a waste channel a SERVICE to
+                 # whoever produced it, rather than pure scavenging.
+                 maint_toxic  * toxic * (1.0f0 - pop.phen[P_STRESS, i])
 
-        e = pop.energy[i] + gained * (1.0f0 - excrete_frac) - upkeep
+        e = pop.energy[i] + gained - upkeep
         e = e > e_max ? e_max : e                      # no indefinite hoarding
         pop.energy[i] = e
         pop.age[i] += Int32(1)

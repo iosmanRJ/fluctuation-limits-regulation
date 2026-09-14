@@ -12,16 +12,25 @@
 
 const NG    = 20                  # regulatory nodes
 const NRES  = 6                   # resource channels
-const NPHEN = 2 * NRES + 5        # 17 phenotype outputs
+const NPHEN = NRES + 6            # 12 phenotype outputs
 
 # --- phenotype layout --------------------------------------------------------
-const P_UPTAKE  = 1:NRES              # 1:6   affinity for each resource channel
-const P_EXCRETE = (NRES + 1):(2NRES)  # 7:12  which wastes this organism emits
-const P_SIZE    = 2NRES + 1           # 13    body size -> maintenance cost
-const P_MOTIL   = 2NRES + 2           # 14    movement probability
-const P_DIVIDE  = 2NRES + 3           # 15    division threshold
-const P_REPAIR  = 2NRES + 4           # 16    DNA repair fidelity (heritable, costly)
-const P_STRESS  = 2NRES + 5           # 17    tolerance to environmental shocks
+const P_UPTAKE  = 1:NRES          # 1:6  allocation across resource channels
+const P_SIZE    = NRES + 1        # 7    body size -> maintenance cost
+const P_MOTIL   = NRES + 2        # 8    movement probability
+const P_DIVIDE  = NRES + 3        # 9    division threshold
+const P_REPAIR  = NRES + 4        # 10   DNA repair fidelity (heritable, costly)
+const P_STRESS  = NRES + 5        # 11   tolerance to shocks AND to waste toxicity
+const P_LEAK    = NRES + 6        # 12   fraction of intake released as byproduct
+
+# NOTE: there is deliberately no evolvable "which byproduct do I emit" trait.
+# Where a byproduct goes is chemistry (see the conversion ladder in sim.jl), not
+# a decision. When it WAS evolvable, organisms discovered a futile cycle — they
+# evolved to excrete 36% of their waste straight back into the channel they had
+# just eaten (vs 17% for a neutral profile), which meant the waste channels were
+# never fed and cross-feeding had nothing to run on. Excluding self-conversion
+# is also what the microbial consumer-resource literature does: the metabolic
+# matrix D has its diagonal excluded on thermodynamic grounds.
 
 """
     develop!(phen, e, buf, W, bias, i, env; niter)
@@ -67,8 +76,6 @@ function develop!(phen::Vector{Float32}, e::Vector{Float32}, buf::Vector{Float32
     # channel"; a budget makes breadth genuinely costly in opportunity terms, so
     # an under-exploited channel is always worth something to somebody.
     @inbounds normalise!(phen, P_UPTAKE)
-    # excretion profile is a proportion, so normalise it too
-    @inbounds normalise!(phen, P_EXCRETE)
     return nothing
 end
 

@@ -71,7 +71,33 @@ Base.@kwdef mutable struct Params
     maint_repair::Float32   = 0.0200f0 # repair fidelity is not free
     maint_crowd::Float32    = 0.0500f0 # per co-located neighbour -> local competition
     maint_load::Float32     = 0.0150f0 # per accumulated deleterious mutation
-    excrete_frac::Float32   = 0.35f0   # share of intake returned as waste
+    # --- rate / yield trade-off (Pfeiffer & Bonhoeffer 2004) -----------------
+    # Leaking more of what you take gives a faster uptake rate but less energy
+    # per unit consumed — the reason real cells ferment to acetate instead of
+    # respiring fully. P_LEAK is the evolvable dial; this is its rate bonus.
+    leak_rate_bonus::Float32 = 1.20f0
+    # Leakage FLOOR, and it is deliberately high. In the microbial
+    # consumer-resource literature leakage is an environmental constant, not a
+    # trait (Marsland et al. run l = 0.8), because it is set by biochemistry.
+    # When it was free to evolve down it went to ~0.003: uptake saturates at
+    # whatever is locally available, so the rate bonus cannot pay for the yield
+    # loss, and the waste channels were starved of supply. The trait can still
+    # raise leakage above this floor.
+    leak_min::Float32        = 0.45f0
+
+    # --- waste toxicity (Black Queen / detoxification) -----------------------
+    # Accumulated byproducts inhibit growth locally, so an organism that eats a
+    # waste channel is doing everyone upwind a service. This is what turns
+    # one-way cross-feeding into a mutualism with negative frequency dependence;
+    # without it a cross-feeder confers nothing and simply gets outcompeted.
+    # Stress tolerance protects against it, which also gives that trait a
+    # continuous role instead of mattering only during rare shocks.
+    # 0.008 is the tested default: it leaves stress tolerance with an INTERIOR
+    # optimum (~0.35 across seeds) instead of pinning it at 1.0, which a linear
+    # tolerance cost did. The response is not monotonic — around 0.015 the dish
+    # can die during the ramp-up, before tolerance has had time to evolve. Sweep
+    # this one carefully.
+    maint_toxic::Float32     = 0.0080f0
     div_energy::Float32     = 2.0f0
     e_init::Float32         = 0.8f0
     e_max::Float32          = 4.0f0    # cells cannot hoard energy indefinitely

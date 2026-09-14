@@ -62,12 +62,15 @@ Mutations are point perturbations of weights, plus gene **silencing** and gene
 | Slots | Trait | Notes |
 |---|---|---|
 | 1–6 | uptake affinity per channel | an **allocation budget**, sums to 1 |
-| 7–12 | excretion profile | which wastes this organism emits, sums to 1 |
-| 13 | body size | scales uptake *and* upkeep (charged on size²) |
-| 14 | motility | movement probability, costed |
-| 15 | division threshold | energy needed to divide |
-| 16 | repair fidelity | suppresses mutation rate, costed |
-| 17 | stress tolerance | survival odds in heat shocks, costed |
+| 7 | body size | scales uptake *and* upkeep (charged on size²) |
+| 8 | motility | movement probability, costed |
+| 9 | division threshold | energy needed to divide |
+| 10 | repair fidelity | suppresses mutation rate, costed |
+| 11 | stress tolerance | shock survival **and** waste-toxicity protection (charged on stress²) |
+| 12 | leakage | fraction of intake released as byproduct, above a floor |
+
+There is deliberately **no** "which byproduct do I emit" trait — see
+[Cross-feeding](#cross-feeding-how-it-is-modelled-and-why).
 
 **Every trait that buys something also costs something.** This is not
 decoration — without a cost, evolution pins a trait to 1.0 and the model stops
@@ -259,31 +262,102 @@ sums differing in the 8th significant figure. Eventually a 1-ULP difference
 flips a comparison and the runs diverge. Pin the Julia version when a result
 needs to be exactly reproducible.
 
-## Known limitations
+## Cross-feeding: how it is modelled, and why
 
-**Cross-feeding decays.** The waste channels exist so that organisms can build
-niches for each other, and early in a run they do — 9–20% of uptake allocation
-goes to waste channels. Over long runs that erodes toward zero and the
-population converges on a single channel-1 specialist type. Things that were
-measured and did NOT fix it:
+The waste channels exist so organisms can build niches for each other. Getting
+that to persist rather than decay took three specific things, each of which the
+microbial consumer-resource literature is explicit about.
 
-- *Starving the dish.* Lowering inflow made it worse, not better (waste uptake
-  0.090 → 0.019 as inflow went 0.25 → 0.08). A smaller population produces less
-  waste, which thins the very niches you are trying to create.
-- *Raising waste yields.* Slows the decay without stopping it: with a shallow
-  yield decline, waste uptake still fell 0.180 → 0.076 over 80k ticks and was
-  still falling.
-- *Making the allocation trade-off convex* (`uptake_exponent` > 1), on the
-  theory that specialists would then out-eat generalists. It does the reverse —
-  the population becomes more generalist, and small dishes starve.
+### 1. A byproduct never returns to its own channel
 
-The population stays one monomorphic type rather than splitting into coexisting
-ecotypes; the trait-spread panel collapsing toward zero is the signature. A fix
-probably needs something that makes rarity genuinely advantageous — an explicit
-metabolic trade-off curve, or enough spatial isolation that local populations
-can diverge before diffusion mixes them. Everything else in the model (seasonal
-adaptation, mutation load ratcheting and purging, clade turnover, spatial
-patchiness in the waste fields) behaves well over long runs.
+Channel `r`'s byproduct is channel `r+1`, always; the last channel's byproduct
+leaves the system. **Where a byproduct goes is chemistry, not a trait.**
+
+This was the bug that broke everything. When the excretion destination *was* an
+evolvable trait, organisms found a futile cycle — they evolved to excrete
+**36% of their waste straight back into the channel they had just eaten**
+(against 17% for a neutral profile). Eat channel 1, excrete a third of it back
+as channel 1, re-eat it. The waste channels were never fed, so cross-feeding
+had nothing to run on and allocation to it decayed to zero.
+
+The consumer-resource models exclude exactly this: the metabolic matrix `D` is
+column-stochastic **with the diagonal excluded**, so a resource cannot be
+reconverted into itself, on thermodynamic grounds. A strictly downstream ladder
+enforces it and additionally rules out longer cycles.
+
+### 2. Leakage is a constant, not a trait
+
+`leak_min` is 0.45, and it is a floor rather than a target. Left free to evolve,
+leakage went to ~0.003 — uptake saturates at whatever is locally available, so
+the rate/yield bonus cannot pay for the yield it costs, and the waste channels
+starved. Leakage is an environmental constant in this literature (Marsland et
+al. run `l = 0.8`) because biochemistry sets it. The trait can still push
+leakage *above* the floor, which keeps the rate/yield trade-off alive.
+
+### 3. Waste is mildly toxic, and tolerance is quadratically costly
+
+Accumulated byproducts inhibit growth locally, so eating a waste channel is a
+*service* to whoever produced it, not mere scavenging. That is what converts
+one-way cross-feeding into a mutualism — the Black Queen mechanism, where
+partitioning a detoxifying function stabilises coexistence even for organisms
+competing for a single resource.
+
+Tolerance is charged on `stress²`. Under a linear cost this trait has no
+interior optimum: it pins at 1.0. **`maint_toxic` is not monotonic** — around
+0.015 the dish can die during the ramp-up, before tolerance has evolved. The
+0.008 default was checked across four seeds.
+
+### Measured outcome
+
+| | waste-channel uptake |
+|---|---|
+| before | 0.180 → **0.076** over 80k ticks, still falling |
+| after | **0.26–0.30**, flat across 60k ticks and four seeds |
+
+Things that were tried and did **not** work, so nobody repeats them:
+
+- *Starving the dish.* Worse, not better (0.090 → 0.019 as inflow went
+  0.25 → 0.08): a smaller population makes less waste, thinning the niches.
+- *Raising waste yields.* Slows the decay without stopping it.
+- *A convex allocation trade-off* (`uptake_exponent` > 1). Adaptive-dynamics
+  theory says evolutionary branching needs a trade-off with positive curvature,
+  and the exponent does drive specialisation up (0.987 → 0.999) — but every
+  organism specialises on the *same* channel, so there is no branching, and
+  small dishes starve. Curvature was not the binding constraint; the futile
+  cycle was.
+
+### Still open
+
+The population remains largely monomorphic — coexisting *ecotypes* (a channel-1
+specialist alongside a channel-2 specialist) do not robustly form; what is
+stable is a population that allocates ~27% of one budget to waste channels.
+Individual-based work finds cross-feeding lineages emerge only with strong
+spatial structure — in well-mixed conditions autonomous mutants take over — and
+that they self-organise into interleaved spatial patterns. Lowering `diff_rate`
+to 0.03 did not produce that here; a real attempt probably needs lower motility
+and a diffusion length shorter than the spacing between waste patches.
+
+### References
+
+- Marsland et al., *Available energy fluxes drive a transition in the diversity,
+  stability, and functional structure of microbial communities* (MiCRM) —
+  [bioRxiv](https://www.biorxiv.org/content/10.1101/335893v2.full)
+- *Stability and feasibility of the Microbial Consumer-Resource Model* —
+  [arXiv:2607.19982](https://arxiv.org/abs/2607.19982)
+- Doebeli, *A model for the evolutionary dynamics of cross-feeding polymorphisms
+  in microorganisms*, Population Ecology (2002) —
+  [Springer](https://link.springer.com/content/pdf/10.1007/s101440200008.pdf)
+- van Dijk et al., *Contingent evolution of alternative metabolic network
+  topologies determines whether cross-feeding evolves*, Communications Biology —
+  [PMC7391776](https://pmc.ncbi.nlm.nih.gov/articles/PMC7391776/)
+- Pakzad & DeAngelis, *Traveling wave formation enables strain coexistence in a
+  spatial model of bacterial cross-feeding*, Mathematical Biosciences (2026) —
+  [PubMed](https://pubmed.ncbi.nlm.nih.gov/41667035/)
+- Morris et al., *Coexistence of evolving bacteria stabilized by a shared Black
+  Queen function*, Evolution —
+  [Wiley](https://onlinelibrary.wiley.com/doi/full/10.1111/evo.12485)
+- *Stochastic trade-offs and the emergence of diversification in E. coli
+  evolution experiments* — [arXiv:2307.11033](https://arxiv.org/abs/2307.11033)
 
 ### A warning from experience
 

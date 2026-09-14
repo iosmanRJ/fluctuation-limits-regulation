@@ -22,9 +22,7 @@ using Test, Random, Statistics
     develop!(phen, e, buf, W, bias, 1, env)
     @test phen == p2
 
-    # excretion profile is a proportion and must sum to one
-    @test sum(phen[P_EXCRETE]) ≈ 1.0f0 atol=1e-4
-    # uptake affinity is an allocation budget, so it must also sum to one —
+    # uptake affinity is an allocation budget, so it must sum to one —
     # this is what makes specialist-vs-generalist a real trade-off
     @test sum(phen[P_UPTAKE]) ≈ 1.0f0 atol=1e-4
 
@@ -363,6 +361,91 @@ end
     @test sum(sim2.pop.occ) == sim2.pop.n
 end
 
+@testset "sim: byproducts never flow back to their own or an upstream channel" begin
+    # THE bug that killed cross-feeding. When the excretion destination was an
+    # evolvable trait, organisms evolved to excrete 36% of their waste straight
+    # back into the channel they had just eaten — a futile cycle that meant the
+    # waste channels were never fed. The microbial consumer-resource literature
+    # excludes the diagonal of the metabolic matrix for exactly this reason.
+    #
+    # Assert it structurally: seed ONLY channel 1, let organisms eat, and check
+    # that channel 1 never gains mass from metabolism.
+    p = Params(grid = 32, capacity = 3000, shock_interval = 0, seed = 12,
+               inflow = 0.0f0, decay = 0.0f0, diff_rate = 0.0f0)
+    sim = Sim(p)
+    fill!(sim.env.res, 0.0f0)
+    for j in 1:p.grid, i in 1:p.grid
+        sim.env.res[1, i, j] = 5.0f0
+    end
+    before = total_resource(sim.env, 1)
+    for _ in 1:60
+        step!(sim)
+    end
+    # with no inflow, channel 1 can only ever decrease
+    @test total_resource(sim.env, 1) < before
+    # and the downstream channels must have been fed by metabolism
+    @test sum(total_resource(sim.env, r) for r in 2:NRES) > 0.0
+
+    # monotonicity: channel 1 must never rise from one tick to the next
+    prev = total_resource(sim.env, 1)
+    for _ in 1:40
+        step!(sim)
+        now = total_resource(sim.env, 1)
+        @test now <= prev + 1e-3
+        prev = now
+    end
+end
+
+@testset "sim: cross-feeding persists instead of decaying away" begin
+    # Regression guard on the headline result. Before the conversion ladder and
+    # the leakage floor, allocation to waste channels decayed toward zero over
+    # long runs (0.180 -> 0.076 over 80k ticks, still falling). It must now hold
+    # up, and it must still be substantial late in the run.
+    p = Params(grid = 96, capacity = 0, seed = 7)
+    sim = Sim(p)
+    waste_share() = begin
+        live = [i for i in 1:high_water(sim.pop) if sim.pop.alive[i]]
+        isempty(live) && return 0.0
+        mean(sum(sim.pop.phen[r, i] for r in 2:NRES) for i in live)
+    end
+    for _ in 1:6000
+        step!(sim)
+    end
+    early = waste_share()
+    for _ in 1:14000
+        step!(sim)
+    end
+    late = waste_share()
+
+    @test sim.pop.n > 0
+    @test early > 0.10                 # cross-feeding establishes
+    @test late  > 0.10                 # and is still there much later
+    @test late  > 0.5 * early          # no collapse
+end
+
+@testset "sim: leakage floor is enforced" begin
+    # Leakage is an environmental constant in the consumer-resource literature,
+    # not a trait. Left free it evolved to ~0.003 and starved the waste channels,
+    # because uptake saturates at what is locally available so the rate bonus
+    # cannot pay for the yield loss. The floor is what guarantees supply.
+    p = Params(grid = 48, capacity = 4000, shock_interval = 0, seed = 19,
+               leak_min = 0.60f0, inflow = 0.0f0, decay = 0.0f0, diff_rate = 0.0f0)
+    sim = Sim(p)
+    fill!(sim.env.res, 0.0f0)
+    for j in 1:p.grid, i in 1:p.grid
+        sim.env.res[1, i, j] = 4.0f0
+    end
+    r1_before = total_resource(sim.env, 1)
+    for _ in 1:40
+        step!(sim)
+    end
+    consumed = r1_before - total_resource(sim.env, 1)
+    produced = sum(total_resource(sim.env, r) for r in 2:NRES)
+    @test consumed > 0
+    # at a 0.6 floor, most of what is consumed should reappear downstream
+    @test produced > 0.30 * consumed
+end
+
 @testset "sim: uptake budget holds for every live organism" begin
     p = Params(grid = 48, capacity = 4000, shock_interval = 0, seed = 71)
     sim = Sim(p)
@@ -374,7 +457,6 @@ end
         sim.pop.alive[i] || continue
         n += 1
         @test sum(sim.pop.phen[P_UPTAKE, i]) ≈ 1.0f0 atol=1e-4
-        @test sum(sim.pop.phen[P_EXCRETE, i]) ≈ 1.0f0 atol=1e-4
         @test all(sim.pop.phen[P_UPTAKE, i] .>= 0.0f0)
     end
     @test n > 0
