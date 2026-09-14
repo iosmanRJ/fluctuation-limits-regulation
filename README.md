@@ -45,11 +45,12 @@ runner prints the measured ticks-per-generation ratio when it finishes.
 
 A gene-regulatory network: a 20×20 weight matrix plus per-node bias. At birth
 the network is run to an approximate fixed point, and the resulting expression
-vector is read off as a **17-trait phenotype** which is then cached for life.
+vector is read off as a **12-trait phenotype** which is then cached for life.
 
 Development happens **once, at birth** — not every tick. Re-expressing every
-tick measured 15× slower (44.3 vs 2.9 ms/generation) for no modelling benefit,
-and "develop, then live as an adult" is the more faithful model anyway.
+tick measured 15× slower (44.3 vs 2.9 ms/tick, on an earlier version of the
+model) for no modelling benefit, and "develop, then live as an adult" is the
+more faithful model anyway.
 
 Local resource concentrations feed the first six network nodes, so the same
 genome develops differently in different conditions (phenotypic plasticity).
@@ -89,8 +90,14 @@ worth something to somebody.
 Six resource channels diffuse across the dish with no-flux edges. **Only
 channel 1 has external inflow.** Channels 2–6 exist purely as metabolic waste,
 so every other niche must be *created* by some organism before anything can
-live in it. Waste channels yield progressively less energy, so eating them is a
-living but not a good one.
+live in it.
+
+Byproducts run strictly downstream: eating channel `r` leaks part of the intake
+into channel `r+1`, and channel 6's byproduct leaves the system. Yields decline
+along the ladder, so each rung is a living but a poorer one than the rung above.
+That ladder is fixed chemistry, not an evolvable trait — see
+[Cross-feeding](#cross-feeding-how-it-is-modelled-and-why) for why that matters
+more than it sounds.
 
 Three pressures keep selection from settling:
 
@@ -155,25 +162,26 @@ A run directory holds:
 
 ## Performance
 
-Measured on an Apple M5 (10 threads), grid 256, ~30k organisms:
+Re-measured on the current model. Population is resource-limited, so it is
+reported alongside throughput — ticks/s depends on how many organisms are alive
+far more than on grid size alone.
 
-| | ticks/s | 1M ticks | ≈ generations |
-|---|---|---|---|
-| default settings | ~200 | ~1.4 h | ~65,000 |
+| grid | capacity | population | organism arrays | ticks/s |
+|---|---|---|---|---|
+| 128 | 65,536 | ~14,500 | 115 MB | **~900** |
+| 256 | 262,144 | ~62,000 | 460 MB | **~240** |
+| 512 | 1,048,576 | ~272,000 | 1.84 GB | **~55** |
+
+Grids 128 and 256 measured on an Apple M5 (10 threads); grid 512 is the median
+of 57 samples from a live run on an Apple M4 Pro (12 threads), where the range
+is 44–132 ticks/s — throughput swings by ~3× across the seasonal population
+cycle, so a single instantaneous reading means little.
 
 Reaching a million *generations* needs well over 15M ticks at grid 512 — use
-the measured `mean_depth`, not an assumed ratio. Run long jobs headless
-with `scripts/run.jl` — the core has no plotting dependency, so it runs fine on
-a machine with no display. `stats.bin` is flushed as it goes, so a long run can
-be charted (or stopped) at any point without losing what it has done.
-
-Memory scales with dish area, since capacity is derived from it:
-
-| grid | capacity | organism arrays | approx ticks/s |
-|---|---|---|---|
-| 128 | 65,536 | 29 MB | ~250 |
-| 256 | 262,144 | 465 MB | ~50 |
-| 512 | 1,048,576 | 1.8 GB | ~13 |
+the measured `mean_depth`, not an assumed ratio. Run long jobs headless with
+`scripts/run.jl`: the core has no plotting dependency, so it runs fine on a
+machine with no display, and `stats.bin` flushes on a 10s timer so a long run
+can be charted or stopped at any point without losing what it has done.
 
 For scale, the same loop in pure Python measured **440 ns per organism-tick
 versus 8.3 ns** in Julia — and that comparison excluded the diffusion step,
@@ -184,15 +192,19 @@ which Julia also had to do.
 Run with `-t auto` (or `-t 12`). Two phases are parallel: resource diffusion
 across channels, and the expensive part of the birth phase.
 
-Measured at grid 512 with ~275k organisms on 12 threads:
+Current split, grid 256 on 10 threads:
 
-| phase | before | after | |
+| phase | ms/tick | share | |
 |---|---|---|---|
-| `settle_births!` | 15.01 ms | 3.29 ms | parallelised, 4.6× |
-| `organism_step!` | 4.36 ms | 4.76 ms | **serial — now the bottleneck** |
-| `diffuse!` | 0.94 ms | 1.40 ms | parallel across channels |
-| `replenish!` | 0.45 ms | 0.42 ms | serial, negligible |
-| **total** | **20.76 ms** | **9.87 ms** | **48 → 101 ticks/s** |
+| `organism_step!` | 2.80 | **67%** | serial — the bottleneck |
+| `settle_births!` | 0.95 | 23% | parallel |
+| `diffuse!` | 0.26 | 6% | parallel across channels |
+| `replenish!` | 0.14 | 3% | serial, negligible |
+
+Parallelising the birth phase was worth **2.1×** when it was measured against
+the serial version (20.76 → 9.87 ms/tick at grid 512, 48 → 101 ticks/s). It
+used to be 72% of runtime on its own; it is now 23%, which is why
+`organism_step!` dominates the table above.
 
 Births dominate because each one develops a fresh regulatory network — tens of
 thousands of developments per tick at this scale. The parallel phase has no
@@ -274,6 +286,11 @@ implementation limit. Symptoms to watch for on the dashboard:
   selective force, births are being dropped, and selection has gone slack.
 - Trait spread collapsing to zero → the population is monomorphic and nothing
   further will happen no matter how long you run it.
+- An ecological *mechanism* quietly fading out (cross-feeding did this) → look
+  for a degree of freedom the organisms can exploit to short-circuit it. Making
+  the excretion destination evolvable let them excrete waste back into the
+  channel they had just eaten, which silently disabled the whole waste economy.
+  If something is chemistry rather than strategy, do not make it a trait.
 
 Charts are the debugger here. Run a few tens of thousands of ticks and look at
 them before committing to a long run.
