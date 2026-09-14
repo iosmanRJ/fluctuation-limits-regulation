@@ -28,6 +28,7 @@ mutable struct Sim
 
     births::Int
     deaths::Int
+    dropped::Int          # births lost to a full organism array — must stay ~0
     last_shock::Int
     shock_log::Vector{Tuple{Int,Symbol}}
 end
@@ -39,7 +40,7 @@ function Sim(p::Params = Params())
     sim = Sim(p, env, pop, CladeTable(), rng, 0,
               Int32[], zeros(Float32, NG), zeros(Float32, NG),
               zeros(Float32, NPHEN), zeros(Float32, NRES),
-              0, 0, 0, Tuple{Int,Symbol}[])
+              0, 0, 0, 0, Tuple{Int,Symbol}[])
     seed_population!(sim, 200)
     return sim
 end
@@ -209,7 +210,13 @@ function settle_births!(sim::Sim)
         parent = Int(pi_)
         pop.alive[parent] || continue          # parent died to a shock meanwhile
         child = claim!(pop)
-        child == 0 && break                    # dish full; no more divisions
+        if child == 0
+            # The organism array is full. This is an IMPLEMENTATION limit, not
+            # an ecological one, and if it happens at scale the run is invalid:
+            # dropped births mean reproductive success stops being selected on.
+            sim.dropped += length(sim.birth_parents)
+            break
+        end
 
         # child appears next to the parent, but only if there is room there
         nx = pop.x[parent] + rand(rng, Int32(-1):Int32(1))

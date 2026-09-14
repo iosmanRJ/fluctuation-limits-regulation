@@ -31,8 +31,12 @@ mutable struct Population
     capacity::Int
 end
 
+"""Resolved organism-array capacity: explicit if set, else scaled to the dish."""
+resolved_capacity(p::Params) =
+    p.capacity > 0 ? p.capacity : p.grid * p.grid * p.capacity_per_cell
+
 function Population(p::Params)
-    cap = p.capacity
+    cap = resolved_capacity(p)
     Population(
         zeros(Int32, cap), zeros(Int32, cap),
         zeros(Float32, cap), zeros(Int32, cap), fill(false, cap),

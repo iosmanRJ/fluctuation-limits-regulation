@@ -27,6 +27,7 @@ function run_sim(; gens::Int,
     t0 = time()
     extinct_at = 0
     last_report = t0
+    warned_full = false
 
     for g in 1:gens
         step!(sim)
@@ -36,6 +37,15 @@ function run_sim(; gens::Int,
             record!(slog, sim)
             verbose && @warn "population went extinct" generation=g
             break
+        end
+
+        if !warned_full && sim.dropped > 0
+            warned_full = true
+            @warn """organism array is full — births are being dropped.
+                   Capacity is an implementation limit, not an ecological one; while
+                   it binds, reproductive success stops being selected on and every
+                   trait drifts toward whatever is cheapest. Raise `capacity` (or
+                   `capacity_per_cell`) and rerun.""" capacity=sim.pop.capacity population=sim.pop.n generation=g
         end
 
         (g % stat_every == 0) && record!(slog, sim)
@@ -60,6 +70,9 @@ function run_sim(; gens::Int,
                        sim.gen, fmt_dur(elapsed), sim.gen / elapsed,
                        extinct_at > 0 ? "  [EXTINCT at $extinct_at]" : "")
 
+    if sim.dropped > 0
+        @warn "run finished with dropped births; treat its evolutionary results as unreliable" dropped=sim.dropped
+    end
     return (; sim, outdir, elapsed, extinct_at, gens_run = sim.gen)
 end
 

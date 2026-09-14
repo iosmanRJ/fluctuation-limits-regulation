@@ -9,7 +9,11 @@ Base.@kwdef mutable struct Params
     # above the resource-determined carrying capacity: if the dish fills, births
     # get dropped, reproductive success stops mattering, and selection collapses
     # into "minimise every cost" — every trait then walks to zero.
-    capacity::Int        = 120_000
+    #
+    # 0 means "scale with the dish" (grid^2 * capacity_per_cell). A fixed default
+    # silently became the binding constraint at grid 256, so it is now derived.
+    capacity::Int          = 0
+    capacity_per_cell::Int = 4          # headroom; max_per_cell is the real limit
     max_per_cell::Int32  = Int32(8)    # hard local packing limit
     seed::Int            = 42
 

@@ -30,7 +30,7 @@ export Params, Sim, Environment, Population, CladeTable,
        StatLog, record!, flush_stats!, read_stats, stat_index, STAT_NAMES,
        snapshot_schedule, write_snapshot, read_snapshot,
        replenish!, diffuse!, total_resource,
-       claim!, kill!, place!, high_water, nclades, new_clade!, prune_clades!,
+       claim!, kill!, place!, high_water, resolved_capacity, nclades, new_clade!, prune_clades!,
        phen_dist2,
        NG, NRES, NPHEN, NSTAT,
        P_UPTAKE, P_EXCRETE, P_SIZE, P_MOTIL, P_DIVIDE, P_REPAIR, P_STRESS

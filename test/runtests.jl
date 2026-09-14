@@ -76,6 +76,40 @@ end
 end
 
 # =============================================================================
+@testset "population: capacity scales with the dish" begin
+    # A fixed capacity default silently became the binding constraint at grid
+    # 256, which invalidates a run. Capacity must track dish area by default.
+    @test resolved_capacity(Params(grid = 128, capacity = 0)) == 128 * 128 * 4
+    @test resolved_capacity(Params(grid = 256, capacity = 0)) == 256 * 256 * 4
+    @test resolved_capacity(Params(grid = 256, capacity = 999)) == 999   # explicit wins
+    @test Population(Params(grid = 64, capacity = 0)).capacity == 64 * 64 * 4
+
+    # the derived headroom must exceed what a dish can physically hold under
+    # the per-cell packing limit only by design, not by accident
+    p = Params(grid = 64, capacity = 0)
+    @test resolved_capacity(p) < p.grid^2 * p.max_per_cell   # per-cell limit binds first
+end
+
+@testset "sim: dropped births are counted" begin
+    # Squeeze capacity so the array fills, and check it is detected rather than
+    # silently degrading selection.
+    p = Params(grid = 48, capacity = 400, shock_interval = 0, seed = 91)
+    sim = Sim(p)
+    for _ in 1:400
+        step!(sim)
+    end
+    @test sim.pop.n <= 400
+    @test sim.dropped > 0            # the condition is observable
+
+    # with room to breathe, nothing is dropped
+    p2 = Params(grid = 48, capacity = 0, shock_interval = 0, seed = 91)
+    s2 = Sim(p2)
+    for _ in 1:400
+        step!(s2)
+    end
+    @test s2.dropped == 0
+end
+
 @testset "population: slot allocator" begin
     p = Params(capacity = 8)
     pop = Population(p)
