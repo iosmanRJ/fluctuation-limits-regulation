@@ -359,16 +359,90 @@ Things that were tried and did **not** work, so nobody repeats them:
   small dishes starve. Curvature was not the binding constraint; the futile
   cycle was.
 
-### Still open
+### Still open: coexisting ecotypes
 
-The population remains largely monomorphic — coexisting *ecotypes* (a channel-1
-specialist alongside a channel-2 specialist) do not robustly form; what is
-stable is a population that allocates ~27% of one budget to waste channels.
-Individual-based work finds cross-feeding lineages emerge only with strong
-spatial structure — in well-mixed conditions autonomous mutants take over — and
-that they self-organise into interleaved spatial patterns. Lowering `diff_rate`
-to 0.03 did not produce that here; a real attempt probably needs lower motility
-and a diffusion length shorter than the spacing between waste patches.
+Cross-feeding is stable, but the population remains **one type**. A histogram of
+channel-1 allocation shows a single sharp peak with **99.9% of organisms topping
+out on channel 1** — not two coexisting specialists. Distinct ecotypes do not
+reliably form.
+
+This was investigated properly and the diagnosis is solid even though the fix
+is not. Recorded here because three plausible explanations turned out to be
+wrong, and re-testing them would waste days.
+
+**Measure branching with a histogram, never with a mean.** A mean allocation of
+ch1 0.70 / ch2 0.19 is *identical* whether every organism is a 0.70/0.19
+generalist or 70% are pure-ch1 and 25% pure-ch2. `std` is also a poor guide.
+Count how many organisms have each channel as their top channel.
+
+**Falsified:**
+
+- *Canalisation.* The regulatory network is not stuck — re-develop the same
+  evolved genomes in an environment with channel 4 abundant and channel 1 absent
+  and 96–100% of them produce channel-4-dominant phenotypes. The machinery works.
+- *Plasticity shielding genotypes from selection.* Setting `plasticity = 0`
+  (allocation purely genetic) changes nothing.
+- *Mutation supply.* A 10× mutation rate changes nothing.
+
+**A measurement trap worth knowing about.** Marginal value computed from
+*standing stock* says channels 3 and 4 are worth ~1.8× channel 1, and an
+invasion calculation on that basis says every pure specialist beats the
+resident by up to +0.21 energy/tick. **Both are wrong.** A waste channel's stock
+is high precisely *because nothing eats it*, while its renewal flux is several
+leakage steps down the ladder. A channel-4 specialist would eat the accumulated
+pool once and then starve. Judge a strategy by the resource's **renewal flux**,
+never by its standing pool.
+
+Working the flux cascade through, the energy carried by each channel goes
+roughly `1 : 0.27 : 0.09 : 0.03`, and the observed allocation (0.78 / 0.17 /
+0.05 / ~0) *is* that optimum. The population is right; there is simply no
+advantage to specialising, because uptake is **linear** in allocation on a
+budget that sums to 1. At the equilibrium where resources equalise, every
+allocation earns the same. Invasion fitness is flat, its second derivative is
+zero, and the singular strategy is degenerate — neutral rather than disruptive.
+Adaptive dynamics requires a branching point to be convergence stable *and*
+evolutionarily unstable, i.e. a fitness **minimum**.
+
+**What partly works, and why it is not the default.** `maint_channel` charges a
+concave proteome cost for breadth (`sum(allocation^channel_cost_exp)`), which is
+real biology — every transporter occupies membrane and ribosome capacity whether
+used or not — and it does turn the flat ridge into a minimum. Measured:
+
+| inflow | `maint_channel` | non-ch1 specialists |
+|---|---|---|
+| 0.25 (default) | 0.04 | 0–2% |
+| 0.60 | 0.04 | 1.8% |
+| **0.60** | **0.10** | **7.1%** |
+| 1.20 | 0.10 | 3.0% |
+| 0.60 | 0.18 | extinct |
+
+It cannot simply be turned up: founders start as random generalists and cannot
+afford a large fixed cost before they have had time to specialise, so anything
+above ~0.10 kills the dish within a handful of ticks. And at the best setting
+found, across six seeds the second ecotype was **0% to 16.6% with one extinction**
+— sometimes a real channel-2 ecotype at 12%, sometimes nothing at all.
+
+It is **off by default** because measured honestly it costs more than it buys:
+at 0.04 with default inflow, population fell from ~12,700 to ~4,600,
+cross-feeding fell from 0.26–0.30 to 0.22, and one seed in five went extinct —
+in exchange for at most 2% branching.
+
+That contingency is itself consistent with the literature: individual-based work
+finds that whether lineages stay autonomous or split into a metabolic division
+of labour is an *evolutionary contingency* — a "frozen metabolic accident"
+established early that constrains everything after it.
+
+**Where to go next.** The same work finds cross-feeding lineages emerge only
+under strong spatial structure, self-organising into interleaved patterns, and
+that in well-mixed conditions autonomous mutants take over. The fields here are
+close to uniform (`avail@organisms ≈ avail@global`), which is the real blocker:
+every organism sees the same resource mixture, so there is one optimal strategy
+and nothing to partition. Lowering `diff_rate` raises field heterogeneity
+(CV 0.51 → 0.89) and does lift branching to ~2%, but not further on its own, and
+making motility expensive enough to matter starves the dish. A serious attempt
+probably needs per-channel diffusion rates — waste products are larger molecules
+and should diffuse slower than the primary resource — so that waste forms
+persistent patches a specialist can live in.
 
 ### References
 
@@ -391,3 +465,11 @@ and a diffusion length shorter than the spacing between waste patches.
   [Wiley](https://onlinelibrary.wiley.com/doi/full/10.1111/evo.12485)
 - *Stochastic trade-offs and the emergence of diversification in E. coli
   evolution experiments* — [arXiv:2307.11033](https://arxiv.org/abs/2307.11033)
+- Geritz et al., *Evolutionarily singular strategies and the adaptive growth and
+  branching of the evolutionary tree* —
+  [Springer](https://link.springer.com/article/10.1023/A:1006554906681)
+- *Continuously stable strategies as evolutionary branching points* —
+  [arXiv:1005.3862](https://arxiv.org/pdf/1005.3862)
+- *Shaping of microbial phenotypes by trade-offs* (proteome allocation and the
+  specialist/generalist trade-off) —
+  [Nature Communications](https://www.nature.com/articles/s41467-024-48591-9)

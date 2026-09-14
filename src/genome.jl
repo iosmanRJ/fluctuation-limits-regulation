@@ -44,7 +44,7 @@ allocates nothing.
 """
 function develop!(phen::Vector{Float32}, e::Vector{Float32}, buf::Vector{Float32},
                   W::Array{Float32,3}, bias::Matrix{Float32}, i::Int,
-                  env::Vector{Float32}; niter::Int = 8)
+                  env::Vector{Float32}; niter::Int = 8, plasticity::Float32 = 1.0f0)
     @inbounds for k in 1:NG
         e[k] = 0.1f0
     end
@@ -56,7 +56,7 @@ function develop!(phen::Vector{Float32}, e::Vector{Float32}, buf::Vector{Float32
             end
             # resource concentrations feed the first NRES nodes -> plasticity
             if k <= NRES
-                s += env[k]
+                s += plasticity * env[k]
             end
             buf[k] = tanh(s)
         end
@@ -244,6 +244,31 @@ end
         k += 1
         k > 64 && return k          # guard against pathological lambda
     end
+end
+
+"""
+    channel_cost(phen, exp) -> Float32
+
+Proteome overhead of the uptake allocation: `sum(a_r ^ exp)`. Computed once at
+birth and cached, because the allocation never changes afterwards and a `pow`
+per channel per organism per tick would be a real cost at scale.
+
+With `exp < 1` this is concave, so spreading the same total allocation across
+more channels costs more — which is what makes the interior of the allocation
+simplex a fitness minimum rather than a flat ridge.
+"""
+@inline function channel_cost(phen::AbstractVector{Float32}, ex::Float32)
+    c = 0.0f0
+    @inbounds if ex == 0.5f0          # by far the common case; avoids a pow
+        for r in P_UPTAKE
+            c += sqrt(phen[r])
+        end
+    else
+        for r in P_UPTAKE
+            c += phen[r]^ex
+        end
+    end
+    c
 end
 
 """Random founder genome: sparse, weakly connected, mostly quiet."""

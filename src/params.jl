@@ -69,6 +69,37 @@ Base.@kwdef mutable struct Params
     maint_motil::Float32    = 0.0350f0 # movement is not free
     maint_stress::Float32   = 0.0400f0 # maintaining shock tolerance is not free
     maint_repair::Float32   = 0.0200f0 # repair fidelity is not free
+    # --- proteome cost of breadth -------------------------------------------
+    # Charged as maint_channel * sum(allocation_r ^ channel_cost_exp).
+    #
+    # This is the term that makes ecotypes possible at all. Uptake is LINEAR in
+    # allocation on a budget that sums to 1, so at the equilibrium where the
+    # resources equalise, every allocation earns exactly the same — invasion
+    # fitness is flat, its second derivative is zero, and the singular strategy
+    # is neutral rather than disruptive. A population there just drifts as one
+    # cloud, which is precisely what was observed: a single peak with 99.9% of
+    # organisms topping out on channel 1.
+    #
+    # A concave cost (exponent < 1) breaks the tie. A specialist pays
+    # maint_channel * 1; an even six-way generalist pays maint_channel * sqrt(6)
+    # = 2.45x that. Uptake is untouched, so specialists lose nothing — unlike
+    # raising uptake_exponent, which starved everyone. The interior becomes a
+    # fitness MINIMUM, which is the textbook condition for evolutionary
+    # branching: convergence stable and evolutionarily unstable.
+    #
+    # Biologically this is proteome allocation: every transporter you express
+    # occupies membrane and ribosome capacity whether or not you are using it,
+    # so breadth has a fixed overhead that specialisation avoids.
+    # DEFAULT OFF (0.0), because measuring it honestly showed it costs more than
+    # it buys: at 0.04 the population fell from ~12,700 to ~4,600, cross-feeding
+    # fell 0.26-0.30 -> 0.22, and 1 seed in 5 went extinct — while branching went
+    # from 0% to at most 2%. Tuned hard (inflow 0.60, cost 0.10) it does produce
+    # a real second ecotype, but only 0-17% of the time across seeds with 1 in 6
+    # dying. See the README for the full result.
+    # Setting channel_cost_exp to 1.0 also disables it (the sum is then always 1).
+    maint_channel::Float32       = 0.0000f0
+    channel_cost_exp::Float32    = 0.50f0
+
     maint_crowd::Float32    = 0.0500f0 # per co-located neighbour -> local competition
     maint_load::Float32     = 0.0150f0 # per accumulated deleterious mutation
     # --- rate / yield trade-off (Pfeiffer & Bonhoeffer 2004) -----------------
@@ -102,6 +133,12 @@ Base.@kwdef mutable struct Params
     e_init::Float32         = 0.8f0
     e_max::Float32          = 4.0f0    # cells cannot hoard energy indefinitely
     max_age::Int32          = Int32(60)
+
+    # How strongly local resource concentrations feed the regulatory network.
+    # 1.0 = full plasticity, 0.0 = allocation is purely genetic. Plasticity can
+    # SUPPRESS diversification: if every genotype plastically converges on the
+    # same behaviour, selection sees no heritable variation to split.
+    plasticity::Float32     = 1.0f0
 
     # --- mutation ------------------------------------------------------------
     mut_rate::Float32       = 1.0f-3   # per weight site per birth, before repair

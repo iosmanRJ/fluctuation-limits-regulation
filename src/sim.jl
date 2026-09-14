@@ -87,10 +87,11 @@ function seed_population!(sim::Sim, n::Int)
             sim.env_scratch[r] = env.res[r, pop.x[i], pop.y[i]]
         end
         develop!(sim.phen_scratch, sim.e_scratch, sim.buf_scratch,
-                 pop.W, pop.bias, i, sim.env_scratch)
+                 pop.W, pop.bias, i, sim.env_scratch; plasticity = p.plasticity)
         @inbounds for k in 1:NPHEN
             pop.phen[k, i] = sim.phen_scratch[k]
         end
+        pop.chan_cost[i] = channel_cost(sim.phen_scratch, p.channel_cost_exp)
     end
     return nothing
 end
@@ -132,6 +133,7 @@ function organism_step!(sim::Sim)
     maint_motil   = p.maint_motil
     maint_stress  = p.maint_stress
     maint_repair  = p.maint_repair
+    maint_chan    = p.maint_channel
     maint_crowd   = p.maint_crowd
     maint_load    = p.maint_load
     maint_toxic   = p.maint_toxic
@@ -199,6 +201,7 @@ function organism_step!(sim::Sim)
                                                        # cost gives tolerance no interior optimum
 
                  maint_repair * pop.phen[P_REPAIR, i] +
+                 maint_chan   * pop.chan_cost[i] +   # proteome cost of breadth
                  maint_crowd  * crowd +
                  maint_load   * Float32(pop.load[i]) +  # genetic deterioration bites here
                  # Waste toxicity, which stress tolerance buys protection from.
@@ -240,6 +243,8 @@ end
 function settle_births!(sim::Sim)
     p, env, pop, rng = sim.p, sim.env, sim.pop, sim.rng
     G = env.G
+    chan_exp = p.channel_cost_exp
+    plast    = p.plasticity
 
     # ---- phase 1 (serial, cheap): claim slots, place children, draw seeds ---
     # Everything here touches shared state — the free list, the occupancy grid,
@@ -309,10 +314,12 @@ function settle_births!(sim::Sim)
                 for r in 1:NRES
                     envs[r] = env.res[r, pop.x[child], pop.y[child]]
                 end
-                develop!(phen, e, buf, pop.W, pop.bias, child, envs)
+                develop!(phen, e, buf, pop.W, pop.bias, child, envs;
+                         plasticity = plast)
                 for kk in 1:NPHEN
                     pop.phen[kk, child] = phen[kk]
                 end
+                pop.chan_cost[child] = channel_cost(phen, chan_exp)
             end
         end
     end

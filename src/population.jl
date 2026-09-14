@@ -15,6 +15,7 @@ mutable struct Population
     age::Vector{Int32}
     alive::Vector{Bool}
     phen::Matrix{Float32}        # NPHEN x cap   cached at birth
+    chan_cost::Vector{Float32}   # sum(allocation^exp), cached at birth like phen
 
     # --- genome, touched only at birth ---------------------------------------
     W::Array{Float32,3}          # NG x NG x cap
@@ -40,7 +41,7 @@ function Population(p::Params)
     Population(
         zeros(Int32, cap), zeros(Int32, cap),
         zeros(Float32, cap), zeros(Int32, cap), fill(false, cap),
-        zeros(Float32, NPHEN, cap),
+        zeros(Float32, NPHEN, cap), zeros(Float32, cap),
         zeros(Float32, NG, NG, cap), zeros(Float32, NG, cap),
         zeros(Int32, cap), zeros(Int32, cap), zeros(UInt32, cap),
         zeros(Int32, p.grid, p.grid),
