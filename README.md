@@ -188,6 +188,41 @@ What dormancy *does* do is substantial and was not the goal:
 Beware of generalising a short stress test. The 7/8 → 1/8 result is real for the
 regime it was measured in and does not transfer to longer runs.
 
+#### What did reduce long-run extinction: variable genomes
+
+Not dormancy — **variable genome size**, and by accident rather than design.
+Re-running the same 200k-tick configuration after that change:
+
+| code | extinctions at 200k ticks |
+|---|---|
+| fixed `NG = 20` | 4/8 = **50%** |
+| variable genome, seeds 1–8 | 0/8 |
+| variable genome, seeds 9–20 | 3/12 |
+| **variable genome, combined** | **3/20 = 15%** |
+
+The 0/8 was a lucky draw and is shown here only because reporting it alone
+would have overstated the effect — 15% across 20 seeds is the number to use.
+Extinction is reduced, not eliminated, and 15% per 200k ticks is still far from
+what a million-generation run would need.
+
+**Two observations about why, one falsified and one open:**
+
+- *Falsified:* genome size does **not** shrink during famine. The obvious story
+  — shrink the genome to cut upkeep exactly when food is scarce — is wrong.
+  Measured across 10 runs, mean `ng` during famine was lower in 5 and higher in
+  5. No systematic response.
+- *Open:* **larger genomes correlate with dying.** Every run that went extinct
+  had mean `ng` above 14.7 (14.9, 15.2, 15.3); every survivor sat below 14.6,
+  with most between 12.4 and 13.2. Clean separation, no overlap across 12 runs.
+  A permanent `maint_gene` plus development tax leaving less margin when inflow
+  collapses would explain it. But those sizes arose by drift, so a run could
+  drift large *and* be fragile for a shared upstream reason — correlation only
+  until an arm with `ng` pinned at 12 versus 20 settles it.
+
+If that link is causal it matters beyond survival: extinction culling large
+genomes is a **population-level force against complexity**, distinct from the
+individual-level selection the complexity arms measured, and invisible to them.
+
 ### Clades
 
 A full per-organism phylogeny is not representable over a million ticks. A
