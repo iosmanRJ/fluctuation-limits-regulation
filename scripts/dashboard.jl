@@ -40,7 +40,11 @@ function mark_shocks!(ax)
     vlines!(ax, shocks; color = (P.muted, 0.45), linewidth = 1, linestyle = :dash)
 end
 
-xs(v) = decimate(v, 3000)
+# Records are written every `stat_every` ticks, so a record index is NOT a tick
+# number. Map back through the logged `gen` column or every axis is wrong by
+# that factor — at stat_every=75 a 239,100-tick run reads as 3,188.
+ticks_of(idx) = gens[idx]
+xs(v) = (let (i, y) = decimate(v, 3000); (ticks_of(i), y) end)
 
 # =============================================================================
 fig = Figure(size = (1500, 1450))
@@ -48,13 +52,14 @@ fig = Figure(size = (1500, 1450))
 Label(fig[0, 1:3], "Evolution in a petri dish — $(basename(RUNDIR))";
       fontsize = 20, color = P.primary, font = :bold, halign = :left)
 Label(fig[1, 1:3],
-      "$(ngen) ticks logged · dashed rules mark mass-extinction events";
+      "$(ngen) records over $(Int(gens[end])) ticks · dashed rules mark mass-extinction events";
       fontsize = 11, color = P.muted, halign = :left)
 
 # --- row 1: the three headline single-series panels ---------------------------
 # One series each, so no legend: the title names the measure.
 ax1 = Axis(fig[2, 1], title = "Population", xlabel = "tick", ylabel = "organisms")
-let (x, lo, hi) = envelope(M[ix("pop"), :])
+let (i, lo, hi) = envelope(M[ix("pop"), :])
+    x = ticks_of(i)
     band!(ax1, x, lo, hi; color = (P.series[1], 0.25))
     lines!(ax1, x, (lo .+ hi) ./ 2; color = P.series[1], linewidth = 2)
 end
