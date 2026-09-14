@@ -1,0 +1,271 @@
+# =============================================================================
+# The simulation loop.
+#
+# Order within one generation:
+#   replenish -> maybe shock -> organism step (collect births) -> settle births
+#   -> diffuse -> log
+#
+# Births are collected during the organism loop and instantiated afterwards, so
+# a newborn never acts in the generation it was born in. Instantiating inline
+# would also let a newborn land in a slot the loop has not yet reached, which
+# silently gives some offspring a free extra tick.
+# =============================================================================
+
+mutable struct Sim
+    p::Params
+    env::Environment
+    pop::Population
+    clades::CladeTable
+    rng::Xoshiro
+    gen::Int
+
+    # scratch, reused every generation so the hot loop allocates nothing
+    birth_parents::Vector{Int32}
+    e_scratch::Vector{Float32}
+    buf_scratch::Vector{Float32}
+    phen_scratch::Vector{Float32}
+    env_scratch::Vector{Float32}
+
+    births::Int
+    deaths::Int
+    last_shock::Int
+    shock_log::Vector{Tuple{Int,Symbol}}
+end
+
+function Sim(p::Params = Params())
+    rng = Xoshiro(p.seed)
+    env = Environment(p)
+    pop = Population(p)
+    sim = Sim(p, env, pop, CladeTable(), rng, 0,
+              Int32[], zeros(Float32, NG), zeros(Float32, NG),
+              zeros(Float32, NPHEN), zeros(Float32, NRES),
+              0, 0, 0, Tuple{Int,Symbol}[])
+    seed_population!(sim, 200)
+    return sim
+end
+
+"""Drop `n` founder organisms with random regulatory networks into the dish."""
+function seed_population!(sim::Sim, n::Int)
+    p, pop, env, rng = sim.p, sim.pop, sim.env, sim.rng
+    G = env.G
+    for _ in 1:n
+        i = claim!(pop)
+        i == 0 && break
+        seed_genome!(pop.W, pop.bias, i, rng)
+        pop.x[i] = rand(rng, Int32(1):Int32(G))
+        pop.y[i] = rand(rng, Int32(1):Int32(G))
+        pop.energy[i] = p.e_init
+        pop.age[i] = 0
+        pop.load[i] = 0
+        pop.bigmut[i] = 0
+        pop.clade[i] = UInt32(0)
+        @inbounds for r in 1:NRES
+            sim.env_scratch[r] = env.res[r, pop.x[i], pop.y[i]]
+        end
+        develop!(sim.phen_scratch, sim.e_scratch, sim.buf_scratch,
+                 pop.W, pop.bias, i, sim.env_scratch)
+        @inbounds for k in 1:NPHEN
+            pop.phen[k, i] = sim.phen_scratch[k]
+        end
+    end
+    return nothing
+end
+
+# -----------------------------------------------------------------------------
+
+function step!(sim::Sim)
+    p, env, pop, rng = sim.p, sim.env, sim.pop, sim.rng
+    sim.gen += 1
+    sim.births = 0
+    sim.deaths = 0
+
+    replenish!(env, p, sim.gen)
+    maybe_shock!(sim)
+    organism_step!(sim)
+    settle_births!(sim)
+    diffuse!(env, p)
+    return sim
+end
+
+function organism_step!(sim::Sim)
+    p, env, pop, rng = sim.p, sim.env, sim.pop, sim.rng
+    res = env.res
+    G = env.G
+    hi = high_water(pop)
+    empty!(sim.birth_parents)
+
+    # hoist every parameter: these are fields of a mutable struct, so the
+    # compiler must reload them on each access unless we pull them out first.
+    yields        = p.yields
+    uptake_scale  = p.uptake_scale
+    maint_base    = p.maint_base
+    maint_size    = p.maint_size
+    maint_uptake  = p.maint_uptake
+    maint_repair  = p.maint_repair
+    excrete_frac  = p.excrete_frac
+    div_energy    = p.div_energy
+    res_cap       = p.res_cap
+    max_age       = p.max_age
+    deaths        = 0
+
+    @inbounds for i in 1:hi
+        pop.alive[i] || continue
+
+        xi = pop.x[i]
+        yi = pop.y[i]
+
+        # --- uptake across channels, weighted by evolved affinity ------------
+        gained     = 0.0f0
+        raw_intake = 0.0f0
+        affinity_total = 0.0f0
+        for r in 1:NRES
+            aff = pop.phen[r, i]
+            affinity_total += aff
+            avail = res[r, xi, yi]
+            got = min(avail, aff * uptake_scale)
+            if got > 0.0f0
+                res[r, xi, yi] = avail - got
+                raw_intake += got
+                gained += got * yields[r]      # lower-quality wastes yield less
+            end
+        end
+
+        # --- excretion: this organism's waste is someone else's niche --------
+        if raw_intake > 0.0f0
+            waste = raw_intake * excrete_frac
+            for r in 1:NRES
+                frac = pop.phen[NRES + r, i]
+                if frac > 0.0f0
+                    v = res[r, xi, yi] + waste * frac
+                    res[r, xi, yi] = v > res_cap ? res_cap : v
+                end
+            end
+        end
+
+        # --- maintenance: broad diets and good repair both cost energy -------
+        upkeep = maint_base +
+                 maint_size   * pop.phen[P_SIZE, i] +
+                 maint_uptake * affinity_total +
+                 maint_repair * pop.phen[P_REPAIR, i]
+
+        e = pop.energy[i] + gained * (1.0f0 - excrete_frac) - upkeep
+        pop.energy[i] = e
+        pop.age[i] += Int32(1)
+
+        # --- movement ---------------------------------------------------------
+        if rand(rng, Float32) < pop.phen[P_MOTIL, i]
+            nx = xi + rand(rng, Int32(-1):Int32(1))
+            ny = yi + rand(rng, Int32(-1):Int32(1))
+            pop.x[i] = nx < Int32(1) ? Int32(1) : (nx > Int32(G) ? Int32(G) : nx)
+            pop.y[i] = ny < Int32(1) ? Int32(1) : (ny > Int32(G) ? Int32(G) : ny)
+        end
+
+        # --- death and division ------------------------------------------------
+        if e <= 0.0f0 || pop.age[i] > max_age
+            kill!(pop, i)
+            deaths += 1
+        else
+            # division threshold is itself an evolved trait
+            thresh = div_energy * (0.5f0 + pop.phen[P_DIVIDE, i])
+            if e >= thresh
+                push!(sim.birth_parents, Int32(i))
+            end
+        end
+    end
+
+    sim.deaths = deaths
+    return nothing
+end
+
+function settle_births!(sim::Sim)
+    p, env, pop, rng = sim.p, sim.env, sim.pop, sim.rng
+    G = env.G
+    births = 0
+
+    @inbounds for pi_ in sim.birth_parents
+        parent = Int(pi_)
+        pop.alive[parent] || continue          # parent died to a shock meanwhile
+        child = claim!(pop)
+        child == 0 && break                    # dish full; no more divisions
+
+        repair = pop.phen[P_REPAIR, parent]
+        nmut, big = inherit!(pop.W, pop.bias, child, parent, rng, p, repair)
+
+        # child appears next to the parent
+        nx = pop.x[parent] + rand(rng, Int32(-1):Int32(1))
+        ny = pop.y[parent] + rand(rng, Int32(-1):Int32(1))
+        pop.x[child] = nx < Int32(1) ? Int32(1) : (nx > Int32(G) ? Int32(G) : nx)
+        pop.y[child] = ny < Int32(1) ? Int32(1) : (ny > Int32(G) ? Int32(G) : ny)
+
+        # parent splits its energy with the child
+        half = pop.energy[parent] * 0.5f0
+        pop.energy[parent] = half
+        pop.energy[child]  = half
+        pop.age[child]     = Int32(0)
+        pop.load[child]    = pop.load[parent] + Int32(nmut)
+
+        # --- develop the child's network in ITS OWN local conditions ---------
+        for r in 1:NRES
+            sim.env_scratch[r] = env.res[r, pop.x[child], pop.y[child]]
+        end
+        develop!(sim.phen_scratch, sim.e_scratch, sim.buf_scratch,
+                 pop.W, pop.bias, child, sim.env_scratch)
+        for k in 1:NPHEN
+            pop.phen[k, child] = sim.phen_scratch[k]
+        end
+
+        # --- clade bookkeeping -------------------------------------------------
+        bm = pop.bigmut[parent] + (big ? Int32(1) : Int32(0))
+        if bm >= p.clade_threshold
+            pop.clade[child]  = new_clade!(sim.clades, pop.clade[parent], sim.gen,
+                                           view(pop.phen, :, child))
+            pop.bigmut[child] = Int32(0)
+        else
+            pop.clade[child]  = pop.clade[parent]
+            pop.bigmut[child] = bm
+        end
+        births += 1
+    end
+
+    sim.births = births
+    return nothing
+end
+
+# -----------------------------------------------------------------------------
+# Mass-extinction events. Three flavours so the survivors are not always the
+# same kind of organism.
+# -----------------------------------------------------------------------------
+
+function maybe_shock!(sim::Sim)
+    p, pop, rng = sim.p, sim.pop, sim.rng
+    p.shock_interval <= 0 && return nothing
+    rand(rng, Float32) < (1.0f0 / p.shock_interval) || return nothing
+
+    kind = rand(rng, (:cull, :heat, :famine))
+    hi = high_water(pop)
+
+    if kind === :cull
+        # indiscriminate: a genetic bottleneck, nothing to adapt to
+        @inbounds for i in 1:hi
+            pop.alive[i] || continue
+            if rand(rng, Float32) < p.shock_kill
+                kill!(pop, i)
+            end
+        end
+    elseif kind === :heat
+        # selective: stress tolerance decides who lives
+        @inbounds for i in 1:hi
+            pop.alive[i] || continue
+            if rand(rng, Float32) < p.shock_kill * (1.0f0 - pop.phen[P_STRESS, i])
+                kill!(pop, i)
+            end
+        end
+    else
+        # famine: nobody dies now, but inflow collapses for a while
+        sim.env.famine = p.famine_len
+    end
+
+    sim.last_shock = sim.gen
+    push!(sim.shock_log, (sim.gen, kind))
+    return nothing
+end
