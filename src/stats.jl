@@ -11,7 +11,7 @@
 # million, and a linear schedule wastes all its resolution on the boring end.
 # =============================================================================
 
-const NSTAT = 10 + NRES + 2 * NPHEN + NRES + 3   # 49
+const NSTAT = 10 + NRES + 2 * NPHEN + NRES + 4   # 50
 
 const STAT_NAMES = vcat(
     ["gen", "pop", "births", "deaths", "mean_energy", "mean_age",
@@ -24,7 +24,7 @@ const STAT_NAMES = vcat(
     # from two coexisting specialists, but these shares can.
     ["top_share$(r)" for r in 1:NRES],
     # Network structure: is the genome gaining or losing complexity?
-    ["mean_nonzero_w", "mean_active_genes", "mean_abs_w"],
+    ["mean_nonzero_w", "mean_active_genes", "mean_abs_w", "mean_ng"],
 )
 
 mutable struct StatLog
@@ -58,7 +58,7 @@ function record!(sl::StatLog, sim::Sim)
 
     n = 0
     sum_e = 0.0; sum_age = 0.0; sum_load = 0.0; sum_depth = 0.0
-    sum_nzw = 0.0; sum_active = 0.0; sum_absw = 0.0
+    sum_nzw = 0.0; sum_active = 0.0; sum_absw = 0.0; sum_ng = 0.0
     top = ntuple(_ -> 0, NRES)
     mean_phen = zeros(Float64, NPHEN)
     sq_phen   = zeros(Float64, NPHEN)
@@ -73,6 +73,7 @@ function record!(sl::StatLog, sim::Sim)
         sum_load += pop.load[i]
         sum_depth += pop.depth[i]
         sum_nzw += pop.nzw[i]; sum_active += pop.active[i]; sum_absw += pop.absw[i]
+        sum_ng += pop.ng[i]
         # which channel does this organism allocate the most to?
         best = 1; bv = pop.phen[1, i]
         for r in 2:NRES
@@ -130,6 +131,7 @@ function record!(sl::StatLog, sim::Sim)
         B[off + NRES + 1, col] = sum_nzw * invn
         B[off + NRES + 2, col] = sum_active * invn
         B[off + NRES + 3, col] = sum_absw * invn
+        B[off + NRES + 4, col] = sum_ng * invn
     end
 
     if sl.k == size(B, 2) || time() - sl.last_flush >= sl.flush_after
@@ -204,7 +206,7 @@ function write_snapshot(sim::Sim, dir::String; nsample::Int = 1500)
 
     open(joinpath(dir, "snap_$(lpad(sim.gen, 9, '0')).bin"), "w") do io
         write(io, Int32(sim.gen), Int32(sim.env.G), Int32(NRES),
-                  Int32(NPHEN), Int32(NG), Int32(ns))
+                  Int32(NPHEN), Int32(NG_MAX), Int32(ns))
         write(io, sim.env.res)
         # The TRUE occupancy grid, not one rebuilt from the organism sample.
         # A density map derived from a 1500-of-113893 sample reads as empty

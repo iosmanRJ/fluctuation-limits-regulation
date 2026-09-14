@@ -6,20 +6,20 @@ using Test, Random, Statistics
 # =============================================================================
 @testset "genome: development" begin
     rng = Xoshiro(1)
-    W = zeros(Float32, NG, NG, 4); bias = zeros(Float32, NG, 4)
+    W = zeros(Float32, NG_MAX, NG_MAX, 4); bias = zeros(Float32, NG_MAX, 4)
     for i in 1:4
         seed_genome!(W, bias, i, rng)
     end
-    phen = zeros(Float32, NPHEN); e = zeros(Float32, NG); buf = zeros(Float32, NG)
+    phen = zeros(Float32, NPHEN); e = zeros(Float32, NG_MAX); buf = zeros(Float32, NG_MAX)
     env = zeros(Float32, NRES)
 
-    develop!(phen, e, buf, W, bias, 1, env)
+    develop!(phen, e, buf, W, bias, 1, env, NG_MAX)
     @test all(0.0f0 .<= phen .<= 1.0f0)
     @test all(isfinite, phen)
 
     # deterministic: same genome + same environment -> same phenotype
     p2 = copy(phen)
-    develop!(phen, e, buf, W, bias, 1, env)
+    develop!(phen, e, buf, W, bias, 1, env, NG_MAX)
     @test phen == p2
 
     # uptake affinity is an allocation budget, so it must sum to one —
@@ -29,28 +29,28 @@ using Test, Random, Statistics
     # plasticity: the same genome in a different environment develops differently
     env2 = fill(2.0f0, NRES)
     phen_b = zeros(Float32, NPHEN)
-    develop!(phen_b, e, buf, W, bias, 1, env2)
+    develop!(phen_b, e, buf, W, bias, 1, env2, NG_MAX)
     @test phen_b != phen
     @test sum(phen_b[P_UPTAKE]) ≈ 1.0f0 atol=1e-4      # budget holds under plasticity
 
     # distinct genomes give distinct phenotypes
     phen_c = zeros(Float32, NPHEN)
-    develop!(phen_c, e, buf, W, bias, 2, env)
+    develop!(phen_c, e, buf, W, bias, 2, env, NG_MAX)
     @test phen_c != phen
 
     # development must not allocate: it runs on every birth
-    develop!(phen, e, buf, W, bias, 1, env)
-    @test @allocated(develop!(phen, e, buf, W, bias, 1, env)) == 0
+    develop!(phen, e, buf, W, bias, 1, env, NG_MAX)
+    @test @allocated(develop!(phen, e, buf, W, bias, 1, env, NG_MAX)) == 0
 end
 
 # =============================================================================
 @testset "genome: mutation and inheritance" begin
     rng = Xoshiro(7)
     p = Params(mut_rate = 0.01f0, p_silence = 0.0f0, p_duplicate = 0.0f0)
-    W = zeros(Float32, NG, NG, 2); bias = zeros(Float32, NG, 2)
+    W = zeros(Float32, NG_MAX, NG_MAX, 2); bias = zeros(Float32, NG_MAX, 2)
     seed_genome!(W, bias, 1, rng)
 
-    nmut, _ = inherit!(W, bias, 2, 1, rng, p, 0.0f0)
+    nmut, _, _, _ = inherit!(W, bias, 2, 1, rng, p, 0.0f0, NG_MAX)
     @test nmut >= 0
     # child is a copy of the parent apart from the mutated sites
     diffs = count(!=(0.0f0), W[:, :, 2] .- W[:, :, 1])
@@ -59,17 +59,17 @@ end
     # perfect repair suppresses the mutation rate relative to none
     p2 = Params(mut_rate = 0.02f0, p_silence = 0.0f0, p_duplicate = 0.0f0,
                 repair_strength = 0.85f0)
-    W2 = zeros(Float32, NG, NG, 2); b2 = zeros(Float32, NG, 2)
+    W2 = zeros(Float32, NG_MAX, NG_MAX, 2); b2 = zeros(Float32, NG_MAX, 2)
     seed_genome!(W2, b2, 1, rng)
-    lo = sum(first(inherit!(W2, b2, 2, 1, rng, p2, 1.0f0)) for _ in 1:400)
-    hi = sum(first(inherit!(W2, b2, 2, 1, rng, p2, 0.0f0)) for _ in 1:400)
+    lo = sum(first(inherit!(W2, b2, 2, 1, rng, p2, 1.0f0, NG_MAX)) for _ in 1:400)
+    hi = sum(first(inherit!(W2, b2, 2, 1, rng, p2, 0.0f0, NG_MAX)) for _ in 1:400)
     @test lo < hi
 
     # gene silencing zeroes every outgoing weight of exactly one node
     p3 = Params(mut_rate = 0.0f0, p_silence = 1.0f0, p_duplicate = 0.0f0)
-    W3 = ones(Float32, NG, NG, 1); b3 = zeros(Float32, NG, 1)
-    mutate!(W3, b3, 1, rng, p3, 0.0f0)
-    silenced = [k for k in 1:NG if all(W3[k, :, 1] .== 0.0f0)]
+    W3 = ones(Float32, NG_MAX, NG_MAX, 1); b3 = zeros(Float32, NG_MAX, 1)
+    mutate!(W3, b3, 1, rng, p3, 0.0f0, NG_MAX)
+    silenced = [k for k in 1:NG_MAX if all(W3[k, :, 1] .== 0.0f0)]
     @test length(silenced) == 1
 end
 
@@ -327,9 +327,15 @@ end
                shock_kill = 0.9f0, seed = 21)
     sim = Sim(p)
     n0 = sim.pop.n
-    step!(sim)
-    @test sim.pop.n < n0             # a shock every generation must bite
+    # Step a handful of times rather than once: a third of shocks are famines,
+    # which kill nobody on the tick they fire, so a single step can legitimately
+    # leave the population untouched.
+    for _ in 1:6
+        step!(sim)
+    end
+    @test sim.pop.n < n0             # repeated shocks must bite
     @test !isempty(sim.shock_log)
+    @test any(k -> k in (:cull, :heat), last.(sim.shock_log))
 end
 
 # =============================================================================
@@ -600,15 +606,15 @@ end
     # all-deleterious settings must drive load strictly up
     p = Params(mut_rate = 0.02f0, p_deleterious = 1.0f0, p_beneficial = 0.0f0,
                p_silence = 0.0f0, p_duplicate = 0.0f0)
-    W = zeros(Float32, NG, NG, 2); b = zeros(Float32, NG, 2)
+    W = zeros(Float32, NG_MAX, NG_MAX, 2); b = zeros(Float32, NG_MAX, 2)
     seed_genome!(W, b, 1, rng)
-    tot = sum(last(inherit!(W, b, 2, 1, rng, p, 0.0f0)) for _ in 1:200)
+    tot = sum(inherit!(W, b, 2, 1, rng, p, 0.0f0, NG_MAX)[3] for _ in 1:200)
     @test tot > 0
 
     # all-beneficial must drive it down
     p2 = Params(mut_rate = 0.02f0, p_deleterious = 0.0f0, p_beneficial = 1.0f0,
                 p_silence = 0.0f0, p_duplicate = 0.0f0)
-    tot2 = sum(last(inherit!(W, b, 2, 1, rng, p2, 0.0f0)) for _ in 1:200)
+    tot2 = sum(inherit!(W, b, 2, 1, rng, p2, 0.0f0, NG_MAX)[3] for _ in 1:200)
     @test tot2 < 0
 end
 
@@ -713,35 +719,94 @@ end
 
     nz = M[stat_index("mean_nonzero_w"), 1]
     ag = M[stat_index("mean_active_genes"), 1]
-    @test 0 < nz <= NG * NG                      # connectivity is in range
-    @test 0 < ag <= NG                           # active genes is in range
+    @test 0 < nz <= NG_MAX * NG_MAX                      # connectivity is in range
+    @test 0 < ag <= NG_MAX                           # active genes is in range
     @test M[stat_index("mean_abs_w"), 1] > 0
+end
+
+@testset "genome: size is variable and bounded" begin
+    rng = Xoshiro(91)
+    W = zeros(Float32, NG_MAX, NG_MAX, 2); b = zeros(Float32, NG_MAX, 2)
+    seed_genome!(W, b, 1, rng, 16)
+
+    # node addition grows the genome, deletion shrinks it
+    padd = Params(mut_rate = 0.0f0, p_silence = 0.0f0, p_duplicate = 0.0f0,
+                  p_node_add = 1.0f0, p_node_del = 0.0f0)
+    _, _, _, ng2 = mutate!(W, b, 1, rng, padd, 0.0f0, 16)
+    @test ng2 == 17
+
+    pdel = Params(mut_rate = 0.0f0, p_silence = 0.0f0, p_duplicate = 0.0f0,
+                  p_node_add = 0.0f0, p_node_del = 1.0f0)
+    _, _, _, ng3 = mutate!(W, b, 1, rng, pdel, 0.0f0, 16)
+    @test ng3 == 15
+
+    # bounds hold at both ends
+    _, _, _, ngmax = mutate!(W, b, 1, rng, padd, 0.0f0, NG_MAX)
+    @test ngmax == NG_MAX               # cannot exceed the array bound
+    _, _, _, ngmin = mutate!(W, b, 1, rng, pdel, 0.0f0, NG_MIN)
+    @test ngmin == NG_MIN               # cannot delete the I/O interface
+
+    # deletion must never touch nodes 1:NPHEN — they are the fixed interface
+    W2 = zeros(Float32, NG_MAX, NG_MAX, 1); b2 = zeros(Float32, NG_MAX, 1)
+    for k in 1:NG_MAX, m in 1:NG_MAX
+        W2[m, k, 1] = Float32(100 * k + m)
+    end
+    iface_before = copy(W2[1:NPHEN, 1:NPHEN, 1])
+    for _ in 1:20
+        mutate!(W2, b2, 1, rng, pdel, 0.0f0, 20)
+    end
+    @test W2[1:NPHEN, 1:NPHEN, 1] == iface_before
+
+    # development respects ng: a bigger network gives a different phenotype
+    phen_a = zeros(Float32, NPHEN); phen_b = zeros(Float32, NPHEN)
+    e = zeros(Float32, NG_MAX); buf = zeros(Float32, NG_MAX)
+    env = zeros(Float32, NRES)
+    seed_genome!(W, b, 1, rng, NG_MAX)
+    develop!(phen_a, e, buf, W, b, 1, env, 14)
+    develop!(phen_b, e, buf, W, b, 1, env, 28)
+    @test phen_a != phen_b
+    @test all(0.0f0 .<= phen_a .<= 1.0f0)
+    @test sum(phen_a[P_UPTAKE]) ≈ 1.0f0 atol=1e-4
+end
+
+@testset "sim: genome size stays in range for every organism" begin
+    p = Params(grid = 48, capacity = 4000, shock_interval = 0, seed = 77,
+               p_node_add = 0.05f0, p_node_del = 0.05f0)
+    sim = Sim(p)
+    for _ in 1:600
+        step!(sim)
+    end
+    live = [i for i in 1:high_water(sim.pop) if sim.pop.alive[i]]
+    @test !isempty(live)
+    @test all(i -> NG_MIN <= sim.pop.ng[i] <= NG_MAX, live)
+    # with high add/delete rates the population should not be monomorphic in size
+    @test length(unique(sim.pop.ng[i] for i in live)) > 1
 end
 
 @testset "genome: structure summary tracks silencing" begin
     rng = Xoshiro(23)
-    W = zeros(Float32, NG, NG, 1); b = zeros(Float32, NG, 1)
+    W = zeros(Float32, NG_MAX, NG_MAX, 1); b = zeros(Float32, NG_MAX, 1)
     seed_genome!(W, b, 1, rng)
-    nz0, act0, aw0 = genome_structure(W, b, 1)
+    nz0, act0, aw0 = genome_structure(W, b, 1, NG_MAX)
     @test nz0 > 0 && act0 > 0 && aw0 > 0
 
     # a fully wired genome has every weight and every gene active
     fill!(W, 1.0f0)
-    nz1, act1, aw1 = genome_structure(W, b, 1)
-    @test nz1 == NG * NG
-    @test act1 == NG
+    nz1, act1, aw1 = genome_structure(W, b, 1, NG_MAX)
+    @test nz1 == NG_MAX * NG_MAX
+    @test act1 == NG_MAX
     @test aw1 ≈ 1.0f0
 
     # silencing one gene zeroes its outgoing row and drops the active count
     p = Params(mut_rate = 0.0f0, p_silence = 1.0f0, p_duplicate = 0.0f0)
-    mutate!(W, b, 1, rng, p, 0.0f0)
-    nz2, act2, _ = genome_structure(W, b, 1)
-    @test act2 == NG - 1
-    @test nz2 == NG * NG - NG
+    mutate!(W, b, 1, rng, p, 0.0f0, NG_MAX)
+    nz2, act2, _ = genome_structure(W, b, 1, NG_MAX)
+    @test act2 == NG_MAX - 1
+    @test nz2 == NG_MAX * NG_MAX - NG_MAX
 
     # an empty genome registers as zero complexity
     fill!(W, 0.0f0)
-    nz3, act3, aw3 = genome_structure(W, b, 1)
+    nz3, act3, aw3 = genome_structure(W, b, 1, NG_MAX)
     @test nz3 == 0 && act3 == 0 && aw3 == 0.0f0
 end
 
@@ -830,7 +895,7 @@ end
     @test all(1 .<= snap.x .<= 24)
     @test all(1 .<= snap.y .<= 24)
     @test !isempty(snap.W)
-    @test size(first(snap.W)) == (NG, NG)
+    @test size(first(snap.W)) == (NG_MAX, NG_MAX)
 end
 
 # =============================================================================

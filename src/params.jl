@@ -182,6 +182,16 @@ Base.@kwdef mutable struct Params
     # Most mutations hurt, a few help. Load can therefore fall as well as rise,
     # which is what makes Muller's ratchet a dynamic (small populations click
     # upward, large ones purge) rather than a one-way count to extinction.
+    # --- genome size ---------------------------------------------------------
+    # Hidden nodes are gained by duplication and lost by deletion, so genome
+    # SIZE evolves rather than only its wiring. maint_gene charges for each
+    # hidden node, since more genes cost more to replicate and express: set it
+    # to 0 to ask whether complexity grows by drift alone.
+    ng_init::Int            = 16       # founders start here, between NG_MIN and NG_MAX
+    p_node_add::Float32     = 0.0030f0
+    p_node_del::Float32     = 0.0030f0
+    maint_gene::Float32     = 0.0015f0 # per hidden node, per tick
+
     p_deleterious::Float32  = 0.70f0
     p_beneficial::Float32   = 0.05f0
     clade_radius2::Float32  = 0.16f0   # squared phenotype distance that names a new clade
