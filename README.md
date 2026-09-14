@@ -43,9 +43,22 @@ runner prints the measured ticks-per-generation ratio when it finishes.
 
 ### Genome
 
-A gene-regulatory network: a 20×20 weight matrix plus per-node bias. At birth
-the network is run to an approximate fixed point, and the resulting expression
+A gene-regulatory network: a weight matrix plus per-node bias. At birth the
+network is run to an approximate fixed point, and the resulting expression
 vector is read off as a **12-trait phenotype** which is then cached for life.
+
+**Genome size is variable.** Nodes `1:NPHEN` are a fixed interface — the first
+`NRES` receive environmental input and the first `NPHEN` are read off as the
+phenotype — so they cannot be added or removed without breaking the mapping.
+Nodes `NPHEN+1 : ng` are **hidden units**, gained by duplication and lost by
+deletion, so an organism's `ng` evolves over `NG_MIN`(12) to `NG_MAX`(32).
+`maint_gene` charges for each hidden node, since more genes cost more to
+replicate and express.
+
+This exists to make the open-endedness question answerable. With a fixed node
+count it was not: connectivity saturated at ~392 of 400 possible weights in
+every run, and "complexity plateaued" could not be told apart from "complexity
+hit the ceiling".
 
 Development happens **once, at birth** — not every tick. Re-expressing every
 tick measured 15× slower (44.3 vs 2.9 ms/tick, on an earlier version of the
@@ -115,6 +128,66 @@ Three pressures keep selection from settling:
 - **Mutation load** — most mutations are deleterious, some beneficial, so load
   can fall as well as rise; Muller's ratchet is a dynamic, not a countdown.
 
+### Dormancy
+
+Below `dorm_threshold` energy an organism goes dormant: upkeep drops to
+`dorm_upkeep` of normal, **ageing pauses**, it cannot divide, and it keeps
+taking up resources at `dorm_uptake` of normal so it can climb back out. This is
+sporulation.
+
+It is not decoration — it is what makes long runs possible at all. **Every
+extinction measured was caused by famine**: 8 of 8 across a 24-run batch, each
+within 24–211 ticks of one, with no cull or heat event killing anything. At
+~0.53 mean energy against ~0.3 upkeep per tick an organism holds under two
+ticks of reserve against a 400-tick famine, so surviving one was impossible by
+construction rather than by ecology.
+
+Measured under a deliberately brutal regime — famines every ~8k ticks, about 3×
+normal, over 60k ticks, 8 seeds:
+
+| `dorm_upkeep` | extinctions |
+|---|---|
+| none | **7/8** |
+| 0.200 | **1/8** |
+| 0.050 | **1/8** |
+| 0.020 | 2/8 |
+| 0.005 | 3/8 |
+
+**Shallow dormancy beats deep**, which is the opposite of the intuition it was
+built on. Going from 20% upkeep to 0.5% makes things *worse*: dormant cells take
+up at only 35% rate, so digging too deep means surviving the famine but never
+climbing back out, and the population lingers dormant instead of recovering.
+**Recovery is the binding constraint, not survival.** The default sits at 0.05,
+in the middle of the flat region.
+
+#### Dormancy does not fix long-run extinction
+
+The table above is a 60k-tick stress test. Over **200k ticks at the normal
+famine rate**, dormancy makes no difference to extinction at all:
+
+| arm | extinct | population | generations | clade Shannon | dormant |
+|---|---|---|---|---|---|
+| no dormancy | **4/8** | 16,594 | 8,629 | 1.18 | 7.6% |
+| dormancy | **4/8** | 30,877 | 6,261 | **4.49** | 35.2% |
+
+Both tests saw a similar *number* of famines (~2.5 vs ~2.7), so the difference
+is not famine exposure — it is **run length**. Dormancy buys survival over 60k
+ticks and has stopped mattering by 200k. Whatever kills long runs is therefore
+not simply an inability to sit out a famine, and that cause is not yet
+identified.
+
+What dormancy *does* do is substantial and was not the goal:
+
+- **population ×1.9**, because organisms that would have starved persist
+- **clade diversity ×3.8** (Shannon 1.18 → 4.49) — dormant cells act as a
+  **seed bank**, so lineages that would have been lost sit out the bad period
+  and return. This is a well-established ecological principle and it fell out
+  of the model unprompted.
+- **generations −28%**, because dormant cells do not divide
+
+Beware of generalising a short stress test. The 7/8 → 1/8 result is real for the
+regime it was measured in and does not transfer to longer runs.
+
 ### Clades
 
 A full per-organism phylogeny is not representable over a million ticks. A
@@ -175,9 +248,27 @@ far more than on grid size alone.
 
 | grid | capacity | population | organism arrays | ticks/s |
 |---|---|---|---|---|
-| 128 | 65,536 | ~14,500 | 115 MB | **~900** |
-| 256 | 262,144 | ~62,000 | 460 MB | **~240** |
-| 512 | 1,048,576 | ~272,000 | 1.84 GB | **~55** |
+| 128 | 65,536 | ~15,800 | 282 MB | **886** |
+| 256 | 262,144 | ~66,000 | 1.13 GB | **234** |
+| 512 | 1,048,576 | ~272,000 | 4.5 GB | ~55 |
+
+Grids 128 and 256 measured on an idle Apple M5 (10 threads) after the move to
+variable genomes; 512 is from a live run on an M4 Pro and is the median of 57
+samples spanning 44–132 ticks/s, since throughput swings ~3× over the seasonal
+population cycle.
+
+Memory scales as `NG_MAX²`, because every organism's weight block is dimensioned
+for the largest genome it could have rather than the one it has — raising
+`NG_MAX` from 20 to 32 multiplied the arrays by 2.6×. **Speed was not affected**
+(886 vs ~900 tick/s at grid 128 before the change).
+
+**Do not benchmark this under load.** A profile taken while other runs competed
+for cores showed every phase ~4× slower, including `diffuse!`, which never
+touches a genome and therefore cannot have been affected by the genome change.
+That artifact was very nearly written up as a regression.
+
+Current phase split, grid 256, idle, 10 threads: `organism_step!` 73%,
+`settle_births!` 18%, `diffuse!` 6%, `replenish!` 3%.
 
 Grids 128 and 256 measured on an Apple M5 (10 threads); grid 512 is the median
 of 57 samples from a live run on an Apple M4 Pro (12 threads), where the range
@@ -483,24 +574,6 @@ None of this is the default. The combo needs inflow raised 2.4x, which changes
 the energy economy of everything else, and the payoff is a minority ecotype
 rather than a split population.
 
-**Where to go next.** The same work finds cross-feeding lineages emerge only
-under strong spatial structure, self-organising into interleaved patterns, and
-that in well-mixed conditions autonomous mutants take over. The fields here are
-close to uniform (`avail@organisms ≈ avail@global`), which is the real blocker:
-every organism sees the same resource mixture, so there is one optimal strategy
-and nothing to partition. Lowering `diff_rate` raises field heterogeneity
-(CV 0.51 → 0.89) and lifts branching to ~2% but no further on its own, and
-making motility expensive enough to matter starves the dish. Per-channel
-diffusion (`diff_falloff`) is now implemented and alone does nothing —
-heterogeneity rises (waste CV 0.125 → 0.302) with branching still at 0%. It
-only pays combined with the proteome cost, as the A/B above shows.
-
-What has *not* been tried: making organisms' offspring disperse less (birth
-placement is currently a neighbouring cell, which is already local), or giving
-the dish a spatial gradient in inflow so that different regions genuinely
-favour different channels rather than relying on the population to generate
-the heterogeneity itself.
-
 ### References
 
 - Marsland et al., *Available energy fluxes drive a transition in the diversity,
@@ -530,3 +603,96 @@ the heterogeneity itself.
 - *Shaping of microbial phenotypes by trade-offs* (proteome allocation and the
   specialist/generalist trade-off) —
   [Nature Communications](https://www.nature.com/articles/s41467-024-48591-9)
+
+## Genome complexity: does it grow?
+
+It does not, and the experiment that shows it is the cleanest in the project.
+
+Connectivity saturating at ~392 of 400 weights was originally read as
+evidence that complexity had stopped growing. That reading was not available:
+`NG` was a hard cap, so saturation was forced. With genome size now variable the
+question is answerable, and the answer is negative.
+
+36 replicates, five arms, 200k ticks (~10,000 generations) at grid 128:
+
+| arm | gene cost | started at | peak | **final** | final connectivity |
+|---|---|---|---|---|---|
+| cost0 | **0** | 16 | 20.8 | **15.1** | 223 |
+| cost15 | 0.0015 | 16 | 17.0 | **13.0** | 161 |
+| cost60 | 0.006 | 16 | 14.2 | **12.0** | 141 |
+| hi28 | 0.0015 | **28** | 28.2 | **14.1** | 189 |
+| lo12 | 0.0015 | **12** | 13.5 | **12.1** | 142 |
+
+**Genome size decays in every arm here, monotonically, and connectivity decays
+with it** (416 → 218 weights in a typical run). But these five arms do not
+support the conclusion they look like they support, because **four of the five
+charge for genes** and the fifth (`cost0`) settles at ~15.1 — about three nodes
+*above* the floor, not at it.
+
+A sixth and seventh arm settle it. Zero gene cost, started at the floor and
+started high:
+
+| arm | gene cost | started at | at 10k ticks | **final** |
+|---|---|---|---|---|
+| free12 | **0** | **12** | **14.5–18.1** | 12.2–15.1 |
+| free20 | **0** | 20 | 20.1–26.1 | 16.0–21.0 |
+
+**Started at the floor with free genes, genome size rises** — 12 to 14.5–18.1
+within 10,000 ticks. So the floor is *not* absorbing; it only looked that way
+because `lo12` carried a gene cost, which makes sitting at the minimum close to
+tautological.
+
+Two caveats that keep this from being a clean positive result either:
+
+- **At `ng = NG_MIN` deletion cannot fire** — only additions are possible at the
+  boundary. Part of the rise from 12 is therefore a mutational boundary effect
+  rather than evidence that hidden units pay.
+- **The two zero-cost arms do not converge** (final medians 13.3 from below,
+  16.5 from above), so there is no demonstrated interior attractor. With
+  symmetric add/delete rates and no cost, drift with a reflecting boundary would
+  also produce roughly this, and 200k ticks may simply be too short.
+
+### What can actually be claimed
+
+- **Complexity does not grow open-endedly.** No arm, at any gene cost, from any
+  starting size, showed sustained growth. Everything either decays or wanders in
+  the mid-teens.
+- **With any real gene cost, size decays to the minimum** and stays there.
+- **With genes free, size does not collapse** — it sits in the mid-teens,
+  reached from both directions but not convergently within 200k ticks.
+- **Whether hidden units carry positive value is UNRESOLVED.** Distinguishing a
+  weak selective benefit from drift-with-a-reflecting-boundary needs an arm that
+  breaks the boundary asymmetry — for instance allowing deletion to fail
+  harmlessly at the floor so add and delete stay symmetric there, or measuring
+  the fitness of matched genotypes differing only in hidden-node count.
+
+The earlier version of this section claimed complexity "decays toward an
+absorbing floor even without a gene cost". That was wrong on both halves: it
+conflated the zero-cost arm (which stops well above the floor) with the
+start-at-the-floor arm (which had a cost). It is recorded here rather than
+quietly deleted because the mistake is instructive — the arms were not a
+factorial design, and the two factors got read off each other.
+
+The likeliest explanation for the absence of growth remains that **this
+environment does not demand regulatory complexity**: mapping six inputs to
+twelve traits is simple enough that the interface layer largely suffices. But
+that is now a hypothesis the data is consistent with, not a result the data
+establishes.
+
+**Where to go next.** The same work finds cross-feeding lineages emerge only
+under strong spatial structure, self-organising into interleaved patterns, and
+that in well-mixed conditions autonomous mutants take over. The fields here are
+close to uniform (`avail@organisms ≈ avail@global`), which is the real blocker:
+every organism sees the same resource mixture, so there is one optimal strategy
+and nothing to partition. Lowering `diff_rate` raises field heterogeneity
+(CV 0.51 → 0.89) and lifts branching to ~2% but no further on its own, and
+making motility expensive enough to matter starves the dish. Per-channel
+diffusion (`diff_falloff`) is now implemented and alone does nothing —
+heterogeneity rises (waste CV 0.125 → 0.302) with branching still at 0%. It
+only pays combined with the proteome cost, as the A/B above shows.
+
+What has *not* been tried: making organisms' offspring disperse less (birth
+placement is currently a neighbouring cell, which is already local), or giving
+the dish a spatial gradient in inflow so that different regions genuinely
+favour different channels rather than relying on the population to generate
+the heterogeneity itself.

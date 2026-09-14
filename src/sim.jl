@@ -54,11 +54,11 @@ function Sim(p::Params = Params())
     pop = Population(p)
     nt = Threads.nthreads()
     sim = Sim(p, env, pop, CladeTable(), rng, 0,
-              Int32[], zeros(Float32, NG), zeros(Float32, NG),
+              Int32[], zeros(Float32, NG_MAX), zeros(Float32, NG_MAX),
               zeros(Float32, NPHEN), zeros(Float32, NRES),
               Int32[], Int32[], UInt64[], Int32[],
-              [zeros(Float32, NG)    for _ in 1:nt],
-              [zeros(Float32, NG)    for _ in 1:nt],
+              [zeros(Float32, NG_MAX) for _ in 1:nt],
+              [zeros(Float32, NG_MAX) for _ in 1:nt],
               [zeros(Float32, NPHEN) for _ in 1:nt],
               [zeros(Float32, NRES)  for _ in 1:nt],
               [Xoshiro(0) for _ in 1:nt],
@@ -78,7 +78,8 @@ function seed_population!(sim::Sim, n::Int)
     for _ in 1:n
         i = claim!(pop)
         i == 0 && break
-        seed_genome!(pop.W, pop.bias, i, rng)
+        pop.ng[i] = Int32(clamp(p.ng_init, NG_MIN, NG_MAX))
+        seed_genome!(pop.W, pop.bias, i, rng, Int(pop.ng[i]))
         pop.x[i] = rand(rng, Int32(1):Int32(G))
         pop.y[i] = rand(rng, Int32(1):Int32(G))
         pop.occ[pop.x[i], pop.y[i]] += Int32(1)
@@ -91,12 +92,13 @@ function seed_population!(sim::Sim, n::Int)
             sim.env_scratch[r] = env.res[r, pop.x[i], pop.y[i]]
         end
         develop!(sim.phen_scratch, sim.e_scratch, sim.buf_scratch,
-                 pop.W, pop.bias, i, sim.env_scratch; plasticity = p.plasticity)
+                 pop.W, pop.bias, i, sim.env_scratch, Int(pop.ng[i]);
+                 plasticity = p.plasticity)
         @inbounds for k in 1:NPHEN
             pop.phen[k, i] = sim.phen_scratch[k]
         end
         pop.chan_cost[i] = channel_cost(sim.phen_scratch, p.channel_cost_exp)
-        nz, act, aw = genome_structure(pop.W, pop.bias, i)
+        nz, act, aw = genome_structure(pop.W, pop.bias, i, Int(pop.ng[i]))
         pop.nzw[i] = nz; pop.active[i] = act; pop.absw[i] = aw
     end
     return nothing
@@ -139,6 +141,7 @@ function organism_step!(sim::Sim)
     maint_motil   = p.maint_motil
     maint_stress  = p.maint_stress
     maint_repair  = p.maint_repair
+    maint_gene    = p.maint_gene
     maint_chan    = p.maint_channel
     maint_crowd   = p.maint_crowd
     maint_load    = p.maint_load
@@ -214,6 +217,7 @@ function organism_step!(sim::Sim)
                                                        # cost gives tolerance no interior optimum
 
                  maint_repair * pop.phen[P_REPAIR, i] +
+                 maint_gene   * Float32(pop.ng[i] - NG_MIN) +  # cost of extra genes
                  maint_chan   * pop.chan_cost[i] +   # proteome cost of breadth
                  maint_crowd  * crowd +
                  maint_load   * Float32(pop.load[i]) +  # genetic deterioration bites here
@@ -325,20 +329,22 @@ function settle_births!(sim::Sim)
                 seed_fast!(crng, sim.pend_seed[k])
 
                 repair = pop.phen[P_REPAIR, parent]
-                _nmut, _big, dload = inherit!(pop.W, pop.bias, child, parent,
-                                              crng, p, repair)
+                ng_p = Int(pop.ng[parent])
+                _nmut, _big, dload, ng_c = inherit!(pop.W, pop.bias, child, parent,
+                                                    crng, p, repair, ng_p)
+                pop.ng[child] = Int32(ng_c)
                 sim.pend_dload[k] = Int32(dload)
 
                 for r in 1:NRES
                     envs[r] = env.res[r, pop.x[child], pop.y[child]]
                 end
-                develop!(phen, e, buf, pop.W, pop.bias, child, envs;
+                develop!(phen, e, buf, pop.W, pop.bias, child, envs, ng_c;
                          plasticity = plast)
                 for kk in 1:NPHEN
                     pop.phen[kk, child] = phen[kk]
                 end
                 pop.chan_cost[child] = channel_cost(phen, chan_exp)
-                nz, act, aw = genome_structure(pop.W, pop.bias, child)
+                nz, act, aw = genome_structure(pop.W, pop.bias, child, ng_c)
                 pop.nzw[child] = nz; pop.active[child] = act; pop.absw[child] = aw
             end
         end

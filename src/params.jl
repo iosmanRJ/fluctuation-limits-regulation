@@ -15,11 +15,17 @@ Base.@kwdef mutable struct Params
     capacity::Int          = 0
     capacity_per_cell::Int = 4          # headroom; max_per_cell is the real limit
     max_per_cell::Int32  = Int32(8)    # hard local packing limit
-    # Founders, 0 = scale with dish area. A fixed count is a trap: 200 founders
-    # is 0.012/cell at grid 128 but 0.0008/cell at grid 512, 16x sparser, and
-    # sparse founders simply fail to establish. Measured: 3 of 8 grid-256 runs
-    # died inside 90k ticks, two of them inside 27k — establishment failures,
-    # not ecology.
+    # Founders, 0 = scale with dish area. A fixed count is a density trap: 200
+    # founders is 0.012/cell at grid 128 but 0.0008/cell at grid 512, 16x
+    # sparser, which makes runs at different grid sizes incomparable.
+    #
+    # It was ALSO hypothesised to explain the early extinctions seen at grid
+    # 256. It does not: scaling founders moved extinctions only 3/8 -> 2/8 over
+    # 8 seeds, which is nothing at that sample size, and a scaled run still died
+    # at tick 10,986. The actual cause turned out to be famine (8 of 8 deaths
+    # followed one within 24-211 ticks), addressed by dormancy. Keep the
+    # scaling because comparability across grid sizes is worth having on its
+    # own; do not credit it with fixing extinction.
     n_founders::Int      = 0
     seed::Int            = 42
 
@@ -182,6 +188,16 @@ Base.@kwdef mutable struct Params
     # Most mutations hurt, a few help. Load can therefore fall as well as rise,
     # which is what makes Muller's ratchet a dynamic (small populations click
     # upward, large ones purge) rather than a one-way count to extinction.
+    # --- genome size ---------------------------------------------------------
+    # Hidden nodes are gained by duplication and lost by deletion, so genome
+    # SIZE evolves rather than only its wiring. maint_gene charges for each
+    # hidden node, since more genes cost more to replicate and express: set it
+    # to 0 to ask whether complexity grows by drift alone.
+    ng_init::Int            = 16       # founders start here, between NG_MIN and NG_MAX
+    p_node_add::Float32     = 0.0030f0
+    p_node_del::Float32     = 0.0030f0
+    maint_gene::Float32     = 0.0015f0 # per hidden node, per tick
+
     p_deleterious::Float32  = 0.70f0
     p_beneficial::Float32   = 0.05f0
     clade_radius2::Float32  = 0.16f0   # squared phenotype distance that names a new clade

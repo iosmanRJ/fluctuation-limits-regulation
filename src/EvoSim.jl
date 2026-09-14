@@ -16,7 +16,7 @@ module EvoSim
 
 using Random, Statistics, LinearAlgebra, Printf, Dates
 
-include("genome.jl")       # defines NG, NRES, NPHEN — must come first
+include("genome.jl")       # defines NG_MAX, NRES, NPHEN — must come first
 include("params.jl")
 include("population.jl")
 include("environment.jl")
@@ -32,7 +32,7 @@ export Params, Sim, Environment, Population, CladeTable,
        replenish!, diffuse!, total_resource,
        claim!, kill!, place!, high_water, resolved_capacity, founder_count, nclades, new_clade!, prune_clades!,
        phen_dist2,
-       NG, NRES, NPHEN, NSTAT,
+       NG_MAX, NG_MIN, NRES, NPHEN, NSTAT,
        P_UPTAKE, P_SIZE, P_MOTIL, P_DIVIDE, P_REPAIR, P_STRESS, P_LEAK
 
 end # module
