@@ -1,0 +1,11 @@
+# Charting environment. Kept separate from the core package so a headless
+# machine can run simulations without OpenGL or any plotting stack.
+#
+#   julia --project=scripts -e 'using Pkg; Pkg.instantiate()'
+#   julia --project=scripts scripts/dashboard.jl runs/my-run
+[deps]
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+EvoSim = "b3f1c2a4-5d6e-4f80-9a1b-2c3d4e5f6a7b"
+GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
