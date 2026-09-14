@@ -58,10 +58,11 @@ function diffuse!(env::Environment, p::Params)
     G = env.G
     src = env.res
     dst = env.buf
-    rate = p.diff_rate
     cap = p.res_cap
 
     Threads.@threads for r in 1:NRES
+        # larger byproducts diffuse more slowly than the primary substrate
+        rate = p.diff_rate * p.diff_falloff^(r - 1)
         @inbounds for j in 2:(G - 1)
             @simd for i in 2:(G - 1)
                 lap = src[r, i-1, j] + src[r, i+1, j] +

@@ -108,6 +108,25 @@ end
     @test s2.dropped == 0
 end
 
+@testset "population: founders scale with the dish" begin
+    # A fixed founder count is a density trap: 200 founders is 0.012/cell at
+    # grid 128 but 0.0008/cell at grid 512, and sparse founders fail to
+    # establish. Measured: 3 of 8 grid-256 runs died inside 90k ticks, two of
+    # them inside 27k.
+    @test founder_count(Params(grid = 128)) == max(200, 128 * 128 ÷ 80)
+    @test founder_count(Params(grid = 512)) > 10 * founder_count(Params(grid = 64))
+    @test founder_count(Params(grid = 256, n_founders = 77)) == 77   # explicit wins
+
+    # founder DENSITY should be roughly grid-independent now
+    d(g) = founder_count(Params(grid = g)) / (g * g)
+    @test d(512) > 0.5 * d(256)
+    @test d(512) < 2.0 * d(256)
+
+    # and the sim actually starts with that many
+    p = Params(grid = 128, capacity = 0)
+    @test Sim(p).pop.n == founder_count(p)
+end
+
 @testset "population: slot allocator" begin
     p = Params(capacity = 8)
     pop = Population(p)

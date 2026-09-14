@@ -63,9 +63,13 @@ function Sim(p::Params = Params())
               [zeros(Float32, NRES)  for _ in 1:nt],
               [Xoshiro(0) for _ in 1:nt],
               0, 0, 0, 0, Tuple{Int,Symbol}[])
-    seed_population!(sim, 200)
+    seed_population!(sim, founder_count(p))
     return sim
 end
+
+"""Founders to seed: explicit if set, else scaled to dish area."""
+founder_count(p::Params) =
+    p.n_founders > 0 ? p.n_founders : max(200, (p.grid * p.grid) ÷ 80)
 
 """Drop `n` founder organisms with random regulatory networks into the dish."""
 function seed_population!(sim::Sim, n::Int)

@@ -15,6 +15,12 @@ Base.@kwdef mutable struct Params
     capacity::Int          = 0
     capacity_per_cell::Int = 4          # headroom; max_per_cell is the real limit
     max_per_cell::Int32  = Int32(8)    # hard local packing limit
+    # Founders, 0 = scale with dish area. A fixed count is a trap: 200 founders
+    # is 0.012/cell at grid 128 but 0.0008/cell at grid 512, 16x sparser, and
+    # sparse founders simply fail to establish. Measured: 3 of 8 grid-256 runs
+    # died inside 90k ticks, two of them inside 27k — establishment failures,
+    # not ecology.
+    n_founders::Int      = 0
     seed::Int            = 42
 
     # --- resources -----------------------------------------------------------
@@ -24,6 +30,16 @@ Base.@kwdef mutable struct Params
     inflow::Float32      = 0.250f0
     yields::Vector{Float32} = Float32[1.0, 0.60, 0.45, 0.35, 0.28, 0.22]  # thermodynamic decline
     diff_rate::Float32   = 0.12f0
+    # Per-channel diffusion falloff: channel r diffuses at
+    # diff_rate * diff_falloff^(r-1). 1.0 means every channel diffuses alike.
+    #
+    # Biologically, metabolic byproducts are larger molecules than the primary
+    # substrate and diffuse more slowly. Mechanically this is an attempt at the
+    # blocker described under 'Still open': the resource fields are near-uniform,
+    # so every organism sees the same mixture and there is one optimal strategy
+    # and nothing to partition. Slow-diffusing waste should form persistent
+    # patches that a specialist could actually live in.
+    diff_falloff::Float32 = 1.0f0
     res_cap::Float32     = 6.0f0
     decay::Float32       = 0.0060f0    # abiotic loss, stops waste accumulating forever
 
