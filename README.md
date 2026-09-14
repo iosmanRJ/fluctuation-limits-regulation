@@ -171,6 +171,41 @@ For scale, the same loop in pure Python measured **440 ns per organism-tick
 versus 8.3 ns** in Julia — and that comparison excluded the diffusion step,
 which Julia also had to do.
 
+### Threading
+
+Run with `-t auto` (or `-t 12`). Two phases are parallel: resource diffusion
+across channels, and the expensive part of the birth phase.
+
+Measured at grid 512 with ~275k organisms on 12 threads:
+
+| phase | before | after | |
+|---|---|---|---|
+| `settle_births!` | 15.01 ms | 3.29 ms | parallelised, 4.6× |
+| `organism_step!` | 4.36 ms | 4.76 ms | **serial — now the bottleneck** |
+| `diffuse!` | 0.94 ms | 1.40 ms | parallel across channels |
+| `replenish!` | 0.45 ms | 0.42 ms | serial, negligible |
+| **total** | **20.76 ms** | **9.87 ms** | **48 → 101 ticks/s** |
+
+Births dominate because each one develops a fresh regulatory network — tens of
+thousands of developments per tick at this scale. The parallel phase has no
+shared writes: each child touches only its own genome and phenotype columns,
+and the environment is read-only while it runs.
+
+**Parallelism does not cost reproducibility.** Each child's RNG seed is drawn
+serially in a fixed order, so its random stream depends on its own seed and
+never on how the work was divided. Verified identical population, phenotype sum
+and clade count at 1, 4 and 10 threads. Per-thread RNGs would have been simpler
+and would have made results thread-count dependent.
+
+**The remaining opportunity is `organism_step!`**, now ~48% of runtime and
+still serial. It cannot be threaded naively: organisms in the same cell deplete
+a shared resource pool by sequential read-modify-write, so concurrent access
+would double-spend. Doing it properly means partitioning organisms into grid
+row-bands so no two threads touch the same cell, which needs a counting sort by
+band each tick (~0.5 ms) and deferred movement, since an organism crossing a
+band boundary would otherwise race on the occupancy grid. Estimated gain is a
+further ~1.5×; it has not been done because a correct 2.1× beats a racy 3×.
+
 ## Development
 
 ```sh
@@ -199,8 +234,25 @@ would break silently:
   plasticity.
 - **Raising a trait's cost lowers its evolved value** — the property that keeps
   traits off the boundary.
-- **Same seed reproduces exactly.** Without this no result is ever checkable.
-- **The hot loop does not allocate.**
+- **Same seed reproduces exactly**, and identically at any thread count.
+  Without this no result is ever checkable.
+- **Allocation does not scale with population.** The test deliberately asserts
+  the scaling property, not a fixed byte budget: a budget passes while
+  per-organism garbage creeps back in. Two per-birth allocations were found
+  this way — `Random.seed!(::Xoshiro, ::UInt64)` costs 368 bytes a call, and a
+  `view(phen, :, child)` escaping into a call allocates.
+
+### Reproducibility, precisely
+
+Same machine and same Julia version: bit-identical, at any thread count.
+
+*Across* Julia versions the discrete trajectory holds for a long time but is
+not guaranteed forever — LLVM reassociates the SIMD dot product in `develop!`
+differently between versions, so some phenotypes differ by ~1 ULP. Measured on
+1.12.7 vs 1.13.0 after 500 ticks: population and lineage depth identical, float
+sums differing in the 8th significant figure. Eventually a 1-ULP difference
+flips a comparison and the runs diverge. Pin the Julia version when a result
+needs to be exactly reproducible.
 
 ### A warning from experience
 
