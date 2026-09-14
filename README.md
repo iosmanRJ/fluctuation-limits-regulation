@@ -27,9 +27,13 @@ on the core by path.
 
 **This is the single most important thing to know about reading results.**
 
-A *tick* is one simulation step. A *generation* is one round of descent. At
-default settings one generation takes roughly **15 ticks**, so a million-tick
-run is about 65,000 generations, not a million.
+A *tick* is one simulation step. A *generation* is one round of descent. One
+generation takes **10–30 ticks**, and the ratio is **not constant** — it grows
+with population, because a crowded dish means less energy per organism and
+slower division. Measured: ~15 ticks/generation at grid 128, ~29 at grid 256.
+
+So a million-tick run is tens of thousands of generations, not a million, and
+you cannot convert between them with a fixed factor.
 
 Every run logs `mean_depth` — the mean lineage depth of living organisms —
 which is the real generation count. Never infer it from the tick number. The
@@ -154,7 +158,8 @@ Measured on an Apple M5 (10 threads), grid 256, ~30k organisms:
 |---|---|---|---|
 | default settings | ~200 | ~1.4 h | ~65,000 |
 
-Reaching a million *generations* needs roughly 15M ticks. Run that headless
+Reaching a million *generations* needs well over 15M ticks at grid 512 — use
+the measured `mean_depth`, not an assumed ratio. Run long jobs headless
 with `scripts/run.jl` — the core has no plotting dependency, so it runs fine on
 a machine with no display. `stats.bin` is flushed as it goes, so a long run can
 be charted (or stopped) at any point without losing what it has done.
@@ -253,6 +258,32 @@ differently between versions, so some phenotypes differ by ~1 ULP. Measured on
 sums differing in the 8th significant figure. Eventually a 1-ULP difference
 flips a comparison and the runs diverge. Pin the Julia version when a result
 needs to be exactly reproducible.
+
+## Known limitations
+
+**Cross-feeding decays.** The waste channels exist so that organisms can build
+niches for each other, and early in a run they do — 9–20% of uptake allocation
+goes to waste channels. Over long runs that erodes toward zero and the
+population converges on a single channel-1 specialist type. Things that were
+measured and did NOT fix it:
+
+- *Starving the dish.* Lowering inflow made it worse, not better (waste uptake
+  0.090 → 0.019 as inflow went 0.25 → 0.08). A smaller population produces less
+  waste, which thins the very niches you are trying to create.
+- *Raising waste yields.* Slows the decay without stopping it: with a shallow
+  yield decline, waste uptake still fell 0.180 → 0.076 over 80k ticks and was
+  still falling.
+- *Making the allocation trade-off convex* (`uptake_exponent` > 1), on the
+  theory that specialists would then out-eat generalists. It does the reverse —
+  the population becomes more generalist, and small dishes starve.
+
+The population stays one monomorphic type rather than splitting into coexisting
+ecotypes; the trait-spread panel collapsing toward zero is the signature. A fix
+probably needs something that makes rarity genuinely advantageous — an explicit
+metabolic trade-off curve, or enough spatial isolation that local populations
+can diverge before diffusion mixes them. Everything else in the model (seasonal
+adaptation, mutation load ratcheting and purging, clade turnover, spatial
+patchiness in the waste fields) behaves well over long runs.
 
 ### A warning from experience
 
