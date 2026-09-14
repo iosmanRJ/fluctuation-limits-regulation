@@ -160,6 +160,34 @@ climbing back out, and the population lingers dormant instead of recovering.
 **Recovery is the binding constraint, not survival.** The default sits at 0.05,
 in the middle of the flat region.
 
+#### Dormancy does not fix long-run extinction
+
+The table above is a 60k-tick stress test. Over **200k ticks at the normal
+famine rate**, dormancy makes no difference to extinction at all:
+
+| arm | extinct | population | generations | clade Shannon | dormant |
+|---|---|---|---|---|---|
+| no dormancy | **4/8** | 16,594 | 8,629 | 1.18 | 7.6% |
+| dormancy | **4/8** | 30,877 | 6,261 | **4.49** | 35.2% |
+
+Both tests saw a similar *number* of famines (~2.5 vs ~2.7), so the difference
+is not famine exposure — it is **run length**. Dormancy buys survival over 60k
+ticks and has stopped mattering by 200k. Whatever kills long runs is therefore
+not simply an inability to sit out a famine, and that cause is not yet
+identified.
+
+What dormancy *does* do is substantial and was not the goal:
+
+- **population ×1.9**, because organisms that would have starved persist
+- **clade diversity ×3.8** (Shannon 1.18 → 4.49) — dormant cells act as a
+  **seed bank**, so lineages that would have been lost sit out the bad period
+  and return. This is a well-established ecological principle and it fell out
+  of the model unprompted.
+- **generations −28%**, because dormant cells do not divide
+
+Beware of generalising a short stress test. The 7/8 → 1/8 result is real for the
+regime it was measured in and does not transfer to longer runs.
+
 ### Clades
 
 A full per-organism phylogeny is not representable over a million ticks. A
@@ -220,17 +248,27 @@ far more than on grid size alone.
 
 | grid | capacity | population | organism arrays | ticks/s |
 |---|---|---|---|---|
-| 128 | 65,536 | ~14,500 | 282 MB | **~900** |
-| 256 | 262,144 | ~62,000 | 1.13 GB | **~240** |
-| 512 | 1,048,576 | ~272,000 | 4.5 GB | **~55** |
+| 128 | 65,536 | ~15,800 | 282 MB | **886** |
+| 256 | 262,144 | ~66,000 | 1.13 GB | **234** |
+| 512 | 1,048,576 | ~272,000 | 4.5 GB | ~55 |
 
-Memory scales as `NG_MAX²` because every organism's weight block is dimensioned
-for the largest genome it could have, not the one it has. Raising `NG_MAX` from
-20 to 32 for variable genomes multiplied the arrays by 2.6×. Throughput figures
-predate that change and are **due a re-measurement on an idle machine** — a
-benchmark taken while other runs were competing for cores showed every phase
-slowing by ~4×, including `diffuse!`, which never touches a genome and so
-cannot have been affected. Do not benchmark this under load.
+Grids 128 and 256 measured on an idle Apple M5 (10 threads) after the move to
+variable genomes; 512 is from a live run on an M4 Pro and is the median of 57
+samples spanning 44–132 ticks/s, since throughput swings ~3× over the seasonal
+population cycle.
+
+Memory scales as `NG_MAX²`, because every organism's weight block is dimensioned
+for the largest genome it could have rather than the one it has — raising
+`NG_MAX` from 20 to 32 multiplied the arrays by 2.6×. **Speed was not affected**
+(886 vs ~900 tick/s at grid 128 before the change).
+
+**Do not benchmark this under load.** A profile taken while other runs competed
+for cores showed every phase ~4× slower, including `diffuse!`, which never
+touches a genome and therefore cannot have been affected by the genome change.
+That artifact was very nearly written up as a regression.
+
+Current phase split, grid 256, idle, 10 threads: `organism_step!` 73%,
+`settle_births!` 18%, `diffuse!` 6%, `replenish!` 3%.
 
 Grids 128 and 256 measured on an Apple M5 (10 threads); grid 512 is the median
 of 57 samples from a live run on an Apple M4 Pro (12 threads), where the range
