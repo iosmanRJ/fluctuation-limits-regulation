@@ -219,9 +219,48 @@ what a million-generation run would need.
   drift large *and* be fragile for a shared upstream reason — correlation only
   until an arm with `ng` pinned at 12 versus 20 settles it.
 
-If that link is causal it matters beyond survival: extinction culling large
-genomes is a **population-level force against complexity**, distinct from the
-individual-level selection the complexity arms measured, and invisible to them.
+#### Tested: genome size does not cause fragility
+
+`ng` pinned at 12 versus 20, node add/delete switched off so size never moves,
+same seeds, only genome size differing.
+
+**One decisive result:** a 20-node genome costs **40% of carrying capacity**
+(median surviving population 32,645 vs 17,846, and the ng=12 populations sit
+within ±2% of each other across seeds). Extra genes are a real metabolic tax.
+
+**But no fragility effect.** Extinction was 1/12 versus 2/12 — Fisher exact
+p = 1.0, and separating 8% from 17% would need ~250 seeds per arm. Re-run with
+a continuous measure instead — minimum population reached as a fraction of that
+run's own median, so it is not merely restating the carrying-capacity gap:
+
+| arm | min-pop ratio, median | range | extinct |
+|---|---|---|---|
+| ng = 12 | 0.0100 | 0.0009 – 0.0520 | 0/6 |
+| ng = 20 | 0.0311 | 0.0004 – 0.0377 | 1/6 |
+
+The distributions overlap almost entirely and the ng=20 median is nominally
+*higher*, i.e. less fragile — the opposite direction. **There is no effect.**
+So "every extinct run had `ng` > 14.7" was coincidence in a small sample, and
+the population-level-force-against-complexity idea it suggested has no support.
+
+#### What the bottleneck numbers actually show
+
+| arm | minimum population reached |
+|---|---|
+| ng = 12 | 21, 91, 159, 303, 780, 1188 |
+| ng = 20 | 0, 5, 179, 466, 478, 497 |
+
+**Every run crashes from ~20,000 to double or single digits.** One ng=12 run
+fell to **21 organisms and recovered**; an ng=20 run fell to **5** and
+recovered; another reached 0 and did not. Survival at these bottlenecks looks
+close to a coin flip, and is independent of genome size.
+
+That reframes extinction here. The model is not fragile because of any
+particular trait — it is fragile because the seasonal cycle and shocks
+routinely drive the population to within tens of organisms of zero, at which
+point demographic stochasticity decides. **Bottleneck depth, not genome size,
+is what a long run would have to address.** Pinning `ng` small buys carrying
+capacity, not safety.
 
 ### Clades
 
