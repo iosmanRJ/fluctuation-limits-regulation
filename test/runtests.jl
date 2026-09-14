@@ -535,6 +535,30 @@ end
     @test first(s2) == 1 && last(s2) == 10 && issorted(s2)
 end
 
+@testset "stats: buffer flushes on a time bound too" begin
+    # A long run with a large stat_every can take hundreds of thousands of
+    # ticks to fill a chunk. Without a time bound the file stays empty and the
+    # run is indistinguishable from a stalled one.
+    dir = mktempdir()
+    sim = Sim(Params(grid = 24, capacity = 500, shock_interval = 0, seed = 3))
+    sl = StatLog(dir; chunk = 100_000, flush_after = 0.0)   # chunk never fills
+    for _ in 1:3
+        step!(sim)
+        record!(sl, sim)
+    end
+    @test filesize(joinpath(dir, "stats.bin")) > 0          # flushed on the time bound
+    @test size(read_stats(dir), 2) == 3
+
+    # with a long time bound it is the chunk that triggers the write instead
+    dir2 = mktempdir()
+    sl2 = StatLog(dir2; chunk = 2, flush_after = 1e6)
+    for _ in 1:2
+        step!(sim)
+        record!(sl2, sim)
+    end
+    @test size(read_stats(dir2), 2) == 2
+end
+
 @testset "stats: log roundtrip" begin
     dir = mktempdir()
     p = Params(grid = 32, capacity = 1000, shock_interval = 0, seed = 4)

@@ -27,12 +27,23 @@ mutable struct StatLog
     k::Int
     counts::Dict{UInt32,Int}
     dir::String
+    last_flush::Float64
+    flush_after::Float64
 end
 
-function StatLog(dir::String; chunk::Int = 4096)
+"""
+    StatLog(dir; chunk, flush_after)
+
+`chunk` records are buffered before writing, but the buffer is also flushed
+every `flush_after` seconds. The time bound matters: a long run with a large
+`stat_every` can take hundreds of thousands of ticks to fill a chunk, during
+which the file stays empty and the run is indistinguishable from a stalled one.
+"""
+function StatLog(dir::String; chunk::Int = 512, flush_after::Real = 10.0)
     mkpath(dir)
     io = open(joinpath(dir, "stats.bin"), "w")
-    StatLog(io, zeros(Float32, NSTAT, chunk), 0, Dict{UInt32,Int}(), dir)
+    StatLog(io, zeros(Float32, NSTAT, chunk), 0, Dict{UInt32,Int}(), dir,
+            time(), Float64(flush_after))
 end
 
 function record!(sl::StatLog, sim::Sim)
@@ -98,11 +109,14 @@ function record!(sl::StatLog, sim::Sim)
         end
     end
 
-    sl.k == size(B, 2) && flush_stats!(sl)
+    if sl.k == size(B, 2) || time() - sl.last_flush >= sl.flush_after
+        flush_stats!(sl)
+    end
     return nothing
 end
 
 function flush_stats!(sl::StatLog)
+    sl.last_flush = time()
     sl.k == 0 && return nothing
     write(sl.io, @view sl.buf[:, 1:sl.k])
     flush(sl.io)

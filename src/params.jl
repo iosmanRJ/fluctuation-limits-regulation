@@ -76,7 +76,10 @@ Base.@kwdef mutable struct Params
     p_deleterious::Float32  = 0.70f0
     p_beneficial::Float32   = 0.05f0
     clade_radius2::Float32  = 0.16f0   # squared phenotype distance that names a new clade
-    clade_gc_interval::Int  = 5_000    # ticks between clade-table garbage collections
+    # Collect often: at grid 512 the table reached 1.4M entries between
+    # collections, ~95 MB of founder phenotypes churned through the garbage
+    # collector every cycle, almost all for clades with no living members.
+    clade_gc_interval::Int  = 1_000    # ticks between clade-table garbage collections
 
     # --- logging -------------------------------------------------------------
     snapshot_decades::Int   = 12       # log-spaced snapshots per decade of generations
