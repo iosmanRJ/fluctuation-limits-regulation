@@ -43,9 +43,22 @@ runner prints the measured ticks-per-generation ratio when it finishes.
 
 ### Genome
 
-A gene-regulatory network: a 20×20 weight matrix plus per-node bias. At birth
-the network is run to an approximate fixed point, and the resulting expression
+A gene-regulatory network: a weight matrix plus per-node bias. At birth the
+network is run to an approximate fixed point, and the resulting expression
 vector is read off as a **12-trait phenotype** which is then cached for life.
+
+**Genome size is variable.** Nodes `1:NPHEN` are a fixed interface — the first
+`NRES` receive environmental input and the first `NPHEN` are read off as the
+phenotype — so they cannot be added or removed without breaking the mapping.
+Nodes `NPHEN+1 : ng` are **hidden units**, gained by duplication and lost by
+deletion, so an organism's `ng` evolves over `NG_MIN`(12) to `NG_MAX`(32).
+`maint_gene` charges for each hidden node, since more genes cost more to
+replicate and express.
+
+This exists to make the open-endedness question answerable. With a fixed node
+count it was not: connectivity saturated at ~392 of 400 possible weights in
+every run, and "complexity plateaued" could not be told apart from "complexity
+hit the ceiling".
 
 Development happens **once, at birth** — not every tick. Re-expressing every
 tick measured 15× slower (44.3 vs 2.9 ms/tick, on an earlier version of the
@@ -115,6 +128,38 @@ Three pressures keep selection from settling:
 - **Mutation load** — most mutations are deleterious, some beneficial, so load
   can fall as well as rise; Muller's ratchet is a dynamic, not a countdown.
 
+### Dormancy
+
+Below `dorm_threshold` energy an organism goes dormant: upkeep drops to
+`dorm_upkeep` of normal, **ageing pauses**, it cannot divide, and it keeps
+taking up resources at `dorm_uptake` of normal so it can climb back out. This is
+sporulation.
+
+It is not decoration — it is what makes long runs possible at all. **Every
+extinction measured was caused by famine**: 8 of 8 across a 24-run batch, each
+within 24–211 ticks of one, with no cull or heat event killing anything. At
+~0.53 mean energy against ~0.3 upkeep per tick an organism holds under two
+ticks of reserve against a 400-tick famine, so surviving one was impossible by
+construction rather than by ecology.
+
+Measured under a deliberately brutal regime — famines every ~8k ticks, about 3×
+normal, over 60k ticks, 8 seeds:
+
+| `dorm_upkeep` | extinctions |
+|---|---|
+| none | **7/8** |
+| 0.200 | **1/8** |
+| 0.050 | **1/8** |
+| 0.020 | 2/8 |
+| 0.005 | 3/8 |
+
+**Shallow dormancy beats deep**, which is the opposite of the intuition it was
+built on. Going from 20% upkeep to 0.5% makes things *worse*: dormant cells take
+up at only 35% rate, so digging too deep means surviving the famine but never
+climbing back out, and the population lingers dormant instead of recovering.
+**Recovery is the binding constraint, not survival.** The default sits at 0.05,
+in the middle of the flat region.
+
 ### Clades
 
 A full per-organism phylogeny is not representable over a million ticks. A
@@ -175,9 +220,17 @@ far more than on grid size alone.
 
 | grid | capacity | population | organism arrays | ticks/s |
 |---|---|---|---|---|
-| 128 | 65,536 | ~14,500 | 115 MB | **~900** |
-| 256 | 262,144 | ~62,000 | 460 MB | **~240** |
-| 512 | 1,048,576 | ~272,000 | 1.84 GB | **~55** |
+| 128 | 65,536 | ~14,500 | 282 MB | **~900** |
+| 256 | 262,144 | ~62,000 | 1.13 GB | **~240** |
+| 512 | 1,048,576 | ~272,000 | 4.5 GB | **~55** |
+
+Memory scales as `NG_MAX²` because every organism's weight block is dimensioned
+for the largest genome it could have, not the one it has. Raising `NG_MAX` from
+20 to 32 for variable genomes multiplied the arrays by 2.6×. Throughput figures
+predate that change and are **due a re-measurement on an idle machine** — a
+benchmark taken while other runs were competing for cores showed every phase
+slowing by ~4×, including `diffuse!`, which never touches a genome and so
+cannot have been affected. Do not benchmark this under load.
 
 Grids 128 and 256 measured on an Apple M5 (10 threads); grid 512 is the median
 of 57 samples from a live run on an Apple M4 Pro (12 threads), where the range
@@ -482,6 +535,14 @@ a single clone, even while all those clades keep eating much the same thing.
 None of this is the default. The combo needs inflow raised 2.4x, which changes
 the energy economy of everything else, and the payoff is a minority ecotype
 rather than a split population.
+
+**On genome complexity.** Connectivity saturating at ~392 of 400 weights was
+originally listed here as evidence that complexity had stopped growing. That
+reading was not available: `NG` was a hard cap, so the network had nowhere to
+go and saturation was forced. Genome size is now variable (see
+[Genome](#genome)), which is what makes the question answerable. The experiment
+— does `ng` grow under drift, under a gene cost, and does it converge to the
+same value starting from above and below? — is the current open thread.
 
 **Where to go next.** The same work finds cross-feeding lineages emerge only
 under strong spatial structure, self-organising into interleaved patterns, and
