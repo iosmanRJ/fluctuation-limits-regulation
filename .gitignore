@@ -1,0 +1,15 @@
+# Julia
+*.jl.cov
+*.jl.*.cov
+*.jl.mem
+Manifest.toml
+/docs/build/
+
+# Simulation output — large binary artifacts, never commit
+/runs/**
+!/runs/.gitkeep
+
+# Editor / OS
+.DS_Store
+.vscode/
+*.swp
