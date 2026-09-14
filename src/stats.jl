@@ -183,6 +183,11 @@ function write_snapshot(sim::Sim, dir::String; nsample::Int = 1500)
         write(io, Int32(sim.gen), Int32(sim.env.G), Int32(NRES),
                   Int32(NPHEN), Int32(NG), Int32(ns))
         write(io, sim.env.res)
+        # The TRUE occupancy grid, not one rebuilt from the organism sample.
+        # A density map derived from a 1500-of-113893 sample reads as empty
+        # almost everywhere and is actively misleading. This costs G^2 Int32
+        # (256 KB at grid 512) — nothing next to the resource fields.
+        write(io, pop.occ)
         for i in sample
             write(io, pop.x[i], pop.y[i], pop.energy[i], pop.age[i],
                       pop.load[i], pop.depth[i], pop.clade[i])
@@ -205,6 +210,8 @@ function read_snapshot(path::String)
         nphen = read(io, Int32); ng = read(io, Int32); ns = read(io, Int32)
         res = Array{Float32,3}(undef, nres, G, G)
         read!(io, res)
+        occ = Array{Int32,2}(undef, G, G)
+        read!(io, occ)
         x = zeros(Int32, ns); y = zeros(Int32, ns); e = zeros(Float32, ns)
         age = zeros(Int32, ns); load = zeros(Int32, ns)
         depth = zeros(Int32, ns); clade = zeros(UInt32, ns)
@@ -222,7 +229,7 @@ function read_snapshot(path::String)
         for j in 1:nw
             read!(io, Ws[j]); read!(io, biases[j])
         end
-        (; gen = Int(gen), G = Int(G), res, x, y, energy = e, age, load, depth,
-           clade, phen, W = Ws, bias = biases)
+        (; gen = Int(gen), G = Int(G), res, occ, x, y, energy = e, age, load,
+           depth, clade, phen, W = Ws, bias = biases)
     end
 end

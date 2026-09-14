@@ -160,44 +160,57 @@ if !isempty(snaps)
     snap = read_snapshot(joinpath(RUNDIR, last(snaps)))
     seqmap = cgrad(P.seq)
 
-    fig2 = Figure(size = (1500, 900))
+    fig2 = Figure(size = (1700, 1000))
     Label(fig2[0, 1:4], "Dish at tick $(snap.gen)"; fontsize = 20,
           color = P.primary, font = :bold, halign = :left)
     Label(fig2[1, 1:4],
           "Each channel on its own scale — the point is spatial pattern, not cross-channel magnitude";
           fontsize = 11, color = P.muted, halign = :left)
 
-    for r in 1:NRES
-        row = 2 + (r - 1) ÷ 3
-        col = 1 + (r - 1) % 3
-        ax = Axis(fig2[row, col]; title = chan_labels[r], aspect = DataAspect())
+    """
+    One panel: heatmap plus its own colorbar, in a nested grid.
+
+    A colorbar placed in the parent cell's Right() protrusion overlaps whatever
+    sits in the next column, and gets its tick labels clipped at the figure
+    edge. Nesting gives the colorbar a real column of its own.
+    """
+    function field_panel!(fig, row, col, title, data, cmap; scatter_pts = nothing)
+        gl = GridLayout(fig[row, col])
+        ax = Axis(gl[1, 1]; title = title, aspect = DataAspect())
         hidedecorations!(ax)
-        hm = heatmap!(ax, snap.res[r, :, :]; colormap = seqmap)
-        Colorbar(fig2[row, col, Right()], hm; width = 8, ticklabelpad = 4)
+        pl = if scatter_pts === nothing
+            heatmap!(ax, data; colormap = cmap)
+        else
+            sc = scatter!(ax, scatter_pts[1], scatter_pts[2];
+                          color = data, colormap = cmap, markersize = 4)
+            xlims!(ax, 1, snap.G); ylims!(ax, 1, snap.G)
+            sc
+        end
+        Colorbar(gl[1, 2], pl; width = 9, ticklabelsize = 9, ticklabelpad = 3)
+        colgap!(gl, 6)
+        ax
     end
 
+    seqmap = cgrad(P.seq)
     # Organism attributes get the SECOND sequential hue so they never read as
     # another resource channel.
     orgmap = cgrad(P.seq2)
-    axo = Axis(fig2[2, 4]; title = "Organisms, shaded by genetic load",
-               aspect = DataAspect())
-    hidedecorations!(axo)
-    sc = scatter!(axo, snap.x, snap.y; color = snap.load, colormap = orgmap,
-                  markersize = 4)
-    Colorbar(fig2[2, 4, Right()], sc; width = 8, ticklabelpad = 4)
-    xlims!(axo, 1, snap.G); ylims!(axo, 1, snap.G)
 
-    axd = Axis(fig2[3, 4]; title = "Organism density", aspect = DataAspect())
-    hidedecorations!(axd)
-    occ = zeros(Float32, snap.G, snap.G)
-    for i in eachindex(snap.x)
-        occ[snap.x[i], snap.y[i]] += 1f0
+    for r in 1:NRES
+        row = 2 + (r - 1) ÷ 3
+        col = 1 + (r - 1) % 3
+        field_panel!(fig2, row, col, chan_labels[r], snap.res[r, :, :], seqmap)
     end
-    hmd = heatmap!(axd, occ; colormap = orgmap)
-    Colorbar(fig2[3, 4, Right()], hmd; width = 8, ticklabelpad = 4)
+
+    field_panel!(fig2, 2, 4, "Organisms, shaded by genetic load", snap.load, orgmap;
+                 scatter_pts = (snap.x, snap.y))
+
+    # the true occupancy grid, recorded in the snapshot
+    field_panel!(fig2, 3, 4, "Organism density (all organisms)",
+                 Float32.(snap.occ), orgmap)
 
     rowsize!(fig2.layout, 0, Fixed(26)); rowsize!(fig2.layout, 1, Fixed(18))
-    rowgap!(fig2.layout, 12); colgap!(fig2.layout, 22)
+    rowgap!(fig2.layout, 14); colgap!(fig2.layout, 26)
 
     out2 = joinpath(RUNDIR, DARK ? "fields-dark.png" : "fields.png")
     save(out2, fig2)

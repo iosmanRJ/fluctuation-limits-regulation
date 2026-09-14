@@ -126,6 +126,7 @@ function organism_step!(sim::Sim)
     # compiler must reload them on each access unless we pull them out first.
     yields        = p.yields
     uptake_rate   = p.uptake_rate
+    uptake_exp    = p.uptake_exponent
     maint_base    = p.maint_base
     maint_size    = p.maint_size
     maint_motil   = p.maint_motil
@@ -147,21 +148,24 @@ function organism_step!(sim::Sim)
         xi = pop.x[i]
         yi = pop.y[i]
 
-        # --- uptake across channels, weighted by evolved affinity ------------
+        # --- uptake across channels, by evolved allocation --------------------
         gained     = 0.0f0
         raw_intake = 0.0f0
-        affinity_total = 0.0f0
         # Size scales uptake as well as upkeep. Without a benefit, size has
         # only a cost and evolution trivially drives it to zero; with both it
         # has an interior optimum that shifts as conditions change.
         size_gain = 0.5f0 + pop.phen[P_SIZE, i]
         for r in 1:NRES
-            aff = pop.phen[r, i]
-            affinity_total += aff
+            aff = pop.phen[r, i]          # allocation share; these sum to 1
             avail = res[r, xi, yi]
-            # proportional, not capped: more affinity always captures more, and
-            # co-located organisms therefore compete for shares of the same pool
-            got = avail * uptake_rate * aff * size_gain
+            # Proportional, not capped: more allocation always captures more,
+            # and co-located organisms compete for shares of the same pool.
+            # Raised to uptake_exp so the trade-off is CONVEX — a specialist
+            # out-eats a generalist on its own channel. Under a linear
+            # trade-off spreading costs nothing in aggregate, there is no
+            # disruptive selection, and the population collapses to one
+            # monomorphic generalist whose waste allocation then erodes away.
+            got = avail * uptake_rate * (aff^uptake_exp) * size_gain
             if got > 0.0f0
                 res[r, xi, yi] = avail - got
                 raw_intake += got

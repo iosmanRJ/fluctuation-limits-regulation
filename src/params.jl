@@ -51,6 +51,19 @@ Base.@kwdef mutable struct Params
     # is multiplicative and frequency-dependent (being bigger than your
     # neighbour pays), so a linear cost just yields an arms race to 1.0.
     uptake_rate::Float32    = 0.60f0   # fraction of local resource taken at full allocation
+    # Uptake scales as allocation^uptake_exponent.
+    #
+    # 1.0 is the tested default. Raising it was an attempt to make the
+    # allocation trade-off convex, on the theory that a specialist would then
+    # out-eat a generalist on its own channel and selection would become
+    # disruptive. MEASURED: it does the opposite — at exponent 2 mean
+    # specialisation fell to 0.32 from 0.70, i.e. the population became MORE
+    # generalist, and at small grid sizes the dish starved to extinction.
+    # Plausibly because aff^2 <= aff shrinks total uptake for everyone, so the
+    # system is energy-poorer and a backup channel is worth more than
+    # committing. Left exposed as a knob, but the hypothesis it was added for
+    # is disproved; do not raise it expecting niche partitioning.
+    uptake_exponent::Float32 = 1.0f0
     maint_base::Float32     = 0.0800f0
     maint_size::Float32     = 0.2200f0 # charged on size^2
     maint_motil::Float32    = 0.0350f0 # movement is not free

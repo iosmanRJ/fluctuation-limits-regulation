@@ -380,6 +380,31 @@ end
     @test n > 0
 end
 
+@testset "sim: uptake exponent changes the outcome, and not as expected" begin
+    # Pins a measured, counter-intuitive result so it is not silently
+    # rediscovered: raising uptake_exponent was meant to make the allocation
+    # trade-off convex and drive niche specialisation. It does the reverse —
+    # the population becomes MORE generalist. Recorded as a regression guard on
+    # the knob's behaviour, not as an endorsement of raising it.
+    function specialisation(exponent)
+        p = Params(; grid = 64, capacity = 12_000, shock_interval = 0, seed = 44,
+                   uptake_exponent = exponent)
+        sim = Sim(p)
+        for _ in 1:2500
+            step!(sim)
+        end
+        live = [i for i in 1:high_water(sim.pop) if sim.pop.alive[i]]
+        isempty(live) && return NaN
+        # max allocation share per organism: 1/NRES is a perfect generalist,
+        # 1.0 is a complete specialist
+        mean(maximum(sim.pop.phen[r, i] for r in P_UPTAKE) for i in live)
+    end
+    linear = specialisation(1.0f0)
+    convex = specialisation(2.0f0)
+    @test linear > 1.0 / NRES        # the default does specialise somewhat
+    @test convex < linear            # raising the exponent generalises instead
+end
+
 @testset "sim: traits that buy something also cost something" begin
     # Every trait with a benefit needs a cost, or evolution pins it to 1.0.
     # Raising a trait's cost must lower its evolved value.
@@ -595,6 +620,12 @@ end
     @test snap.G == 24
     @test size(snap.res) == (NRES, 24, 24)
     @test snap.res == sim.env.res
+    # occupancy must be the real grid, not one rebuilt from the organism
+    # sample — a density map derived from a sample reads as empty almost
+    # everywhere once the population is much larger than the sample
+    @test snap.occ == sim.pop.occ
+    @test sum(snap.occ) == sim.pop.n
+    @test size(snap.occ) == (24, 24)
     @test size(snap.phen, 1) == NPHEN
     @test length(snap.x) <= 50
     @test all(1 .<= snap.x .<= 24)
