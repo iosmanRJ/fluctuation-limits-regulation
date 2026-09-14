@@ -22,6 +22,12 @@ const LIGHT = (
     # single-hue sequential ramp (blue 100 -> 700) for magnitude fields
     seq       = ["#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf",
                  "#184f95", "#0d366b"],
+    # When two sequential contexts share a view, the second takes the next
+    # categorical hue (orange) as its OWN one-hue ramp — never a rainbow, and
+    # never the same ramp twice, which would make organisms invisible against
+    # the resource field they sit on.
+    seq2      = ["#fde3d6", "#fbc6ad", "#f7a481", "#f2825a", "#eb6834",
+                 "#c44f22", "#933a17"],
 )
 
 const DARK = (
@@ -35,6 +41,8 @@ const DARK = (
                  "#008300", "#9085e9", "#e66767"],
     seq       = ["#0d366b", "#184f95", "#256abf", "#3987e5", "#6da7ec",
                  "#9ec5f4", "#cde2fb"],
+    seq2      = ["#933a17", "#c44f22", "#eb6834", "#f2825a", "#f7a481",
+                 "#fbc6ad", "#fde3d6"],
 )
 
 palette(dark::Bool) = dark ? DARK : LIGHT

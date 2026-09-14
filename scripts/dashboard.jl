@@ -176,11 +176,13 @@ if !isempty(snaps)
         Colorbar(fig2[row, col, Right()], hm; width = 8, ticklabelpad = 4)
     end
 
-    # organism positions, shaded by genetic load (a magnitude -> sequential ramp)
+    # Organism attributes get the SECOND sequential hue so they never read as
+    # another resource channel.
+    orgmap = cgrad(P.seq2)
     axo = Axis(fig2[2, 4]; title = "Organisms, shaded by genetic load",
                aspect = DataAspect())
     hidedecorations!(axo)
-    sc = scatter!(axo, snap.x, snap.y; color = snap.load, colormap = seqmap,
+    sc = scatter!(axo, snap.x, snap.y; color = snap.load, colormap = orgmap,
                   markersize = 4)
     Colorbar(fig2[2, 4, Right()], sc; width = 8, ticklabelpad = 4)
     xlims!(axo, 1, snap.G); ylims!(axo, 1, snap.G)
@@ -191,7 +193,7 @@ if !isempty(snaps)
     for i in eachindex(snap.x)
         occ[snap.x[i], snap.y[i]] += 1f0
     end
-    hmd = heatmap!(axd, occ; colormap = seqmap)
+    hmd = heatmap!(axd, occ; colormap = orgmap)
     Colorbar(fig2[3, 4, Right()], hmd; width = 8, ticklabelpad = 4)
 
     rowsize!(fig2.layout, 0, Fixed(26)); rowsize!(fig2.layout, 1, Fixed(18))
