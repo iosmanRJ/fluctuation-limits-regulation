@@ -242,6 +242,98 @@ end
 end
 
 # =============================================================================
+@testset "sim: occupancy grid stays consistent" begin
+    # The occupancy grid is updated incrementally on every move, birth and
+    # death. If it drifts, crowding costs silently decouple from reality and
+    # every result becomes meaningless — so check it against the truth.
+    p = Params(grid = 40, capacity = 5000, seed = 31)
+    sim = Sim(p)
+
+    function check_occ(sim)
+        truth = zeros(Int32, sim.p.grid, sim.p.grid)
+        n = 0
+        for i in 1:high_water(sim.pop)
+            sim.pop.alive[i] || continue
+            truth[sim.pop.x[i], sim.pop.y[i]] += Int32(1)
+            n += 1
+        end
+        (truth == sim.pop.occ, n)
+    end
+
+    ok, n = check_occ(sim)
+    @test ok
+    @test n == sim.pop.n
+    @test sum(sim.pop.occ) == sim.pop.n
+
+    for _ in 1:250
+        step!(sim)
+    end
+    ok, n = check_occ(sim)
+    @test ok                                  # survives births, deaths and moves
+    @test n == sim.pop.n
+    @test sum(sim.pop.occ) == sim.pop.n
+    @test all(sim.pop.occ .>= 0)
+    @test maximum(sim.pop.occ) <= p.max_per_cell
+
+    # and through a mass-extinction event, which kills outside the main loop
+    p2 = Params(grid = 40, capacity = 5000, shock_interval = 1, shock_kill = 0.7f0, seed = 32)
+    sim2 = Sim(p2)
+    for _ in 1:40
+        step!(sim2)
+    end
+    truth2 = zeros(Int32, 40, 40)
+    for i in 1:high_water(sim2.pop)
+        sim2.pop.alive[i] && (truth2[sim2.pop.x[i], sim2.pop.y[i]] += Int32(1))
+    end
+    @test truth2 == sim2.pop.occ
+    @test sum(sim2.pop.occ) == sim2.pop.n
+end
+
+@testset "sim: energy ceiling and load penalty" begin
+    p = Params(grid = 40, capacity = 5000, shock_interval = 0, e_max = 2.5f0, seed = 41)
+    sim = Sim(p)
+    for _ in 1:300
+        step!(sim)
+    end
+    for i in 1:high_water(sim.pop)
+        sim.pop.alive[i] || continue
+        @test sim.pop.energy[i] <= p.e_max + 1.0f-5     # no hoarding
+        @test sim.pop.load[i] >= 0                      # load never goes negative
+    end
+
+    # load must actually cost energy: two identical dishes, one with the
+    # penalty switched off, must diverge
+    base = Params(grid = 32, capacity = 3000, shock_interval = 0, seed = 55,
+                  mut_rate = 0.01f0, maint_load = 0.0f0)
+    pen  = Params(grid = 32, capacity = 3000, shock_interval = 0, seed = 55,
+                  mut_rate = 0.01f0, maint_load = 0.02f0)
+    sa, sb = Sim(base), Sim(pen)
+    for _ in 1:200
+        step!(sa); step!(sb)
+    end
+    load_a = mean(sa.pop.load[i] for i in 1:high_water(sa.pop) if sa.pop.alive[i])
+    load_b = mean(sb.pop.load[i] for i in 1:high_water(sb.pop) if sb.pop.alive[i])
+    @test load_b < load_a          # the penalty purges damaged lineages
+end
+
+@testset "genome: mutation classification" begin
+    rng = Xoshiro(77)
+    # all-deleterious settings must drive load strictly up
+    p = Params(mut_rate = 0.02f0, p_deleterious = 1.0f0, p_beneficial = 0.0f0,
+               p_silence = 0.0f0, p_duplicate = 0.0f0)
+    W = zeros(Float32, NG, NG, 2); b = zeros(Float32, NG, 2)
+    seed_genome!(W, b, 1, rng)
+    tot = sum(last(inherit!(W, b, 2, 1, rng, p, 0.0f0)) for _ in 1:200)
+    @test tot > 0
+
+    # all-beneficial must drive it down
+    p2 = Params(mut_rate = 0.02f0, p_deleterious = 0.0f0, p_beneficial = 1.0f0,
+                p_silence = 0.0f0, p_duplicate = 0.0f0)
+    tot2 = sum(last(inherit!(W, b, 2, 1, rng, p2, 0.0f0)) for _ in 1:200)
+    @test tot2 < 0
+end
+
+# =============================================================================
 @testset "stats: schedule" begin
     s = snapshot_schedule(1_000_000, 12)
     @test first(s) == 1

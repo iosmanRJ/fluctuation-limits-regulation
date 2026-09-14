@@ -54,9 +54,11 @@ function seed_population!(sim::Sim, n::Int)
         seed_genome!(pop.W, pop.bias, i, rng)
         pop.x[i] = rand(rng, Int32(1):Int32(G))
         pop.y[i] = rand(rng, Int32(1):Int32(G))
+        pop.occ[pop.x[i], pop.y[i]] += Int32(1)
         pop.energy[i] = p.e_init
         pop.age[i] = 0
         pop.load[i] = 0
+        pop.depth[i] = 0
         pop.bigmut[i] = 0
         pop.clade[i] = UInt32(0)
         @inbounds for r in 1:NRES
@@ -97,15 +99,19 @@ function organism_step!(sim::Sim)
     # hoist every parameter: these are fields of a mutable struct, so the
     # compiler must reload them on each access unless we pull them out first.
     yields        = p.yields
-    uptake_scale  = p.uptake_scale
+    uptake_rate   = p.uptake_rate
     maint_base    = p.maint_base
     maint_size    = p.maint_size
     maint_uptake  = p.maint_uptake
     maint_repair  = p.maint_repair
+    maint_crowd   = p.maint_crowd
+    maint_load    = p.maint_load
     excrete_frac  = p.excrete_frac
     div_energy    = p.div_energy
     res_cap       = p.res_cap
+    e_max         = p.e_max
     max_age       = p.max_age
+    occ           = pop.occ
     deaths        = 0
 
     @inbounds for i in 1:hi
@@ -118,11 +124,17 @@ function organism_step!(sim::Sim)
         gained     = 0.0f0
         raw_intake = 0.0f0
         affinity_total = 0.0f0
+        # Size scales uptake as well as upkeep. Without a benefit, size has
+        # only a cost and evolution trivially drives it to zero; with both it
+        # has an interior optimum that shifts as conditions change.
+        size_gain = 0.5f0 + pop.phen[P_SIZE, i]
         for r in 1:NRES
             aff = pop.phen[r, i]
             affinity_total += aff
             avail = res[r, xi, yi]
-            got = min(avail, aff * uptake_scale)
+            # proportional, not capped: more affinity always captures more, and
+            # co-located organisms therefore compete for shares of the same pool
+            got = avail * uptake_rate * aff * size_gain
             if got > 0.0f0
                 res[r, xi, yi] = avail - got
                 raw_intake += got
@@ -143,12 +155,16 @@ function organism_step!(sim::Sim)
         end
 
         # --- maintenance: broad diets and good repair both cost energy -------
+        crowd = Float32(occ[xi, yi] - Int32(1))     # neighbours sharing this cell
         upkeep = maint_base +
                  maint_size   * pop.phen[P_SIZE, i] +
                  maint_uptake * affinity_total +
-                 maint_repair * pop.phen[P_REPAIR, i]
+                 maint_repair * pop.phen[P_REPAIR, i] +
+                 maint_crowd  * crowd +
+                 maint_load   * Float32(pop.load[i])   # genetic deterioration bites here
 
         e = pop.energy[i] + gained * (1.0f0 - excrete_frac) - upkeep
+        e = e > e_max ? e_max : e                      # no indefinite hoarding
         pop.energy[i] = e
         pop.age[i] += Int32(1)
 
@@ -156,8 +172,9 @@ function organism_step!(sim::Sim)
         if rand(rng, Float32) < pop.phen[P_MOTIL, i]
             nx = xi + rand(rng, Int32(-1):Int32(1))
             ny = yi + rand(rng, Int32(-1):Int32(1))
-            pop.x[i] = nx < Int32(1) ? Int32(1) : (nx > Int32(G) ? Int32(G) : nx)
-            pop.y[i] = ny < Int32(1) ? Int32(1) : (ny > Int32(G) ? Int32(G) : ny)
+            nx = nx < Int32(1) ? Int32(1) : (nx > Int32(G) ? Int32(G) : nx)
+            ny = ny < Int32(1) ? Int32(1) : (ny > Int32(G) ? Int32(G) : ny)
+            place!(pop, i, nx, ny)
         end
 
         # --- death and division ------------------------------------------------
@@ -188,21 +205,31 @@ function settle_births!(sim::Sim)
         child = claim!(pop)
         child == 0 && break                    # dish full; no more divisions
 
-        repair = pop.phen[P_REPAIR, parent]
-        nmut, big = inherit!(pop.W, pop.bias, child, parent, rng, p, repair)
-
-        # child appears next to the parent
+        # child appears next to the parent, but only if there is room there
         nx = pop.x[parent] + rand(rng, Int32(-1):Int32(1))
         ny = pop.y[parent] + rand(rng, Int32(-1):Int32(1))
-        pop.x[child] = nx < Int32(1) ? Int32(1) : (nx > Int32(G) ? Int32(G) : nx)
-        pop.y[child] = ny < Int32(1) ? Int32(1) : (ny > Int32(G) ? Int32(G) : ny)
+        nx = nx < Int32(1) ? Int32(1) : (nx > Int32(G) ? Int32(G) : nx)
+        ny = ny < Int32(1) ? Int32(1) : (ny > Int32(G) ? Int32(G) : ny)
+        if pop.occ[nx, ny] >= p.max_per_cell
+            kill!(pop, child)                  # no room; the division fails
+            continue
+        end
+
+        repair = pop.phen[P_REPAIR, parent]
+        nmut, big, dload = inherit!(pop.W, pop.bias, child, parent, rng, p, repair)
+
+        pop.x[child] = nx
+        pop.y[child] = ny
+        pop.occ[nx, ny] += Int32(1)
 
         # parent splits its energy with the child
         half = pop.energy[parent] * 0.5f0
         pop.energy[parent] = half
         pop.energy[child]  = half
         pop.age[child]     = Int32(0)
-        pop.load[child]    = pop.load[parent] + Int32(nmut)
+        pop.depth[child]   = pop.depth[parent] + Int32(1)
+        # load can fall as well as rise: beneficial mutations undo damage
+        pop.load[child]    = max(pop.load[parent] + Int32(dload), Int32(0))
 
         # --- develop the child's network in ITS OWN local conditions ---------
         for r in 1:NRES

@@ -81,11 +81,11 @@ function develop!(phen::Vector{Float32}, e::Vector{Float32}, buf::Vector{Float32
 end
 
 """
-    inherit!(W, bias, child, parent, rng, p) -> (nmut, big_effect)
+    inherit!(W, bias, child, parent, rng, p, repair) -> (nmut, big_effect, dload)
 
 Copy parent's genome to the child slot and mutate it. Returns how many
-mutations landed and whether any was large enough to count as a clade-founding
-event.
+mutations landed, whether any was large enough to count as a clade-founding
+event, and the net change in deleterious load.
 
 Mutation classes:
   * point      - perturb one regulatory weight (the overwhelming majority)
@@ -93,9 +93,11 @@ Mutation classes:
   * duplication- copy one node's regulatory role onto another (raw material
                  for novelty; this is how GRNs gain functions)
 
-Most point mutations are deleterious simply because a population sitting near
-a local optimum has more ways to get worse than better. That emergent load is
-the honest version; `nmut` tracks accumulation so Muller's ratchet is visible.
+Point mutations perturb the network, and a population near a local optimum has
+more ways to get worse than better — that part is emergent. On top of it each
+mutation is classified deleterious/neutral/beneficial so an explicit load
+counter can carry a direct metabolic penalty; because load can fall as well as
+rise, Muller's ratchet behaves like a ratchet rather than a countdown.
 """
 function inherit!(W::Array{Float32,3}, bias::Matrix{Float32},
                   child::Int, parent::Int, rng, p, repair::Float32)
@@ -116,6 +118,7 @@ function mutate!(W::Array{Float32,3}, bias::Matrix{Float32}, i::Int, rng, p, rep
     nsites = NG * NG
     nmut = 0
     big  = false
+    dload = 0
 
     # expected point mutations this birth; sampled as a small Poisson draw
     lam = rate * nsites
@@ -126,6 +129,7 @@ function mutate!(W::Array{Float32,3}, bias::Matrix{Float32}, i::Int, rng, p, rep
         d = p.mut_sigma * randn(rng, Float32)
         W[m, k, i] += d
         nmut += 1
+        dload += classify_mutation(rng, p)
         if abs(d) > 2.0f0 * p.mut_sigma
             big = true
         end
@@ -136,6 +140,7 @@ function mutate!(W::Array{Float32,3}, bias::Matrix{Float32}, i::Int, rng, p, rep
         k = rand(rng, 1:NG)
         bias[k, i] += p.mut_sigma * randn(rng, Float32)
         nmut += 1
+        dload += classify_mutation(rng, p)
     end
 
     # structural: gene silencing
@@ -145,6 +150,7 @@ function mutate!(W::Array{Float32,3}, bias::Matrix{Float32}, i::Int, rng, p, rep
             W[k, m, i] = 0.0f0
         end
         nmut += 1
+        dload += 1          # knocking out a gene is reliably damaging
         big = true
     end
 
@@ -163,7 +169,15 @@ function mutate!(W::Array{Float32,3}, bias::Matrix{Float32}, i::Int, rng, p, rep
         end
     end
 
-    return nmut, big
+    return nmut, big, dload
+end
+
+"""Deleterious (+1), beneficial (-1) or neutral (0)."""
+@inline function classify_mutation(rng, p)
+    u = rand(rng, Float32)
+    u < p.p_deleterious && return 1
+    u < p.p_deleterious + p.p_beneficial && return -1
+    return 0
 end
 
 """Poisson draw, fine for the small lambda (<~10) we always use here."""

@@ -21,9 +21,11 @@ mutable struct Population
     bias::Matrix{Float32}        # NG x cap
 
     # --- bookkeeping ----------------------------------------------------------
+    depth::Vector{Int32}         # lineage depth = generations of descent from a founder
     load::Vector{Int32}          # accumulated mutations in this lineage (Muller's ratchet)
     bigmut::Vector{Int32}        # big-effect mutations since this clade was founded
     clade::Vector{UInt32}
+    occ::Matrix{Int32}           # per-cell occupancy, for local competition
     free::Vector{Int32}          # stack of reusable slots
     n::Int                       # number currently alive
     watermark::Int               # highest slot ever handed out
@@ -37,7 +39,8 @@ function Population(p::Params)
         zeros(Float32, cap), zeros(Int32, cap), fill(false, cap),
         zeros(Float32, NPHEN, cap),
         zeros(Float32, NG, NG, cap), zeros(Float32, NG, cap),
-        zeros(Int32, cap), zeros(Int32, cap), zeros(UInt32, cap),
+        zeros(Int32, cap), zeros(Int32, cap), zeros(Int32, cap), zeros(UInt32, cap),
+        zeros(Int32, p.grid, p.grid),
         Int32[], 0, 0, cap,
     )
 end
@@ -65,9 +68,23 @@ generations that cost would dominate everything else.
 end
 
 @inline function kill!(pop::Population, i::Int)
-    @inbounds pop.alive[i] = false
+    @inbounds begin
+        pop.alive[i] = false
+        pop.occ[pop.x[i], pop.y[i]] -= Int32(1)
+    end
     push!(pop.free, Int32(i))
     pop.n -= 1
+    return nothing
+end
+
+"""Move organism `i`, keeping the occupancy grid in step."""
+@inline function place!(pop::Population, i::Int, nx::Int32, ny::Int32)
+    @inbounds begin
+        pop.occ[pop.x[i], pop.y[i]] -= Int32(1)
+        pop.x[i] = nx
+        pop.y[i] = ny
+        pop.occ[nx, ny] += Int32(1)
+    end
     return nothing
 end
 

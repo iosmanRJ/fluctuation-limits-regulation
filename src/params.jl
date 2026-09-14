@@ -5,47 +5,68 @@
 Base.@kwdef mutable struct Params
     # --- world ---------------------------------------------------------------
     grid::Int            = 256
-    capacity::Int        = 60_000      # hard ceiling on simultaneous organisms
+    # Capacity is an ARRAY bound, not an ecological one. It must stay well
+    # above the resource-determined carrying capacity: if the dish fills, births
+    # get dropped, reproductive success stops mattering, and selection collapses
+    # into "minimise every cost" — every trait then walks to zero.
+    capacity::Int        = 120_000
+    max_per_cell::Int32  = Int32(8)    # hard local packing limit
     seed::Int            = 42
 
     # --- resources -----------------------------------------------------------
     # Channel 1 is the only abiotic input. Channels 2..NRES exist ONLY as
     # metabolic waste, so every one of them is a niche that has to be created
     # by some other organism before anything can live in it.
-    inflow::Float32      = 0.020f0
+    inflow::Float32      = 0.250f0
     yields::Vector{Float32} = Float32[1.0, 0.60, 0.45, 0.35, 0.28, 0.22]  # thermodynamic decline
     diff_rate::Float32   = 0.12f0
-    res_cap::Float32     = 4.0f0
-    decay::Float32       = 0.0015f0    # abiotic loss, stops waste accumulating forever
+    res_cap::Float32     = 6.0f0
+    decay::Float32       = 0.0060f0    # abiotic loss, stops waste accumulating forever
 
     # --- seasonality ---------------------------------------------------------
-    season_period::Int   = 20_000
+    season_period::Int   = 15_000
     season_amp::Float32  = 0.60f0
 
     # --- shocks --------------------------------------------------------------
-    shock_interval::Int  = 50_000      # mean generations between mass-extinction events
+    shock_interval::Int  = 25_000      # mean generations between mass-extinction events
     shock_kill::Float32  = 0.92f0      # baseline fraction killed
     famine_len::Int      = 400         # generations of suppressed inflow after a famine
     famine_factor::Float32 = 0.12f0
 
     # --- metabolism ----------------------------------------------------------
-    uptake_scale::Float32   = 0.35f0
-    maint_base::Float32     = 0.012f0
-    maint_size::Float32     = 0.050f0
-    maint_uptake::Float32   = 0.018f0  # cost per unit total affinity -> forces specialisation
-    maint_repair::Float32   = 0.030f0  # repair fidelity is not free
+    # The whole energy economy is scaled so a tick is roughly one cell cycle.
+    # Slow division makes ticks and generations diverge badly: at max_age 3000
+    # a 50k-tick run contained only ~66 generations of actual descent, far too
+    # few for anything to evolve.
+    # Uptake is PROPORTIONAL to what is locally available rather than capped by
+    # it. A hard cap means affinity above the ambient concentration buys
+    # nothing, so under scarcity affinity becomes pure cost and specialisation
+    # can never pay for itself.
+    uptake_rate::Float32    = 0.60f0   # fraction of local resource taken at affinity 1
+    maint_base::Float32     = 0.0800f0
+    maint_size::Float32     = 0.1500f0
+    maint_uptake::Float32   = 0.0600f0 # per unit total affinity -> forces specialisation
+    maint_repair::Float32   = 0.0800f0 # repair fidelity is not free
+    maint_crowd::Float32    = 0.0500f0 # per co-located neighbour -> local competition
+    maint_load::Float32     = 0.0040f0 # per accumulated deleterious mutation
     excrete_frac::Float32   = 0.35f0   # share of intake returned as waste
     div_energy::Float32     = 2.0f0
     e_init::Float32         = 0.8f0
-    max_age::Int32          = Int32(3000)
+    e_max::Float32          = 4.0f0    # cells cannot hoard energy indefinitely
+    max_age::Int32          = Int32(60)
 
     # --- mutation ------------------------------------------------------------
-    mut_rate::Float32       = 2.0f-4   # per weight site per birth, before repair
+    mut_rate::Float32       = 1.0f-3   # per weight site per birth, before repair
     mut_sigma::Float32      = 0.25f0
     repair_strength::Float32 = 0.85f0  # max suppression a perfect repairer achieves
     p_silence::Float32      = 0.0020f0
     p_duplicate::Float32    = 0.0020f0
-    clade_threshold::Int    = 8        # big-effect mutations before a new clade is named
+    # Most mutations hurt, a few help. Load can therefore fall as well as rise,
+    # which is what makes Muller's ratchet a dynamic (small populations click
+    # upward, large ones purge) rather than a one-way count to extinction.
+    p_deleterious::Float32  = 0.70f0
+    p_beneficial::Float32   = 0.05f0
+    clade_threshold::Int    = 4        # big-effect mutations before a new clade is named
 
     # --- logging -------------------------------------------------------------
     snapshot_decades::Int   = 12       # log-spaced snapshots per decade of generations

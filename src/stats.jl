@@ -11,11 +11,11 @@
 # million, and a linear schedule wastes all its resolution on the boring end.
 # =============================================================================
 
-const NSTAT = 9 + NRES + 2 * NPHEN     # 49
+const NSTAT = 10 + NRES + 2 * NPHEN    # 50
 
 const STAT_NAMES = vcat(
     ["gen", "pop", "births", "deaths", "mean_energy", "mean_age",
-     "mean_load", "clade_shannon", "clades_alive"],
+     "mean_load", "clade_shannon", "clades_alive", "mean_depth"],
     ["res$(r)_total" for r in 1:NRES],
     ["mean_phen$(k)" for k in 1:NPHEN],
     ["std_phen$(k)" for k in 1:NPHEN],
@@ -40,7 +40,7 @@ function record!(sl::StatLog, sim::Sim)
     hi  = high_water(pop)
 
     n = 0
-    sum_e = 0.0; sum_age = 0.0; sum_load = 0.0
+    sum_e = 0.0; sum_age = 0.0; sum_load = 0.0; sum_depth = 0.0
     mean_phen = zeros(Float64, NPHEN)
     sq_phen   = zeros(Float64, NPHEN)
     counts = sl.counts
@@ -52,6 +52,7 @@ function record!(sl::StatLog, sim::Sim)
         sum_e    += pop.energy[i]
         sum_age  += pop.age[i]
         sum_load += pop.load[i]
+        sum_depth += pop.depth[i]
         counts[pop.clade[i]] = get(counts, pop.clade[i], 0) + 1
         for k in 1:NPHEN
             v = Float64(pop.phen[k, i])
@@ -84,15 +85,16 @@ function record!(sl::StatLog, sim::Sim)
         B[6, col] = sum_age * invn
         B[7, col] = sum_load * invn
         B[8, col] = H
-        B[9, col] = length(counts)
+        B[9, col]  = length(counts)
+        B[10, col] = sum_depth * invn        # generations of descent, not ticks
         for r in 1:NRES
-            B[9 + r, col] = total_resource(sim.env, r)
+            B[10 + r, col] = total_resource(sim.env, r)
         end
         for k in 1:NPHEN
             m = mean_phen[k] * invn
             v = max(sq_phen[k] * invn - m * m, 0.0)
-            B[9 + NRES + k, col]         = m
-            B[9 + NRES + NPHEN + k, col] = sqrt(v)
+            B[10 + NRES + k, col]         = m
+            B[10 + NRES + NPHEN + k, col] = sqrt(v)
         end
     end
 
@@ -169,7 +171,7 @@ function write_snapshot(sim::Sim, dir::String; nsample::Int = 1500)
         write(io, sim.env.res)
         for i in sample
             write(io, pop.x[i], pop.y[i], pop.energy[i], pop.age[i],
-                      pop.load[i], pop.clade[i])
+                      pop.load[i], pop.depth[i], pop.clade[i])
             write(io, @view pop.phen[:, i])
         end
         # genomes of the first 200 sampled organisms, for post-hoc network analysis
@@ -190,12 +192,14 @@ function read_snapshot(path::String)
         res = Array{Float32,3}(undef, nres, G, G)
         read!(io, res)
         x = zeros(Int32, ns); y = zeros(Int32, ns); e = zeros(Float32, ns)
-        age = zeros(Int32, ns); load = zeros(Int32, ns); clade = zeros(UInt32, ns)
+        age = zeros(Int32, ns); load = zeros(Int32, ns)
+        depth = zeros(Int32, ns); clade = zeros(UInt32, ns)
         phen = zeros(Float32, nphen, ns)
         for i in 1:ns
             x[i] = read(io, Int32); y[i] = read(io, Int32)
             e[i] = read(io, Float32); age[i] = read(io, Int32)
-            load[i] = read(io, Int32); clade[i] = read(io, UInt32)
+            load[i] = read(io, Int32); depth[i] = read(io, Int32)
+            clade[i] = read(io, UInt32)
             read!(io, @view phen[:, i])
         end
         nw = read(io, Int32)
@@ -204,7 +208,7 @@ function read_snapshot(path::String)
         for j in 1:nw
             read!(io, Ws[j]); read!(io, biases[j])
         end
-        (; gen = Int(gen), G = Int(G), res, x, y, energy = e, age, load, clade,
-           phen, W = Ws, bias = biases)
+        (; gen = Int(gen), G = Int(G), res, x, y, energy = e, age, load, depth,
+           clade, phen, W = Ws, bias = biases)
     end
 end
