@@ -149,6 +149,9 @@ function organism_step!(sim::Sim)
     res_cap       = p.res_cap
     e_max         = p.e_max
     max_age       = p.max_age
+    dorm_thresh   = p.dorm_threshold
+    dorm_upkeep   = p.dorm_upkeep
+    dorm_uptake   = p.dorm_uptake
     occ           = pop.occ
     deaths        = 0
 
@@ -161,6 +164,9 @@ function organism_step!(sim::Sim)
         # --- uptake, conversion and leakage ----------------------------------
         gained     = 0.0f0
         toxic      = 0.0f0
+        # Dormancy is decided from the energy carried INTO the tick, so it
+        # cannot flicker within one.
+        dormant = pop.energy[i] < dorm_thresh
         # Size scales uptake as well as upkeep. Without a benefit, size has
         # only a cost and evolution trivially drives it to zero; with both it
         # has an interior optimum that shifts as conditions change.
@@ -169,6 +175,7 @@ function organism_step!(sim::Sim)
         # but extract less from each unit of it.
         leak = leak_min + (1.0f0 - leak_min) * pop.phen[P_LEAK, i]
         rate_mult = size_gain * (1.0f0 + leak_bonus * leak)
+        dormant && (rate_mult *= dorm_uptake)
 
         for r in 1:NRES
             aff = pop.phen[r, i]          # allocation share; these sum to 1
@@ -215,10 +222,14 @@ function organism_step!(sim::Sim)
                  # whoever produced it, rather than pure scavenging.
                  maint_toxic  * toxic * (1.0f0 - pop.phen[P_STRESS, i])
 
+        # a spore costs almost nothing to maintain
+        dormant && (upkeep *= dorm_upkeep)
+
         e = pop.energy[i] + gained - upkeep
         e = e > e_max ? e_max : e                      # no indefinite hoarding
         pop.energy[i] = e
-        pop.age[i] += Int32(1)
+        # ageing pauses while dormant: a spore waits out the famine
+        dormant || (pop.age[i] += Int32(1))
 
         # --- movement ---------------------------------------------------------
         if rand(rng, Float32) < pop.phen[P_MOTIL, i]
@@ -234,9 +245,10 @@ function organism_step!(sim::Sim)
             kill!(pop, i)
             deaths += 1
         else
-            # division threshold is itself an evolved trait
+            # division threshold is itself an evolved trait; a dormant cell
+            # does not divide however much it happens to be holding
             thresh = div_energy * (0.5f0 + pop.phen[P_DIVIDE, i])
-            if e >= thresh
+            if !dormant && e >= thresh
                 push!(sim.birth_parents, Int32(i))
             end
         end

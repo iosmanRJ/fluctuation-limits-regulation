@@ -148,6 +148,23 @@ Base.@kwdef mutable struct Params
     div_energy::Float32     = 2.0f0
     e_init::Float32         = 0.8f0
     e_max::Float32          = 4.0f0    # cells cannot hoard energy indefinitely
+
+    # --- dormancy (sporulation) ----------------------------------------------
+    # Every single extinction measured was caused by a famine — 8 of 8, each
+    # within 24-211 ticks of one. The reason is that organisms carry no buffer:
+    # at ~0.53 mean energy against ~0.3 upkeep per tick, they hold under two
+    # ticks of reserve against a 400-tick famine, so it is unsurvivable by
+    # construction rather than by ecology.
+    #
+    # Below `dorm_threshold` energy an organism goes dormant: upkeep drops to
+    # `dorm_upkeep` of normal, ageing pauses, and it cannot divide. It still
+    # takes up resources (at `dorm_uptake` of normal) so it can climb back out
+    # when food returns. This is sporulation, which is precisely the adaptation
+    # to famine, and it makes surviving one a strategy rather than an
+    # impossibility.
+    dorm_threshold::Float32 = 0.15f0
+    dorm_upkeep::Float32    = 0.05f0   # fraction of normal upkeep while dormant
+    dorm_uptake::Float32    = 0.35f0   # fraction of normal uptake while dormant
     max_age::Int32          = Int32(60)
 
     # How strongly local resource concentrations feed the regulatory network.

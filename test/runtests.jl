@@ -527,6 +527,47 @@ end
     @test dear_mot < cheap_mot
 end
 
+@testset "sim: dormancy" begin
+    # Every extinction measured was famine-caused (8 of 8, each within 24-211
+    # ticks of one), because organisms carry under two ticks of reserve against
+    # a 400-tick famine. Dormancy is what makes surviving one possible.
+    p = Params(grid = 48, capacity = 4000, shock_interval = 0, seed = 88,
+               dorm_threshold = 0.15f0, dorm_upkeep = 0.05f0)
+    sim = Sim(p)
+    for _ in 1:300
+        step!(sim)
+    end
+    live = [i for i in 1:high_water(sim.pop) if sim.pop.alive[i]]
+    @test !isempty(live)
+
+    # a dormant cell must not divide, however much energy it happens to hold
+    # (it is below threshold by definition, so this is about the guard itself)
+    @test all(i -> sim.pop.energy[i] >= 0.0f0, live)
+
+    # ageing pauses while dormant: with a lethal-upkeep dish and no inflow,
+    # organisms should go dormant and persist far longer than max_age would
+    # otherwise allow
+    function survives(dorm)
+        q = Params(grid = 24, capacity = 900, shock_interval = 0, seed = 5,
+                   inflow = 0.0f0, decay = 0.0f0, diff_rate = 0.0f0,
+                   dorm_threshold = dorm ? 0.5f0 : -1.0f0, dorm_upkeep = 0.02f0)
+        s = Sim(q)
+        fill!(s.env.res, 0.0f0)          # total famine from tick 1
+        t_out = 0
+        for t in 1:3000
+            step!(s)
+            if s.pop.n == 0
+                t_out = t
+                break
+            end
+        end
+        t_out == 0 ? 3000 : t_out
+    end
+    without = survives(false)
+    with    = survives(true)
+    @test with > 3 * without        # spores outlast non-spores by a wide margin
+end
+
 @testset "sim: energy ceiling and load penalty" begin
     p = Params(grid = 40, capacity = 5000, shock_interval = 0, e_max = 2.5f0, seed = 41)
     sim = Sim(p)
