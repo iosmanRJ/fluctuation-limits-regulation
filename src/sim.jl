@@ -59,7 +59,6 @@ function seed_population!(sim::Sim, n::Int)
         pop.age[i] = 0
         pop.load[i] = 0
         pop.depth[i] = 0
-        pop.bigmut[i] = 0
         pop.clade[i] = UInt32(0)
         @inbounds for r in 1:NRES
             sim.env_scratch[r] = env.res[r, pop.x[i], pop.y[i]]
@@ -86,6 +85,10 @@ function step!(sim::Sim)
     organism_step!(sim)
     settle_births!(sim)
     diffuse!(env, p)
+
+    if p.clade_gc_interval > 0 && sim.gen % p.clade_gc_interval == 0
+        prune_clades!(sim.clades, pop)
+    end
     return sim
 end
 
@@ -102,7 +105,8 @@ function organism_step!(sim::Sim)
     uptake_rate   = p.uptake_rate
     maint_base    = p.maint_base
     maint_size    = p.maint_size
-    maint_uptake  = p.maint_uptake
+    maint_motil   = p.maint_motil
+    maint_stress  = p.maint_stress
     maint_repair  = p.maint_repair
     maint_crowd   = p.maint_crowd
     maint_load    = p.maint_load
@@ -156,9 +160,11 @@ function organism_step!(sim::Sim)
 
         # --- maintenance: broad diets and good repair both cost energy -------
         crowd = Float32(occ[xi, yi] - Int32(1))     # neighbours sharing this cell
+        sz = pop.phen[P_SIZE, i]
         upkeep = maint_base +
-                 maint_size   * pop.phen[P_SIZE, i] +
-                 maint_uptake * affinity_total +
+                 maint_size   * sz * sz +             # quadratic: bounds the size arms race
+                 maint_motil  * pop.phen[P_MOTIL, i] +
+                 maint_stress * pop.phen[P_STRESS, i] +
                  maint_repair * pop.phen[P_REPAIR, i] +
                  maint_crowd  * crowd +
                  maint_load   * Float32(pop.load[i])   # genetic deterioration bites here
@@ -216,7 +222,7 @@ function settle_births!(sim::Sim)
         end
 
         repair = pop.phen[P_REPAIR, parent]
-        nmut, big, dload = inherit!(pop.W, pop.bias, child, parent, rng, p, repair)
+        nmut, _big, dload = inherit!(pop.W, pop.bias, child, parent, rng, p, repair)
 
         pop.x[child] = nx
         pop.y[child] = ny
@@ -242,14 +248,16 @@ function settle_births!(sim::Sim)
         end
 
         # --- clade bookkeeping -------------------------------------------------
-        bm = pop.bigmut[parent] + (big ? Int32(1) : Int32(0))
-        if bm >= p.clade_threshold
-            pop.clade[child]  = new_clade!(sim.clades, pop.clade[parent], sim.gen,
-                                           view(pop.phen, :, child))
-            pop.bigmut[child] = Int32(0)
+        # A child that has drifted far enough from its clade's founder
+        # phenotype founds a new clade. Radius, not mutation count: the same
+        # number of mutations can mean nothing or everything depending on where
+        # they land in the network.
+        parent_clade = pop.clade[parent]
+        if phen_dist2(sim.clades, parent_clade, view(pop.phen, :, child)) > p.clade_radius2
+            pop.clade[child] = new_clade!(sim.clades, parent_clade, sim.gen,
+                                          view(pop.phen, :, child))
         else
-            pop.clade[child]  = pop.clade[parent]
-            pop.bigmut[child] = bm
+            pop.clade[child] = parent_clade
         end
         births += 1
     end

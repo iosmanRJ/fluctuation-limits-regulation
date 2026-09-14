@@ -42,13 +42,18 @@ Base.@kwdef mutable struct Params
     # it. A hard cap means affinity above the ambient concentration buys
     # nothing, so under scarcity affinity becomes pure cost and specialisation
     # can never pay for itself.
-    uptake_rate::Float32    = 0.60f0   # fraction of local resource taken at affinity 1
+    # Every trait that buys something must also cost something, or evolution
+    # simply pins it to the boundary. Size is charged QUADRATICALLY: its benefit
+    # is multiplicative and frequency-dependent (being bigger than your
+    # neighbour pays), so a linear cost just yields an arms race to 1.0.
+    uptake_rate::Float32    = 0.60f0   # fraction of local resource taken at full allocation
     maint_base::Float32     = 0.0800f0
-    maint_size::Float32     = 0.1500f0
-    maint_uptake::Float32   = 0.0600f0 # per unit total affinity -> forces specialisation
-    maint_repair::Float32   = 0.0800f0 # repair fidelity is not free
+    maint_size::Float32     = 0.2200f0 # charged on size^2
+    maint_motil::Float32    = 0.0350f0 # movement is not free
+    maint_stress::Float32   = 0.0400f0 # maintaining shock tolerance is not free
+    maint_repair::Float32   = 0.0200f0 # repair fidelity is not free
     maint_crowd::Float32    = 0.0500f0 # per co-located neighbour -> local competition
-    maint_load::Float32     = 0.0040f0 # per accumulated deleterious mutation
+    maint_load::Float32     = 0.0150f0 # per accumulated deleterious mutation
     excrete_frac::Float32   = 0.35f0   # share of intake returned as waste
     div_energy::Float32     = 2.0f0
     e_init::Float32         = 0.8f0
@@ -66,7 +71,8 @@ Base.@kwdef mutable struct Params
     # upward, large ones purge) rather than a one-way count to extinction.
     p_deleterious::Float32  = 0.70f0
     p_beneficial::Float32   = 0.05f0
-    clade_threshold::Int    = 4        # big-effect mutations before a new clade is named
+    clade_radius2::Float32  = 0.16f0   # squared phenotype distance that names a new clade
+    clade_gc_interval::Int  = 5_000    # ticks between clade-table garbage collections
 
     # --- logging -------------------------------------------------------------
     snapshot_decades::Int   = 12       # log-spaced snapshots per decade of generations

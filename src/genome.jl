@@ -61,22 +61,14 @@ function develop!(phen::Vector{Float32}, e::Vector{Float32}, buf::Vector{Float32
         phen[k] = 0.5f0 * (e[k] + 1.0f0)
     end
 
-    # excretion profile is a proportion, so normalise it
-    @inbounds begin
-        tot = 0.0f0
-        for k in P_EXCRETE
-            tot += phen[k]
-        end
-        if tot > 1.0f-6
-            for k in P_EXCRETE
-                phen[k] /= tot
-            end
-        else
-            for k in P_EXCRETE
-                phen[k] = 1.0f0 / NRES
-            end
-        end
-    end
+    # Uptake affinity is an ALLOCATION, not a set of independent dials: the
+    # organism divides one fixed budget across channels. Independent affinities
+    # make breadth merely expensive, which collapses to "specialise on the best
+    # channel"; a budget makes breadth genuinely costly in opportunity terms, so
+    # an under-exploited channel is always worth something to somebody.
+    @inbounds normalise!(phen, P_UPTAKE)
+    # excretion profile is a proportion, so normalise it too
+    @inbounds normalise!(phen, P_EXCRETE)
     return nothing
 end
 
@@ -178,6 +170,23 @@ end
     u < p.p_deleterious && return 1
     u < p.p_deleterious + p.p_beneficial && return -1
     return 0
+end
+
+@inline function normalise!(phen::Vector{Float32}, rng_idx)
+    tot = 0.0f0
+    @inbounds for k in rng_idx
+        tot += phen[k]
+    end
+    @inbounds if tot > 1.0f-6
+        for k in rng_idx
+            phen[k] /= tot
+        end
+    else
+        for k in rng_idx
+            phen[k] = 1.0f0 / length(rng_idx)
+        end
+    end
+    return nothing
 end
 
 """Poisson draw, fine for the small lambda (<~10) we always use here."""

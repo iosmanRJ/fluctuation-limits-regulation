@@ -24,12 +24,16 @@ using Test, Random, Statistics
 
     # excretion profile is a proportion and must sum to one
     @test sum(phen[P_EXCRETE]) ≈ 1.0f0 atol=1e-4
+    # uptake affinity is an allocation budget, so it must also sum to one —
+    # this is what makes specialist-vs-generalist a real trade-off
+    @test sum(phen[P_UPTAKE]) ≈ 1.0f0 atol=1e-4
 
     # plasticity: the same genome in a different environment develops differently
     env2 = fill(2.0f0, NRES)
     phen_b = zeros(Float32, NPHEN)
     develop!(phen_b, e, buf, W, bias, 1, env2)
     @test phen_b != phen
+    @test sum(phen_b[P_UPTAKE]) ≈ 1.0f0 atol=1e-4      # budget holds under plasticity
 
     # distinct genomes give distinct phenotypes
     phen_c = zeros(Float32, NPHEN)
@@ -289,6 +293,44 @@ end
     @test sum(sim2.pop.occ) == sim2.pop.n
 end
 
+@testset "sim: uptake budget holds for every live organism" begin
+    p = Params(grid = 48, capacity = 4000, shock_interval = 0, seed = 71)
+    sim = Sim(p)
+    for _ in 1:400
+        step!(sim)
+    end
+    n = 0
+    for i in 1:high_water(sim.pop)
+        sim.pop.alive[i] || continue
+        n += 1
+        @test sum(sim.pop.phen[P_UPTAKE, i]) ≈ 1.0f0 atol=1e-4
+        @test sum(sim.pop.phen[P_EXCRETE, i]) ≈ 1.0f0 atol=1e-4
+        @test all(sim.pop.phen[P_UPTAKE, i] .>= 0.0f0)
+    end
+    @test n > 0
+end
+
+@testset "sim: traits that buy something also cost something" begin
+    # Every trait with a benefit needs a cost, or evolution pins it to 1.0.
+    # Raising a trait's cost must lower its evolved value.
+    function evolved(trait, kw)
+        p = Params(; grid = 48, capacity = 4000, shock_interval = 0, seed = 84, kw...)
+        sim = Sim(p)
+        for _ in 1:1500
+            step!(sim)
+        end
+        live = [i for i in 1:high_water(sim.pop) if sim.pop.alive[i]]
+        isempty(live) ? NaN : mean(sim.pop.phen[trait, i] for i in live)
+    end
+    cheap_size = evolved(P_SIZE, (maint_size = 0.02f0,))
+    dear_size  = evolved(P_SIZE, (maint_size = 0.60f0,))
+    @test dear_size < cheap_size
+
+    cheap_mot = evolved(P_MOTIL, (maint_motil = 0.0f0,))
+    dear_mot  = evolved(P_MOTIL, (maint_motil = 0.20f0,))
+    @test dear_mot < cheap_mot
+end
+
 @testset "sim: energy ceiling and load penalty" begin
     p = Params(grid = 40, capacity = 5000, shock_interval = 0, e_max = 2.5f0, seed = 41)
     sim = Sim(p)
@@ -331,6 +373,81 @@ end
                 p_silence = 0.0f0, p_duplicate = 0.0f0)
     tot2 = sum(last(inherit!(W, b, 2, 1, rng, p2, 0.0f0)) for _ in 1:200)
     @test tot2 < 0
+end
+
+# =============================================================================
+@testset "clades: pruning preserves the partition" begin
+    # Pruning renumbers every clade id in the table AND in the population.
+    # If the remap is wrong, diversity statistics silently become fiction, so
+    # assert the partition of living organisms is exactly preserved.
+    p = Params(grid = 64, capacity = 8000, seed = 63, clade_gc_interval = 0)
+    sim = Sim(p)
+    for _ in 1:1200
+        step!(sim)
+    end
+
+    live() = [i for i in 1:high_water(sim.pop) if sim.pop.alive[i]]
+    before_ids = [sim.pop.clade[i] for i in live()]
+    before_n = nclades(sim.clades)
+    @test before_n > 1                       # the run actually diversified
+
+    # the partition is the grouping of organisms, independent of id numbering
+    partition(ids) = sort([sort(findall(==(c), ids)) for c in unique(ids)])
+    before_part = partition(before_ids)
+
+    nk = prune_clades!(sim.clades, sim.pop)
+    after_ids = [sim.pop.clade[i] for i in live()]
+
+    @test nk <= before_n                     # pruning never grows the table
+    @test nk == nclades(sim.clades)
+    @test partition(after_ids) == before_part            # same grouping
+    @test length(unique(after_ids)) == length(unique(before_ids))
+
+    # every remaining id must be in range, and the tree must stay well-formed
+    @test all(c -> Int(c) < nk, after_ids)
+    @test sim.clades.parent[1] == 0                       # root
+    for c in 2:nk
+        @test Int(sim.clades.parent[c]) < c - 1           # parents precede children
+    end
+    @test length(sim.clades.founder) == nk * NPHEN
+    @test length(sim.clades.born) == nk
+
+    # pruning again is a no-op
+    nk2 = prune_clades!(sim.clades, sim.pop)
+    @test nk2 == nk
+    @test [sim.pop.clade[i] for i in live()] == after_ids
+
+    # and the simulation keeps running correctly afterwards
+    for _ in 1:100
+        step!(sim)
+    end
+    @test sim.pop.n > 0
+    @test all(i -> Int(sim.pop.clade[i]) < nclades(sim.clades), live())
+
+    # automatic GC during a run keeps the table bounded
+    p2 = Params(grid = 64, capacity = 8000, seed = 63, clade_gc_interval = 200)
+    s2 = Sim(p2)
+    for _ in 1:1200
+        step!(s2)
+    end
+    @test nclades(s2.clades) < before_n       # GC actually reclaimed entries
+    @test s2.pop.n > 0
+end
+
+@testset "clades: founded on phenotypic drift" begin
+    ct = CladeTable()
+    phen = zeros(Float32, NPHEN)
+    @test phen_dist2(ct, UInt32(0), phen) ≈ 0.0f0
+
+    far = copy(phen); far[1] = 1.0f0
+    @test phen_dist2(ct, UInt32(0), far) ≈ 1.0f0
+
+    c = new_clade!(ct, UInt32(0), 500, far)
+    @test nclades(ct) == 2
+    @test ct.parent[Int(c) + 1] == 0
+    @test ct.born[Int(c) + 1] == 500
+    @test phen_dist2(ct, c, far) ≈ 0.0f0        # measured against its own founder
+    @test phen_dist2(ct, c, phen) ≈ 1.0f0
 end
 
 # =============================================================================
