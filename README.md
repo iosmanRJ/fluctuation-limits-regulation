@@ -585,28 +585,61 @@ question is answerable, and the answer is negative.
 | hi28 | 0.0015 | **28** | 28.2 | **14.1** | 189 |
 | lo12 | 0.0015 | **12** | 13.5 | **12.1** | 142 |
 
-**Genome size decays in every arm, monotonically, and connectivity decays with
-it** (416 → 218 weights in a typical run). Two results carry the argument:
+**Genome size decays in every arm here, monotonically, and connectivity decays
+with it** (416 → 218 weights in a typical run). But these five arms do not
+support the conclusion they look like they support, because **four of the five
+charge for genes** and the fifth (`cost0`) settles at ~15.1 — about three nodes
+*above* the floor, not at it.
 
-- **It decays with the gene cost set to zero.** `cost0` still falls from a peak
-  of 20.8 to 15.1, so this is not the explicit `maint_gene` charge. Adding a
-  node duplicates an existing one and perturbs a network that already works, so
-  additions are deleterious on average and selection removes them. Complexity
-  is costly here even when nothing charges for it.
-- **The floor is absorbing.** Starting at `NG_MIN`, genome size never rises —
-  12.1 → 12.0 across 200k ticks. If hidden units conferred any benefit at all, a
-  population sitting at the minimum would acquire them. It does not.
+A sixth and seventh arm settle it. Zero gene cost, started at the floor and
+started high:
 
-Starting high converges downward (28 → 14.1) while starting low stays put, so
-this is not a common interior attractor. It is a ratchet toward the minimum.
+| arm | gene cost | started at | at 10k ticks | **final** |
+|---|---|---|---|---|
+| free12 | **0** | **12** | **14.5–18.1** | 12.2–15.1 |
+| free20 | **0** | 20 | 20.1–26.1 | 16.0–21.0 |
 
-The honest reading: **this environment does not reward regulatory complexity.**
-Mapping six environmental inputs to twelve traits is a task simple enough that
-the fixed interface layer suffices, and every hidden unit is overhead. Open-
-ended complexity growth would need a task that actually demands it — conditional
-responses with memory, organism-organism interaction, or an environment whose
-structure keeps changing faster than a minimal network can track. That is the
-next thing worth building, and it is a much larger change than adding nodes.
+**Started at the floor with free genes, genome size rises** — 12 to 14.5–18.1
+within 10,000 ticks. So the floor is *not* absorbing; it only looked that way
+because `lo12` carried a gene cost, which makes sitting at the minimum close to
+tautological.
+
+Two caveats that keep this from being a clean positive result either:
+
+- **At `ng = NG_MIN` deletion cannot fire** — only additions are possible at the
+  boundary. Part of the rise from 12 is therefore a mutational boundary effect
+  rather than evidence that hidden units pay.
+- **The two zero-cost arms do not converge** (final medians 13.3 from below,
+  16.5 from above), so there is no demonstrated interior attractor. With
+  symmetric add/delete rates and no cost, drift with a reflecting boundary would
+  also produce roughly this, and 200k ticks may simply be too short.
+
+### What can actually be claimed
+
+- **Complexity does not grow open-endedly.** No arm, at any gene cost, from any
+  starting size, showed sustained growth. Everything either decays or wanders in
+  the mid-teens.
+- **With any real gene cost, size decays to the minimum** and stays there.
+- **With genes free, size does not collapse** — it sits in the mid-teens,
+  reached from both directions but not convergently within 200k ticks.
+- **Whether hidden units carry positive value is UNRESOLVED.** Distinguishing a
+  weak selective benefit from drift-with-a-reflecting-boundary needs an arm that
+  breaks the boundary asymmetry — for instance allowing deletion to fail
+  harmlessly at the floor so add and delete stay symmetric there, or measuring
+  the fitness of matched genotypes differing only in hidden-node count.
+
+The earlier version of this section claimed complexity "decays toward an
+absorbing floor even without a gene cost". That was wrong on both halves: it
+conflated the zero-cost arm (which stops well above the floor) with the
+start-at-the-floor arm (which had a cost). It is recorded here rather than
+quietly deleted because the mistake is instructive — the arms were not a
+factorial design, and the two factors got read off each other.
+
+The likeliest explanation for the absence of growth remains that **this
+environment does not demand regulatory complexity**: mapping six inputs to
+twelve traits is simple enough that the interface layer largely suffices. But
+that is now a hypothesis the data is consistent with, not a result the data
+establishes.
 
 **Where to go next.** The same work finds cross-feeding lineages emerge only
 under strong spatial structure, self-organising into interleaved patterns, and
