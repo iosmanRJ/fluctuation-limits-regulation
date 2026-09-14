@@ -189,6 +189,42 @@ end
     return nothing
 end
 
+"""
+    seed_fast!(rng, seed)
+
+Re-seed an `Xoshiro` in place, allocation-free.
+
+`Random.seed!(::Xoshiro, ::UInt64)` allocates 368 bytes per call, which at tens
+of thousands of births per tick is pure garbage. This does the same SplitMix64
+state expansion by assigning the state words directly.
+"""
+@inline function splitmix64(z::UInt64)
+    x = z
+    x = (x ⊻ (x >> 30)) * 0xbf58476d1ce4e5b9
+    x = (x ⊻ (x >> 27)) * 0x94d049bb133111eb
+    return x ⊻ (x >> 31)
+end
+
+@inline function seed_fast!(rng::Xoshiro, seed::UInt64)
+    # Written out rather than with an inner helper closure: a closure that
+    # mutates a captured variable gets boxed, which allocates more than the
+    # Random.seed! call this replaces.
+    z = seed
+    z += 0x9e3779b97f4a7c15; a = splitmix64(z)
+    z += 0x9e3779b97f4a7c15; b = splitmix64(z)
+    z += 0x9e3779b97f4a7c15; c = splitmix64(z)
+    z += 0x9e3779b97f4a7c15; d = splitmix64(z)
+    z += 0x9e3779b97f4a7c15; e = splitmix64(z)
+    # a zero state is absorbing for xoshiro; vanishingly unlikely here, but one
+    # occurrence would be silent, so guard it
+    if (a | b | c | d | e) == 0x0000000000000000
+        a = 0x9e3779b97f4a7c15
+    end
+    setfield!(rng, :s0, a); setfield!(rng, :s1, b); setfield!(rng, :s2, c)
+    setfield!(rng, :s3, d); setfield!(rng, :s4, e)
+    return rng
+end
+
 """Poisson draw, fine for the small lambda (<~10) we always use here."""
 @inline function pois_small(rng, lam::Float32)
     lam <= 0.0f0 && return 0

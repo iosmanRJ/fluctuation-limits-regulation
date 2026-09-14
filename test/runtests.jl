@@ -245,15 +245,51 @@ end
     @test s3.env.res != s1.env.res
 end
 
-@testset "sim: the hot loop does not allocate" begin
-    p = Params(grid = 48, capacity = 3000, shock_interval = 0, seed = 5)
-    sim = Sim(p)
-    for _ in 1:80                    # let the birth buffer reach steady size
-        step!(sim)
+@testset "sim: allocation does not scale with population" begin
+    # The invariant that matters is not a fixed byte budget — the parallel
+    # birth phase spawns tasks, which costs a constant few KB per tick — but
+    # that allocation must not grow with the number of organisms. Anything
+    # per-organism or per-birth is a garbage generator at 1e6 ticks.
+    function bytes_per_tick(grid, cap)
+        p = Params(grid = grid, capacity = cap, shock_interval = 0, seed = 5)
+        sim = Sim(p)
+        for _ in 1:150                # let buffers reach steady size
+            step!(sim)
+        end
+        (minimum(@allocated(step!(sim)) for _ in 1:20), sim.pop.n)
     end
-    a = @allocated step!(sim)
-    # a handful of small allocations is tolerable; growth per generation is not
-    @test a < 8_000
+    small, n_small = bytes_per_tick(48, 3_000)
+    large, n_large = bytes_per_tick(160, 40_000)
+
+    @test n_large > 5 * n_small       # the comparison is meaningful
+    # a 10x population must not bring a 10x allocation
+    @test large < 2 * small
+    @test large / n_large < 1.0       # well under a byte per organism
+
+    # seeding an RNG must be allocation-free: it runs once per birth, and
+    # Random.seed!(::Xoshiro, ::UInt64) costs 368 bytes a call
+    r = Xoshiro(0)
+    seed_fast!(r, UInt64(1))
+    @test @allocated(seed_fast!(r, UInt64(99))) == 0
+end
+
+@testset "genome: fast seeding behaves like a seeding function" begin
+    a, b = Xoshiro(0), Xoshiro(0)
+    seed_fast!(a, UInt64(12345))
+    seed_fast!(b, UInt64(12345))
+    @test [rand(a, UInt64) for _ in 1:8] == [rand(b, UInt64) for _ in 1:8]
+
+    seed_fast!(a, UInt64(12345)); seed_fast!(b, UInt64(12346))
+    @test [rand(a, UInt64) for _ in 1:8] != [rand(b, UInt64) for _ in 1:8]
+
+    # re-seeding must reset the stream, not continue it
+    seed_fast!(a, UInt64(7)); first_run = [rand(a, Float32) for _ in 1:16]
+    seed_fast!(a, UInt64(7)); @test [rand(a, Float32) for _ in 1:16] == first_run
+
+    # and never leave the all-zero state, which xoshiro cannot escape
+    seed_fast!(a, UInt64(0))
+    @test any(!=(0), (a.s0, a.s1, a.s2, a.s3, a.s4))
+    @test length(unique(rand(a, UInt64) for _ in 1:8)) > 1
 end
 
 @testset "sim: extinction is reachable and handled" begin

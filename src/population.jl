@@ -116,14 +116,20 @@ nclades(ct::CladeTable) = length(ct.parent)
 
 @inline founder_offset(c::UInt32) = Int(c) * NPHEN
 
-function new_clade!(ct::CladeTable, parent::UInt32, gen::Int, phen::AbstractVector{Float32})
+function new_clade!(ct::CladeTable, parent::UInt32, gen::Int,
+                    phen::Matrix{Float32}, col::Int)
     push!(ct.parent, parent)
     push!(ct.born, Int32(gen))
     @inbounds for k in 1:NPHEN
-        push!(ct.founder, phen[k])
+        push!(ct.founder, phen[k, col])
     end
     return UInt32(length(ct.parent) - 1)
 end
+
+# convenience form for tests and one-off calls; the hot path uses the column
+# form above, because a `view` per birth allocates
+new_clade!(ct::CladeTable, parent::UInt32, gen::Int, phen::AbstractVector{Float32}) =
+    new_clade!(ct, parent, gen, reshape(collect(Float32, phen), NPHEN, 1), 1)
 
 """
     phen_dist2(ct, clade, phen) -> squared Euclidean distance
@@ -133,6 +139,17 @@ a phenotypic neighbourhood, which is both more meaningful than counting
 "large-effect" mutations and self-limiting: drift has to actually go somewhere
 to found a new clade, so the table cannot explode.
 """
+@inline function phen_dist2(ct::CladeTable, clade::UInt32,
+                            phen::Matrix{Float32}, col::Int)
+    off = founder_offset(clade)
+    d = 0.0f0
+    @inbounds for k in 1:NPHEN
+        dk = phen[k, col] - ct.founder[off + k]
+        d += dk * dk
+    end
+    d
+end
+
 @inline function phen_dist2(ct::CladeTable, clade::UInt32, phen::AbstractVector{Float32})
     off = founder_offset(clade)
     d = 0.0f0

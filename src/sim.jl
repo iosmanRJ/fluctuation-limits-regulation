@@ -26,6 +26,21 @@ mutable struct Sim
     phen_scratch::Vector{Float32}
     env_scratch::Vector{Float32}
 
+    # Pending births: slots and seeds are assigned serially, then the expensive
+    # per-birth work (genome copy, mutation, network development) runs in
+    # parallel. Each child writes only its OWN genome slot, so the parallel
+    # phase has no shared writes at all.
+    pend_parent::Vector{Int32}
+    pend_child::Vector{Int32}
+    pend_seed::Vector{UInt64}
+    pend_dload::Vector{Int32}
+    # one scratch set per worker chunk
+    tl_e::Vector{Vector{Float32}}
+    tl_buf::Vector{Vector{Float32}}
+    tl_phen::Vector{Vector{Float32}}
+    tl_env::Vector{Vector{Float32}}
+    tl_rng::Vector{Xoshiro}        # re-seeded in place; constructing one per birth allocates
+
     births::Int
     deaths::Int
     dropped::Int          # births lost to a full organism array — must stay ~0
@@ -37,9 +52,16 @@ function Sim(p::Params = Params())
     rng = Xoshiro(p.seed)
     env = Environment(p)
     pop = Population(p)
+    nt = Threads.nthreads()
     sim = Sim(p, env, pop, CladeTable(), rng, 0,
               Int32[], zeros(Float32, NG), zeros(Float32, NG),
               zeros(Float32, NPHEN), zeros(Float32, NRES),
+              Int32[], Int32[], UInt64[], Int32[],
+              [zeros(Float32, NG)    for _ in 1:nt],
+              [zeros(Float32, NG)    for _ in 1:nt],
+              [zeros(Float32, NPHEN) for _ in 1:nt],
+              [zeros(Float32, NRES)  for _ in 1:nt],
+              [Xoshiro(0) for _ in 1:nt],
               0, 0, 0, 0, Tuple{Int,Symbol}[])
     seed_population!(sim, 200)
     return sim
@@ -204,11 +226,21 @@ end
 function settle_births!(sim::Sim)
     p, env, pop, rng = sim.p, sim.env, sim.pop, sim.rng
     G = env.G
-    births = 0
 
+    # ---- phase 1 (serial, cheap): claim slots, place children, draw seeds ---
+    # Everything here touches shared state — the free list, the occupancy grid,
+    # the RNG — so it stays serial. It is only a few operations per birth.
+    empty!(sim.pend_parent); empty!(sim.pend_child); empty!(sim.pend_seed)
     @inbounds for pi_ in sim.birth_parents
         parent = Int(pi_)
         pop.alive[parent] || continue          # parent died to a shock meanwhile
+
+        nx = pop.x[parent] + rand(rng, Int32(-1):Int32(1))
+        ny = pop.y[parent] + rand(rng, Int32(-1):Int32(1))
+        nx = nx < Int32(1) ? Int32(1) : (nx > Int32(G) ? Int32(G) : nx)
+        ny = ny < Int32(1) ? Int32(1) : (ny > Int32(G) ? Int32(G) : ny)
+        pop.occ[nx, ny] >= p.max_per_cell && continue   # no room; division fails
+
         child = claim!(pop)
         if child == 0
             # The organism array is full. This is an IMPLEMENTATION limit, not
@@ -218,58 +250,87 @@ function settle_births!(sim::Sim)
             break
         end
 
-        # child appears next to the parent, but only if there is room there
-        nx = pop.x[parent] + rand(rng, Int32(-1):Int32(1))
-        ny = pop.y[parent] + rand(rng, Int32(-1):Int32(1))
-        nx = nx < Int32(1) ? Int32(1) : (nx > Int32(G) ? Int32(G) : nx)
-        ny = ny < Int32(1) ? Int32(1) : (ny > Int32(G) ? Int32(G) : ny)
-        if pop.occ[nx, ny] >= p.max_per_cell
-            kill!(pop, child)                  # no room; the division fails
-            continue
-        end
-
-        repair = pop.phen[P_REPAIR, parent]
-        nmut, _big, dload = inherit!(pop.W, pop.bias, child, parent, rng, p, repair)
-
         pop.x[child] = nx
         pop.y[child] = ny
         pop.occ[nx, ny] += Int32(1)
 
-        # parent splits its energy with the child
+        # Each child gets its own RNG seed, drawn serially in a fixed order.
+        # That is what keeps results EXACTLY reproducible regardless of how
+        # many threads run phase 2 — per-thread RNGs would make the stream
+        # depend on the thread count.
+        push!(sim.pend_parent, Int32(parent))
+        push!(sim.pend_child, Int32(child))
+        push!(sim.pend_seed, rand(rng, UInt64))
+    end
+
+    np = length(sim.pend_child)
+    resize!(sim.pend_dload, np)
+
+    # ---- phase 2 (parallel, expensive): mutate and develop -----------------
+    # ~72% of total runtime lived here and ran on one core. Each task writes
+    # only to its own children's genome and phenotype columns, so there are no
+    # shared writes; env is read-only for the duration.
+    if np > 0
+        nchunk = min(Threads.nthreads(), np)
+        Threads.@threads for c in 1:nchunk
+            e    = sim.tl_e[c]
+            buf  = sim.tl_buf[c]
+            phen = sim.tl_phen[c]
+            envs = sim.tl_env[c]
+            crng = sim.tl_rng[c]
+            lo = ((c - 1) * np) ÷ nchunk + 1
+            hi = (c * np) ÷ nchunk
+            @inbounds for k in lo:hi
+                parent = Int(sim.pend_parent[k])
+                child  = Int(sim.pend_child[k])
+                # allocation-free re-seed; seeding from the child's OWN seed
+                # keeps the random stream independent of the thread count
+                seed_fast!(crng, sim.pend_seed[k])
+
+                repair = pop.phen[P_REPAIR, parent]
+                _nmut, _big, dload = inherit!(pop.W, pop.bias, child, parent,
+                                              crng, p, repair)
+                sim.pend_dload[k] = Int32(dload)
+
+                for r in 1:NRES
+                    envs[r] = env.res[r, pop.x[child], pop.y[child]]
+                end
+                develop!(phen, e, buf, pop.W, pop.bias, child, envs)
+                for kk in 1:NPHEN
+                    pop.phen[kk, child] = phen[kk]
+                end
+            end
+        end
+    end
+
+    # ---- phase 3 (serial, cheap): energy split, lineage and clade bookkeeping
+    # The clade table is shared and grows, so assignment stays serial.
+    @inbounds for k in 1:np
+        parent = Int(sim.pend_parent[k])
+        child  = Int(sim.pend_child[k])
+
         half = pop.energy[parent] * 0.5f0
         pop.energy[parent] = half
         pop.energy[child]  = half
         pop.age[child]     = Int32(0)
         pop.depth[child]   = pop.depth[parent] + Int32(1)
         # load can fall as well as rise: beneficial mutations undo damage
-        pop.load[child]    = max(pop.load[parent] + Int32(dload), Int32(0))
+        pop.load[child]    = max(pop.load[parent] + sim.pend_dload[k], Int32(0))
 
-        # --- develop the child's network in ITS OWN local conditions ---------
-        for r in 1:NRES
-            sim.env_scratch[r] = env.res[r, pop.x[child], pop.y[child]]
-        end
-        develop!(sim.phen_scratch, sim.e_scratch, sim.buf_scratch,
-                 pop.W, pop.bias, child, sim.env_scratch)
-        for k in 1:NPHEN
-            pop.phen[k, child] = sim.phen_scratch[k]
-        end
-
-        # --- clade bookkeeping -------------------------------------------------
         # A child that has drifted far enough from its clade's founder
         # phenotype founds a new clade. Radius, not mutation count: the same
         # number of mutations can mean nothing or everything depending on where
         # they land in the network.
         parent_clade = pop.clade[parent]
-        if phen_dist2(sim.clades, parent_clade, view(pop.phen, :, child)) > p.clade_radius2
+        if phen_dist2(sim.clades, parent_clade, pop.phen, child) > p.clade_radius2
             pop.clade[child] = new_clade!(sim.clades, parent_clade, sim.gen,
-                                          view(pop.phen, :, child))
+                                          pop.phen, child)
         else
             pop.clade[child] = parent_clade
         end
-        births += 1
     end
 
-    sim.births = births
+    sim.births = np
     return nothing
 end
 
