@@ -536,13 +536,45 @@ None of this is the default. The combo needs inflow raised 2.4x, which changes
 the energy economy of everything else, and the payoff is a minority ecotype
 rather than a split population.
 
-**On genome complexity.** Connectivity saturating at ~392 of 400 weights was
-originally listed here as evidence that complexity had stopped growing. That
-reading was not available: `NG` was a hard cap, so the network had nowhere to
-go and saturation was forced. Genome size is now variable (see
-[Genome](#genome)), which is what makes the question answerable. The experiment
-— does `ng` grow under drift, under a gene cost, and does it converge to the
-same value starting from above and below? — is the current open thread.
+### Genome complexity does not grow — measured
+
+Connectivity saturating at ~392 of 400 weights was originally read here as
+evidence that complexity had stopped growing. That reading was not available:
+`NG` was a hard cap, so saturation was forced. With genome size now variable the
+question is answerable, and the answer is negative.
+
+36 replicates, five arms, 200k ticks (~10,000 generations) at grid 128:
+
+| arm | gene cost | started at | peak | **final** | final connectivity |
+|---|---|---|---|---|---|
+| cost0 | **0** | 16 | 20.8 | **15.1** | 223 |
+| cost15 | 0.0015 | 16 | 17.0 | **13.0** | 161 |
+| cost60 | 0.006 | 16 | 14.2 | **12.0** | 141 |
+| hi28 | 0.0015 | **28** | 28.2 | **14.1** | 189 |
+| lo12 | 0.0015 | **12** | 13.5 | **12.1** | 142 |
+
+**Genome size decays in every arm, monotonically, and connectivity decays with
+it** (416 → 218 weights in a typical run). Two results carry the argument:
+
+- **It decays with the gene cost set to zero.** `cost0` still falls from a peak
+  of 20.8 to 15.1, so this is not the explicit `maint_gene` charge. Adding a
+  node duplicates an existing one and perturbs a network that already works, so
+  additions are deleterious on average and selection removes them. Complexity
+  is costly here even when nothing charges for it.
+- **The floor is absorbing.** Starting at `NG_MIN`, genome size never rises —
+  12.1 → 12.0 across 200k ticks. If hidden units conferred any benefit at all, a
+  population sitting at the minimum would acquire them. It does not.
+
+Starting high converges downward (28 → 14.1) while starting low stays put, so
+this is not a common interior attractor. It is a ratchet toward the minimum.
+
+The honest reading: **this environment does not reward regulatory complexity.**
+Mapping six environmental inputs to twelve traits is a task simple enough that
+the fixed interface layer suffices, and every hidden unit is overhead. Open-
+ended complexity growth would need a task that actually demands it — conditional
+responses with memory, organism-organism interaction, or an environment whose
+structure keeps changing faster than a minimal network can track. That is the
+next thing worth building, and it is a much larger change than adding nodes.
 
 **Where to go next.** The same work finds cross-feeding lineages emerge only
 under strong spatial structure, self-organising into interleaved patterns, and
