@@ -1017,3 +1017,113 @@ placement is currently a neighbouring cell, which is already local), or giving
 the dish a spatial gradient in inflow so that different regions genuinely
 favour different channels rather than relying on the population to generate
 the heterogeneity itself.
+
+## Making the environment demand complexity — and why it could not be done
+
+Complexity plateaus at ~22 nodes. Walsh (2026) attributes that to a shrinking
+solution space, Lynch to population size. A third possibility appears untested:
+maybe the plateau is set by the *task*, and a job that actually requires a
+conditional response would move it. `yield_zones` was built to test that — the
+dish splits into vertical bands and each band rotates which channel pays best,
+so the *set* of yields is identical everywhere and only the context changes.
+
+The answer is that **the hypothesis remains untested, because the environment
+could not be made to demand complexity.** Genome size did move, substantially
+and reproducibly, but nothing ties that to the task.
+
+### The first version failed for an obvious reason
+
+Rotating the yields alone does nothing. Channel 1 is the sole recipient of
+external inflow, so it is far more abundant everywhere, and a yield rotation
+spanning 1.0 → 0.22 cannot outweigh that. Organisms went on eating channel 1 in
+every zone and simply paid for it: genome size unchanged, population 958 → 505.
+The dish became uniformly worse rather than context-dependent. `rotate_inflow`
+fixes the alignment so the abundant channel and the best-paying channel coincide.
+
+### With the alignment fixed, genome size rises — monotonically
+
+Six seeds per condition, 150k ticks, complexity-permissive regime (grid 32,
+`maint_gene = 0`, `p_node_add = 0.006`, `p_node_del = 0.002`):
+
+| zones | final `ng` | SE | population |
+|---|---|---|---|
+| 1 | 21.81 | ±0.51 | 958 |
+| 2 | 23.96 | ±0.58 | 1013 |
+| 4 | 24.82 | ±0.96 | 1263 |
+| 6 | **26.69** | ±1.17 | 1297 |
+
+`ng ~ log2(zones)`: **+1.74 per doubling** (t = 4.17, R² = 0.44). Spearman
+ρ = +0.66, permutation p = 0.00066. Controlling for population the slope is
++1.86 (t = 2.90) while `log2(pop)` contributes nothing (t = −0.24). Weights per
+node rise too, 21.0 → 25.5, so the networks are denser rather than padded.
+
+It is a **higher plateau, not open-ended growth** — every condition flattens by
+25–50% through the run and holds. And it is not a ceiling artifact: re-running
+zones = 6 with `NG_MAX` raised 32 → 64 gives 26.01 vs 26.69 (t = −0.43), so the
+bound never bound.
+
+### Two findings that take it all back
+
+**Organisms do not respond conditionally.** The decisive test takes the *same*
+organism and develops it under each zone's environment in turn. One encoding a
+fixed optimum gives the same uptake profile whatever it is shown; one encoding a
+conditional map shifts. Averaged over 3 seeds:
+
+| evolved in | final `ng` | switchers | profile spread | max shift |
+|---|---|---|---|---|
+| 1-zone world | 21.70 | 40.7% | 0.185 | 0.491 |
+| 6-zone world | 27.12 | 11.9% | 0.086 | 0.354 |
+
+Organisms from the zoned world are **less** plastic, not more, on every measure
+and in 2 of 3 seeds each. In one seed the 6-zone population's top channel was
+`ch6 ch6 ch6 ch6 ch6 ch6` — identical across all six probes. The bigger genomes
+are not doing conditional work.
+
+**And the control arm produced the largest genomes of all.** Holding
+`rotate_inflow` on and switching off only `rotate_yield` was meant to isolate the
+payoff rotation. It does not: without the yield rotation the abundant channel in
+each zone pays 0.22–0.35 instead of 1.0, so most of the dish is poor.
+
+| cell | population | standing resource | final `ng` |
+|---|---|---|---|
+| zones 2, yield rot **no** | 516 | 5342 | **28.72** |
+| zones 2, yield rot yes | 1013 | 2347 | 23.96 |
+| zones 4, yield rot **no** | 371 | 7599 | **27.10** |
+| zones 4, yield rot yes | 1263 | 1968 | 24.82 |
+| zones 6, yield rot **no** | 452 | 7174 | 25.23 |
+| zones 6, yield rot yes | 1297 | 2749 | 26.69 |
+
+Resource piles up unconsumed, population falls 2.5–3.5×, and the arm with the
+*less* conditional task carries the **largest genomes in the dataset** — with a
+trend running *downward* in zones (28.7 → 27.1 → 25.2). Smaller population, more
+drift, more complexity. That is Lynch again, arriving as a confound. Pooled
+across both arms nothing survives: `log2(zones)` t = −0.34, `yield_rot` t = −0.95,
+R² = 0.09.
+
+### Why the task could not be built
+
+The zones never present distinct readable optima, and the reason is the
+conversion ladder. Channel *r*'s byproduct is *r+1*, always. An organism eats the
+inflow channel down to nothing and excretes one step along, so **the realised
+concentration peak sits systematically downstream of the channel actually being
+supplied**, and waste accumulates in ch5/ch6 everywhere. Expected top channel by
+zone is `ch1 ch6 ch5 ch4 ch3 ch2`; what the field actually shows is
+`ch3 ch6 ch5 ch6 ch6 ch6`.
+
+This is not a diffusion problem. Lowering `diff_rate` 6× (0.12 → 0.02),
+tripling the grid (32 → 96), and adding per-channel falloff all leave it at 1–2
+zones out of 6. Raising `decay` 13× (0.006 → 0.08) reaches 3 of 6 — at the cost
+of cross-feeding (downstream uptake share 0.846 → 0.704) and population
+(1608 → 1115); at 0.20 the dish goes extinct.
+
+**So in a model with a fixed downstream excretion ladder, a spatially varying
+optimum cannot be made legible from local concentration.** Consumption plus
+excretion displace the peak away from the supply. Fixing that means dismantling
+the cross-feeding ladder — which exists because an evolvable excretion
+destination produced a futile cycle and killed cross-feeding outright.
+
+The `ng` rise is therefore real, reproducible, and **unattributable**: most
+plausibly a side effect of the zoned dish changing selection intensity, not
+evidence that complexity was demanded. `rotate_inflow` and `rotate_yield` are
+kept so the experiment can be redone if the ladder is ever replaced by a
+metabolic matrix that does not pile waste into a terminal sink.
