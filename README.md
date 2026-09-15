@@ -855,6 +855,65 @@ start-at-the-floor arm (which had a cost). It is recorded here rather than
 quietly deleted because the mistake is instructive — the arms were not a
 factorial design, and the two factors got read off each other.
 
+### Entrenchment, measured directly
+
+Constructive Neutral Evolution rests on **entrenchment**: neutrally-added
+components become indispensable over time, because the rest of the system comes
+to depend on them. In real organisms that is inferred from phylogeny, because
+you cannot delete a component and read off the cost as a function of how long it
+has been there. Here you can — delete each hidden node, re-develop the network,
+and measure how far the phenotype moves.
+
+**Result: entrenchment is real.** 519,839 measurements across 24 seeds, 4,229
+nodes tracked individually by unique id:
+
+| | |
+|---|---|
+| nodes qualifying (≥5 observations spanning ≥20,000 ticks) | 248 |
+| **positive slopes** | **173/248 (69.8%)** |
+| median slope | +1.02×10⁻⁶ disruption per tick |
+| effect over a 100k-tick lifetime | **+0.102 disruption units** |
+| sign test | z = +6.22, **p = 4.9×10⁻¹⁰** |
+
+Nodes present longer are measurably harder to remove.
+
+#### Two earlier versions of this measurement were wrong
+
+Both are recorded because the failure modes are the instructive part.
+
+**Attempt 1 said entrenchment was absent** (r = −0.052). It sampled nodes only
+at the *end* of a run, so every node observed was a survivor and **96% were
+already older than 60,000 ticks**. With almost no young nodes to compare
+against, the age axis was nearly constant and the correlation was noise around a
+flat line. A further 20% of the sample were founder nodes, structurally
+different from duplication-added ones, which dominated the oldest bin.
+
+**Attempt 2 said entrenchment was strong** (r = +0.211, n = 67,068). It measured
+during the run, fixing the age coverage, but grouped nodes into 5,000-tick birth
+cohorts — mixing different nodes together — and pooled every measurement as if
+independent. Most observations are repeat measurements of the *same* node, so
+the correlation was inflated roughly by the number of re-measurements. Its own
+paired cohort test was far weaker: 12/20 rising, p = 0.25.
+
+**The unit of analysis is a node, not a measurement.** Attempt 3 gives each node
+a unique id, follows it as it ages, and reduces it to a single regression slope.
+That yields 248 independent points instead of half a million correlated ones,
+and a clean answer. The inclusion rule — ≥5 observations spanning ≥20,000 ticks
+— matters too: slopes fitted over a narrow age window are dominated by noise,
+which is what flattened attempt 2's cohort test.
+
+Caveat: only 248 of 4,229 nodes qualified, because most do not survive long
+enough to yield a slope. That is survivorship again, though here it is
+conservative — short-lived nodes are the ones least likely to have entrenched.
+
+#### What entrenchment does and does not explain
+
+It does **not** rescue open-endedness. Complexity still plateaus at ~22 while
+entrenchment is demonstrably operating, so the ratchet exists but is **too weak
+to overcome drift–selection balance** at this population size. That is a more
+informative statement than either "complexity grows" or "complexity does not":
+the CNE mechanism is present and quantified, and still insufficient.
+
 ### What makes complexity accumulate: a 2×2×2 factorial
 
 The absence of growth is not mysterious. Constructive Neutral Evolution names

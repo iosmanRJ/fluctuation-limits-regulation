@@ -34,6 +34,7 @@ mutable struct Sim
     pend_child::Vector{Int32}
     pend_seed::Vector{UInt64}
     pend_dload::Vector{Int32}
+    pend_nid::Vector{Int32}       # pre-reserved node ids, one per pending birth
     # one scratch set per worker chunk
     tl_e::Vector{Vector{Float32}}
     tl_buf::Vector{Vector{Float32}}
@@ -44,6 +45,7 @@ mutable struct Sim
     births::Int
     deaths::Int
     dropped::Int          # births lost to a full organism array — must stay ~0
+    next_node_id::Int     # hands out unique ids so individual nodes can be tracked
     last_shock::Int
     shock_log::Vector{Tuple{Int,Symbol}}
 end
@@ -56,13 +58,13 @@ function Sim(p::Params = Params())
     sim = Sim(p, env, pop, CladeTable(), rng, 0,
               Int32[], zeros(Float32, NG_MAX), zeros(Float32, NG_MAX),
               zeros(Float32, NPHEN), zeros(Float32, NRES),
-              Int32[], Int32[], UInt64[], Int32[],
+              Int32[], Int32[], UInt64[], Int32[], Int32[],
               [zeros(Float32, NG_MAX) for _ in 1:nt],
               [zeros(Float32, NG_MAX) for _ in 1:nt],
               [zeros(Float32, NPHEN) for _ in 1:nt],
               [zeros(Float32, NRES)  for _ in 1:nt],
               [Xoshiro(0) for _ in 1:nt],
-              0, 0, 0, 0, Tuple{Int,Symbol}[])
+              0, 0, 0, 0, 1, Tuple{Int,Symbol}[])
     seed_population!(sim, founder_count(p))
     return sim
 end
@@ -79,6 +81,10 @@ function seed_population!(sim::Sim, n::Int)
         i = claim!(pop)
         i == 0 && break
         pop.ng[i] = Int32(clamp(p.ng_init, NG_MIN, NG_MAX))
+        for q in 1:NG_MAX
+            pop.node_born[q, i] = Int32(0)
+            pop.node_id[q, i] = Int32(q)      # founders share ids 1..NG_MAX
+        end
         seed_genome!(pop.W, pop.bias, i, rng, Int(pop.ng[i]))
         pop.x[i] = rand(rng, Int32(1):Int32(G))
         pop.y[i] = rand(rng, Int32(1):Int32(G))
@@ -272,6 +278,7 @@ function settle_births!(sim::Sim)
     # Everything here touches shared state — the free list, the occupancy grid,
     # the RNG — so it stays serial. It is only a few operations per birth.
     empty!(sim.pend_parent); empty!(sim.pend_child); empty!(sim.pend_seed)
+    empty!(sim.pend_nid)
     @inbounds for pi_ in sim.birth_parents
         parent = Int(pi_)
         pop.alive[parent] || continue          # parent died to a shock meanwhile
@@ -302,6 +309,10 @@ function settle_births!(sim::Sim)
         push!(sim.pend_parent, Int32(parent))
         push!(sim.pend_child, Int32(child))
         push!(sim.pend_seed, rand(rng, UInt64))
+        # reserve an id per pending birth in the SERIAL phase; the parallel
+        # phase must not share a mutable counter
+        push!(sim.pend_nid, Int32(sim.next_node_id))
+        sim.next_node_id += 1
     end
 
     np = length(sim.pend_child)
@@ -329,10 +340,24 @@ function settle_births!(sim::Sim)
                 seed_fast!(crng, sim.pend_seed[k])
 
                 repair = pop.phen[P_REPAIR, parent]
+                nid = sim.pend_nid[k]
                 ng_p = Int(pop.ng[parent])
-                _nmut, _big, dload, ng_c = inherit!(pop.W, pop.bias, child, parent,
-                                                    crng, p, repair, ng_p)
+                _nmut, _big, dload, ng_c, added, moved =
+                    inherit!(pop.W, pop.bias, child, parent, crng, p, repair, ng_p)
                 pop.ng[child] = Int32(ng_c)
+                # carry each node's birth tick across, then record what changed
+                for q in 1:max(ng_p, ng_c)
+                    pop.node_born[q, child] = pop.node_born[q, parent]
+                    pop.node_id[q, child]   = pop.node_id[q, parent]
+                end
+                if moved != 0                       # a deletion swapped the last
+                    pop.node_born[moved, child] = pop.node_born[ng_c + 1, parent]
+                    pop.node_id[moved, child]   = pop.node_id[ng_c + 1, parent]
+                end
+                if added != 0                       # a brand new node
+                    pop.node_born[added, child] = Int32(sim.gen)
+                    pop.node_id[added, child]   = Int32(nid)
+                end
                 sim.pend_dload[k] = Int32(dload)
 
                 for r in 1:NRES

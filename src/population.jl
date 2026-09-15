@@ -17,6 +17,16 @@ mutable struct Population
     phen::Matrix{Float32}        # NPHEN x cap   cached at birth
     chan_cost::Vector{Float32}   # sum(allocation^exp), cached at birth like phen
     ng::Vector{Int32}            # regulatory nodes this organism actually has
+    # Tick at which each node entered this lineage. Needed to ask whether a
+    # node becomes harder to remove the longer it has been present, which is
+    # the entrenchment claim at the centre of Constructive Neutral Evolution
+    # and is normally argued from phylogeny rather than measured.
+    node_born::Matrix{Int32}     # NG_MAX x cap
+    # A unique id per node, so the SAME node can be followed across
+    # measurements and across the descendants that inherit it. Birth tick alone
+    # does not identify a node: several are born on the same tick and lineages
+    # diverge afterwards.
+    node_id::Matrix{Int32}       # NG_MAX x cap
     nzw::Vector{Int32}           # non-zero regulatory weights, cached at birth
     active::Vector{Int32}        # nodes with any outgoing weight, cached at birth
     absw::Vector{Float32}        # mean |weight|, cached at birth
@@ -46,7 +56,8 @@ function Population(p::Params)
         zeros(Int32, cap), zeros(Int32, cap),
         zeros(Float32, cap), zeros(Int32, cap), fill(false, cap),
         zeros(Float32, NPHEN, cap), zeros(Float32, cap),
-        zeros(Int32, cap), zeros(Int32, cap), zeros(Int32, cap), zeros(Float32, cap),
+        zeros(Int32, cap), zeros(Int32, NG_MAX, cap), zeros(Int32, NG_MAX, cap),
+        zeros(Int32, cap), zeros(Int32, cap), zeros(Float32, cap),
         zeros(Float32, NG_MAX, NG_MAX, cap), zeros(Float32, NG_MAX, cap),
         zeros(Int32, cap), zeros(Int32, cap), zeros(UInt32, cap),
         zeros(Int32, p.grid, p.grid),
