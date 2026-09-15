@@ -262,6 +262,73 @@ point demographic stochasticity decides. **Bottleneck depth, not genome size,
 is what a long run would have to address.** Pinning `ng` small buys carrying
 capacity, not safety.
 
+#### What drives the bottlenecks: season sets *when*, famine sets *how deep*
+
+Every deep trough across 6 seeds × 200k ticks, recorded with the season phase,
+whether a famine was active, and time since the last shock.
+
+**Season is the clock.** Inflow bottoms at phase 0.75, and **16 of 19 troughs
+fall in phase 0.6–1.1** — the half-cycle around and after that minimum, against
+~10 expected if phase were irrelevant. The median trough sits at phase 0.91,
+about 16% of a cycle after the low, which is the lag of a population tracking a
+declining resource.
+
+**Famine sets the depth.** Of the six deepest troughs (<100 organisms), their
+ticks-since-last-shock were 428, 436, 429 and 413 — against a `famine_len` of
+400. The bottoms land as a famine expires on top of the seasonal minimum.
+
+#### But famine DURATION is not the lever — total severity is
+
+That timing invited an obvious mechanism: a 400-tick famine spans a whole
+seasonal descent, so shortening it should stop the two stacking. Shortening
+`famine_len` 400 → 150 did give a **23× deeper margin and 0/6 extinctions**.
+
+**That result was confounded and the hypothesis is false.** Integrated severity
+is `famine_len × (1 − famine_factor)`, and the arms were not matched: 400 × 0.88
+= **352** tick-equivalents against 150 × 0.95 = **142**. The short arm simply
+carried 40% of the total food loss — and that cannot be fixed by deepening,
+since at 150 ticks the maximum possible deficit is 150, still under 352.
+
+Matching the deficit by making the *long* famine shallower instead:
+
+| arm | deficit | median min-pop ratio | extinct |
+|---|---|---|---|
+| long + shallow, 400 × 0.65 | 140 | **0.0600** | 0/8 |
+| short + deep, 150 × 0.05 | 142 | **0.0469** | 0/8 |
+
+**Indistinguishable.** Paired by seed the short arm was better in only 3 of 8,
+and long+shallow is nominally the *safer* of the two — the opposite of the
+prediction. Duration does not matter; only the product does.
+
+The deepest troughs landing 413–436 ticks after a shock was a *consequence* of
+famine duration, not evidence that duration caused the depth. Suggestive
+timing, wrong mechanism.
+
+#### Softening famine removes extinction *and* raises diversity
+
+`famine_factor` therefore defaults to **0.65**, not 0.12, cutting the integrated
+deficit from 352 to 140. Validated over 6 seeds × 200k ticks against the old
+default:
+
+| metric | harsh 0.12 | soft 0.65 | |
+|---|---|---|---|
+| extinctions | 1/6 | **0/6** | |
+| minimum population | 31 | **1,222** | **39× safer** |
+| cross-feeding | 0.277 | 0.270 | unchanged |
+| **clade diversity (Shannon)** | 1.15 | **3.48** | **3× higher** |
+| trait spread | 0.0235 | 0.0261 | slightly higher |
+| generations reached | 5,965 | 5,632 | unchanged |
+
+The expected cost did not appear. Less famine *should* mean weaker selection and
+a duller model — instead **diversity tripled**. Harsh famines bottleneck the
+population to 6–31 organisms, which purges nearly every lineage; soft ones
+bottom out at 720–4,885, so far more clades survive. **The harsh setting was not
+generating diversity through selection, it was destroying it through
+bottlenecks.**
+
+This is the first configuration under which a million-generation run is
+plausible rather than doomed.
+
 ### Clades
 
 A full per-organism phylogeny is not representable over a million ticks. A
