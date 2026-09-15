@@ -464,6 +464,33 @@ implementation limit. Symptoms to watch for on the dashboard:
   channel they had just eaten, which silently disabled the whole waste economy.
   If something is chemistry rather than strategy, do not make it a trait.
 
+### Controls, or: three hypotheses that died the same way
+
+Three mechanisms were proposed, each fitted the data, and each was false. In
+every case the giveaway only appeared because a control existed.
+
+| hypothesis | why it looked right | what killed it |
+|---|---|---|
+| large genomes cause fragility | every extinct run had `ng` > 14.7, every survivor below 14.6, no overlap in 12 runs | pinning `ng` at 12 vs 20: extinction 1/12 vs 2/12, and on a continuous measure the ng=20 arm was nominally *less* fragile |
+| genomes shrink during famine | an adaptive story that would neatly explain improved survival | mean `ng` during famine was lower in 5 of 10 runs and higher in 5 |
+| famine *duration* drives bottleneck depth | deepest troughs landed 413–436 ticks after a shock, against `famine_len` 400 | matching total deficit: 400 × 0.65 and 150 × 0.05 are indistinguishable |
+
+The pattern is the same each time: a **correlation in a small sample plus a
+plausible mechanism**, which together feel like an explanation. The control is
+what separates them, and in two of the three cases the control was cheap and
+took twenty minutes.
+
+Two specific traps worth naming:
+
+- **Check that a "control" actually controls.** The famine-duration arms were
+  run as a matched comparison and were not matched at all — integrated severity
+  differed by 2.5×, which nobody would have noticed without writing out
+  `len × (1 − factor)`. The confounded version gave a clean-looking 23× effect.
+- **Binary extinction is the wrong statistic at these sample sizes.** 1/12 vs
+  2/12 is Fisher p = 1.0, and separating 8% from 17% needs ~250 seeds per arm.
+  Minimum population reached, as a fraction of the run's own median, measures
+  the same fragility continuously and settles it at n=6.
+
 ### Two ways to measure the wrong thing
 
 Both of these produced confident, completely wrong conclusions here. They are
