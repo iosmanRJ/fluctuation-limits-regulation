@@ -133,6 +133,8 @@ function mutate!(W::Array{Float32,3}, bias::Matrix{Float32}, i::Int, rng, p,
     nmut = 0
     big  = false
     dload = 0
+    added = 0      # index of a node added this birth, 0 if none
+    moved = 0      # index a deletion swapped the last node into, 0 if none
 
     # expected point mutations this birth; sampled as a small Poisson draw
     lam = rate * nsites
@@ -198,6 +200,7 @@ function mutate!(W::Array{Float32,3}, bias::Matrix{Float32}, i::Int, rng, p,
         bias[ng, i] = bias[src, i]
         nmut += 1
         big = true
+        added = ng                 # caller stamps this node's birth tick
     elseif rand(rng, Float32) < p.p_node_del && ng > NG_MIN
         # remove a random HIDDEN node by swapping it with the last one and
         # shrinking; hidden nodes carry no fixed meaning, so a swap is free
@@ -212,9 +215,10 @@ function mutate!(W::Array{Float32,3}, bias::Matrix{Float32}, i::Int, rng, p,
         ng -= 1
         nmut += 1
         big = true
+        moved = h                  # caller moves the age of the swapped node
     end
 
-    return nmut, big, dload, ng
+    return nmut, big, dload, ng, added, moved
 end
 
 """Deleterious (+1), beneficial (-1) or neutral (0)."""

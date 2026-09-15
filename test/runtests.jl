@@ -724,6 +724,44 @@ end
     @test M[stat_index("mean_abs_w"), 1] > 0
 end
 
+@testset "population: node identity and age are tracked" begin
+    # Entrenchment is measured by following an INDIVIDUAL node as it ages, so
+    # each node needs a stable unique id and a birth tick that survive
+    # inheritance, duplication and the swap-with-last deletion.
+    p = Params(grid = 32, capacity = 3000, shock_interval = 0, seed = 44,
+               p_node_add = 0.02f0, p_node_del = 0.02f0)
+    sim = Sim(p)
+    for _ in 1:1500
+        step!(sim)
+    end
+    live = [i for i in 1:high_water(sim.pop) if sim.pop.alive[i]]
+    @test !isempty(live)
+
+    for i in live
+        ng = Int(sim.pop.ng[i])
+        ids = [sim.pop.node_id[q, i] for q in 1:ng]
+        @test allunique(ids)                       # no duplicate ids in a genome
+        @test all(>(0), ids)                       # every live node has an id
+        for q in 1:ng
+            b = sim.pop.node_born[q, i]
+            @test 0 <= b <= sim.gen                # birth tick is sane
+        end
+    end
+
+    # nodes added during the run must carry ids beyond the founder block,
+    # and founders must still be marked with birth tick 0
+    evolved = [(i, q) for i in live for q in 1:Int(sim.pop.ng[i])
+               if sim.pop.node_born[q, i] > 0]
+    @test !isempty(evolved)                        # the run actually added nodes
+    @test all(sim.pop.node_id[q, i] > NG_MAX for (i, q) in evolved)
+    founders = [(i, q) for i in live for q in 1:Int(sim.pop.ng[i])
+                if sim.pop.node_born[q, i] == 0]
+    @test all(sim.pop.node_id[q, i] <= NG_MAX for (i, q) in founders)
+
+    # ids are handed out serially and never reused
+    @test sim.next_node_id > NG_MAX
+end
+
 @testset "genome: size is variable and bounded" begin
     rng = Xoshiro(91)
     W = zeros(Float32, NG_MAX, NG_MAX, 2); b = zeros(Float32, NG_MAX, 2)

@@ -763,6 +763,20 @@ rather than a split population.
   [Wiley](https://onlinelibrary.wiley.com/doi/full/10.1111/evo.12485)
 - *Stochastic trade-offs and the emergence of diversification in E. coli
   evolution experiments* — [arXiv:2307.11033](https://arxiv.org/abs/2307.11033)
+- Lukeš et al., *How a neutral evolutionary ratchet can build cellular
+  complexity* (Constructive Neutral Evolution) —
+  [IUBMB Life](https://iubmb.onlinelibrary.wiley.com/doi/10.1002/iub.489)
+- *Constructive Neutral Evolution 20 Years Later* —
+  [PMC7982386](https://pmc.ncbi.nlm.nih.gov/articles/PMC7982386/)
+- Lynch, *Drift and genome complexity* (mutational hazard hypothesis) —
+  [PLoS Genetics](https://journals.plos.org/plosgenetics/article?id=10.1371%2Fjournal.pgen.1002092)
+- Lynch, *Non-adaptive origins of interactome complexity* —
+  [Nature](https://www.nature.com/articles/nature09992)
+- *Evolutionary simulations reveal a role for genomic recombination in the
+  evolution of gene regulatory network complexity and robustness* (2026) —
+  [PMC13455014](https://pmc.ncbi.nlm.nih.gov/articles/PMC13455014/)
+- *Open-Ended Evolution* (ALife encyclopedia) —
+  [alife.org](https://alife.org/encyclopedia/introduction/open-ended-evolution/)
 - Geritz et al., *Evolutionarily singular strategies and the adaptive growth and
   branching of the evolutionary tree* —
   [Springer](https://link.springer.com/article/10.1023/A:1006554906681)
@@ -840,6 +854,145 @@ conflated the zero-cost arm (which stops well above the floor) with the
 start-at-the-floor arm (which had a cost). It is recorded here rather than
 quietly deleted because the mistake is instructive — the arms were not a
 factorial design, and the two factors got read off each other.
+
+### Entrenchment, measured directly
+
+Constructive Neutral Evolution rests on **entrenchment**: neutrally-added
+components become indispensable over time, because the rest of the system comes
+to depend on them. In real organisms that is inferred from phylogeny, because
+you cannot delete a component and read off the cost as a function of how long it
+has been there. Here you can — delete each hidden node, re-develop the network,
+and measure how far the phenotype moves.
+
+**Result: entrenchment is real.** 519,839 measurements across 24 seeds, 4,229
+nodes tracked individually by unique id:
+
+| | |
+|---|---|
+| nodes qualifying (≥5 observations spanning ≥20,000 ticks) | 248 |
+| **positive slopes** | **173/248 (69.8%)** |
+| median slope | +1.02×10⁻⁶ disruption per tick |
+| effect over a 100k-tick lifetime | **+0.102 disruption units** |
+| sign test | z = +6.22, **p = 4.9×10⁻¹⁰** |
+
+Nodes present longer are measurably harder to remove.
+
+#### Two earlier versions of this measurement were wrong
+
+Both are recorded because the failure modes are the instructive part.
+
+**Attempt 1 said entrenchment was absent** (r = −0.052). It sampled nodes only
+at the *end* of a run, so every node observed was a survivor and **96% were
+already older than 60,000 ticks**. With almost no young nodes to compare
+against, the age axis was nearly constant and the correlation was noise around a
+flat line. A further 20% of the sample were founder nodes, structurally
+different from duplication-added ones, which dominated the oldest bin.
+
+**Attempt 2 said entrenchment was strong** (r = +0.211, n = 67,068). It measured
+during the run, fixing the age coverage, but grouped nodes into 5,000-tick birth
+cohorts — mixing different nodes together — and pooled every measurement as if
+independent. Most observations are repeat measurements of the *same* node, so
+the correlation was inflated roughly by the number of re-measurements. Its own
+paired cohort test was far weaker: 12/20 rising, p = 0.25.
+
+**The unit of analysis is a node, not a measurement.** Attempt 3 gives each node
+a unique id, follows it as it ages, and reduces it to a single regression slope.
+That yields 248 independent points instead of half a million correlated ones,
+and a clean answer. The inclusion rule — ≥5 observations spanning ≥20,000 ticks
+— matters too: slopes fitted over a narrow age window are dominated by noise,
+which is what flattened attempt 2's cohort test.
+
+Caveat: only 248 of 4,229 nodes qualified, because most do not survive long
+enough to yield a slope. That is survivorship again, though here it is
+conservative — short-lived nodes are the ones least likely to have entrenched.
+
+#### What entrenchment does and does not explain
+
+It does **not** rescue open-endedness. Complexity still plateaus at ~22 while
+entrenchment is demonstrably operating, so the ratchet exists but is **too weak
+to overcome drift–selection balance** at this population size.
+
+#### None of this is novel — checked
+
+This was briefly written up here as a new finding. A literature check says
+otherwise, and the check is recorded because the temptation to believe it was
+new was strong.
+
+**The method is standard.** Protein evolution has measured entrenchment this way
+for years: *"entrenchment is measured by reverting a mutation to its original
+amino acid at times posterior to the mutation's occurrence, and observing
+whether this reversion is typically deleterious at subsequent times."* That is
+exactly the delete-and-measure-against-age design above. See [Emergent time
+scales of epistasis in protein
+evolution](https://www.pnas.org/doi/10.1073/pnas.2406807121) and [Hsp90 over a
+billion years](https://pmc.ncbi.nlm.nih.gov/articles/PMC5924896/).
+
+**The result is established.** Entrenchment rising with evolutionary time is the
+expected finding, and even the "weaker than expected" nuance is published —
+[*Epistasis plays a limited role in driving entrenchment during neutral protein
+evolution*](https://link.springer.com/article/10.1186/s13059-026-04157-0)
+(Genome Biology, 2026).
+
+**The conclusion is published too.** Walsh (2026), [*Neutrally Evolving
+Interlocking Complexity in the Quandary Den*](https://arxiv.org/html/2604.18361),
+simulates CNE directly and concludes the ratchet is self-limiting and complexity
+plateaus. Their limiting mechanism differs — shrinking solution space rather
+than drift–selection balance — and they run a population of **one**, so drift
+plays no part. But the headline is theirs.
+
+What is left unclaimed is narrow: Walsh does not examine population size or
+drift, and the protein work measures sites within a fixed-length sequence rather
+than components whose *number* evolves. Age-resolved entrenchment under evolving
+component count with real population dynamics does not appear to have been done.
+That is a gap-filling increment, not a finding, and it does not support a paper.
+
+### What makes complexity accumulate: a 2×2×2 factorial
+
+The absence of growth is not mysterious. Constructive Neutral Evolution names
+four conditions under which complexity fails to accumulate, and this model
+violated two outright: **selection too strong** (populations of 20,000–30,000
+purge neutral additions) and **mutation unbiased** (`p_node_add` equalled
+`p_node_del` exactly, giving no directional ratchet). Lynch's mutational hazard
+hypothesis says the same from the other side — genome expansion needs small
+effective population size so drift can overwhelm purifying selection.
+
+Both are one-parameter changes. Full factorial, 3 seeds per cell, 150k ticks,
+reporting final mean genome size:
+
+| small pop | mutation bias | gene cost | final `ng` |
+|---|---|---|---|
+| — | — | yes | **13.0** |
+| — | ✓ | yes | 13.4 |
+| ✓ | — | yes | 14.8 |
+| ✓ | ✓ | yes | 15.0 |
+| — | — | no | 15.1 |
+| — | ✓ | no | 17.0 |
+| ✓ | — | no | 20.0 |
+| **✓** | **✓** | **no** | **21.5** |
+
+**Complexity is sustained at 21.5 against a baseline of 13.0** — 1.7×, held flat
+across 150k ticks rather than decaying. This is the first configuration in which
+genome size does not collapse.
+
+**The gene cost gates everything.** With a real per-gene cost, selection purges
+additions regardless of anything else: small populations buy **+1.8** and
+mutation bias buys **+0.4**. Remove the cost so additions are neutral and the
+same two factors become potent: small populations buy **+4.9**, bias **+1.9**.
+
+That gating is the whole result, and it is mechanistically obvious in hindsight.
+**Mutational bias changes the supply of additions, not their fate.** If every
+extra gene carries a fitness cost, selection removes them however fast they
+arrive — which is why the CNE condition about insertion bias does nothing here
+until the additions are actually neutral. Drift can only preserve what selection
+is indifferent to.
+
+So the earlier framing — that the environment is too simple to reward complexity
+— was at best half the story. The population was also far too large and every
+gene was taxed. Under **large populations with efficient purifying selection,
+streamlining is the predicted outcome**, and the literature says so explicitly:
+prokaryotic ribosomes are streamlined precisely because prokaryotic populations
+are huge. This model's organisms are prokaryote-like with enormous populations,
+so shedding genome was never a failure — it was the textbook result.
 
 The likeliest explanation for the absence of growth remains that **this
 environment does not demand regulatory complexity**: mapping six inputs to
