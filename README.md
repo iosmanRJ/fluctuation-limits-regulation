@@ -910,9 +910,41 @@ conservative — short-lived nodes are the ones least likely to have entrenched.
 
 It does **not** rescue open-endedness. Complexity still plateaus at ~22 while
 entrenchment is demonstrably operating, so the ratchet exists but is **too weak
-to overcome drift–selection balance** at this population size. That is a more
-informative statement than either "complexity grows" or "complexity does not":
-the CNE mechanism is present and quantified, and still insufficient.
+to overcome drift–selection balance** at this population size.
+
+#### None of this is novel — checked
+
+This was briefly written up here as a new finding. A literature check says
+otherwise, and the check is recorded because the temptation to believe it was
+new was strong.
+
+**The method is standard.** Protein evolution has measured entrenchment this way
+for years: *"entrenchment is measured by reverting a mutation to its original
+amino acid at times posterior to the mutation's occurrence, and observing
+whether this reversion is typically deleterious at subsequent times."* That is
+exactly the delete-and-measure-against-age design above. See [Emergent time
+scales of epistasis in protein
+evolution](https://www.pnas.org/doi/10.1073/pnas.2406807121) and [Hsp90 over a
+billion years](https://pmc.ncbi.nlm.nih.gov/articles/PMC5924896/).
+
+**The result is established.** Entrenchment rising with evolutionary time is the
+expected finding, and even the "weaker than expected" nuance is published —
+[*Epistasis plays a limited role in driving entrenchment during neutral protein
+evolution*](https://link.springer.com/article/10.1186/s13059-026-04157-0)
+(Genome Biology, 2026).
+
+**The conclusion is published too.** Walsh (2026), [*Neutrally Evolving
+Interlocking Complexity in the Quandary Den*](https://arxiv.org/html/2604.18361),
+simulates CNE directly and concludes the ratchet is self-limiting and complexity
+plateaus. Their limiting mechanism differs — shrinking solution space rather
+than drift–selection balance — and they run a population of **one**, so drift
+plays no part. But the headline is theirs.
+
+What is left unclaimed is narrow: Walsh does not examine population size or
+drift, and the protein work measures sites within a fixed-length sequence rather
+than components whose *number* evolves. Age-resolved entrenchment under evolving
+component count with real population dynamics does not appear to have been done.
+That is a gap-filling increment, not a finding, and it does not support a paper.
 
 ### What makes complexity accumulate: a 2×2×2 factorial
 
