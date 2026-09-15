@@ -35,6 +35,36 @@ Base.@kwdef mutable struct Params
     # by some other organism before anything can live in it.
     inflow::Float32      = 0.250f0
     yields::Vector{Float32} = Float32[1.0, 0.60, 0.45, 0.35, 0.28, 0.22]  # thermodynamic decline
+
+    # --- how hard is the task? ------------------------------------------------
+    # The dish is split into `yield_zones` vertical bands, and each band ROTATES
+    # the yield vector, so which channel pays best depends on where you are.
+    # With 1 zone the task is the original one: a single fixed optimum, which a
+    # minimal network can encode. With several zones an organism must sense its
+    # context and respond differently — a conditional map, which is what hidden
+    # units are for.
+    #
+    # This is the untested question. Complexity is known to plateau; Walsh 2026
+    # attributes that to a shrinking solution space and Lynch to population
+    # size, but nobody appears to have asked whether a task that actually
+    # REQUIRES complexity moves the plateau.
+    # NOTE on the first attempt: rotating only the YIELDS does not make the task
+    # harder in the intended way. Channel 1 is the sole channel with external
+    # inflow, so it is far more abundant everywhere; a yield rotation spanning
+    # 1.0 to 0.22 cannot overcome that. Organisms kept eating channel 1 in every
+    # zone and simply paid for it (population 958 -> 505 with no change in
+    # genome size). Rotating the INFLOW channel too is what actually moves the
+    # optimum between zones.
+    #
+    # The two halves of the manipulation are separable so the effect can be
+    # decomposed: `rotate_inflow` moves WHICH CHANNEL IS ABUNDANT between zones,
+    # `rotate_yield` moves WHICH CHANNEL PAYS BEST. Turning either off while
+    # holding `yield_zones` fixed keeps the spatial structure — and therefore
+    # the population size and the standing resource stock — and removes only
+    # one source of context-dependence.
+    yield_zones::Int        = 1
+    rotate_inflow::Bool     = true     # zone r also receives its inflow on the rotated channel
+    rotate_yield::Bool      = true     # zone r also rotates which channel pays best
     diff_rate::Float32   = 0.12f0
     # Per-channel diffusion falloff: channel r diffuses at
     # diff_rate * diff_falloff^(r-1). 1.0 means every channel diffuses alike.

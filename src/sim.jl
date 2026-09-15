@@ -140,6 +140,10 @@ function organism_step!(sim::Sim)
     # hoist every parameter: these are fields of a mutable struct, so the
     # compiler must reload them on each access unless we pull them out first.
     yields        = p.yields
+    nzones        = p.yield_zones
+    # zones for the YIELD rotation specifically; 1 disables it while leaving the
+    # inflow rotation (and hence the spatial structure) untouched
+    yzones        = p.rotate_yield ? nzones : 1
     uptake_rate   = p.uptake_rate
     uptake_exp    = p.uptake_exponent
     maint_base    = p.maint_base
@@ -179,6 +183,7 @@ function organism_step!(sim::Sim)
         # Size scales uptake as well as upkeep. Without a benefit, size has
         # only a cost and evolution trivially drives it to zero; with both it
         # has an interior optimum that shifts as conditions change.
+        zone = zone_of(nzones, xi, G)
         size_gain = 0.5f0 + pop.phen[P_SIZE, i]
         # Rate/yield trade-off: leaking more lets a cell pull resource in faster
         # but extract less from each unit of it.
@@ -198,7 +203,7 @@ function organism_step!(sim::Sim)
             got <= 0.0f0 && continue
             got > avail && (got = avail)
             res[r, xi, yi] = avail - got
-            gained += got * yields[r] * (1.0f0 - leak)
+            gained += got * zone_yield(yields, yzones, zone, r) * (1.0f0 - leak)
 
             # --- the conversion ladder ---------------------------------------
             # Channel r's byproduct is channel r+1, always. A resource is never
