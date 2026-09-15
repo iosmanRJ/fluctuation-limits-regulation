@@ -763,6 +763,20 @@ rather than a split population.
   [Wiley](https://onlinelibrary.wiley.com/doi/full/10.1111/evo.12485)
 - *Stochastic trade-offs and the emergence of diversification in E. coli
   evolution experiments* — [arXiv:2307.11033](https://arxiv.org/abs/2307.11033)
+- Lukeš et al., *How a neutral evolutionary ratchet can build cellular
+  complexity* (Constructive Neutral Evolution) —
+  [IUBMB Life](https://iubmb.onlinelibrary.wiley.com/doi/10.1002/iub.489)
+- *Constructive Neutral Evolution 20 Years Later* —
+  [PMC7982386](https://pmc.ncbi.nlm.nih.gov/articles/PMC7982386/)
+- Lynch, *Drift and genome complexity* (mutational hazard hypothesis) —
+  [PLoS Genetics](https://journals.plos.org/plosgenetics/article?id=10.1371%2Fjournal.pgen.1002092)
+- Lynch, *Non-adaptive origins of interactome complexity* —
+  [Nature](https://www.nature.com/articles/nature09992)
+- *Evolutionary simulations reveal a role for genomic recombination in the
+  evolution of gene regulatory network complexity and robustness* (2026) —
+  [PMC13455014](https://pmc.ncbi.nlm.nih.gov/articles/PMC13455014/)
+- *Open-Ended Evolution* (ALife encyclopedia) —
+  [alife.org](https://alife.org/encyclopedia/introduction/open-ended-evolution/)
 - Geritz et al., *Evolutionarily singular strategies and the adaptive growth and
   branching of the evolutionary tree* —
   [Springer](https://link.springer.com/article/10.1023/A:1006554906681)
@@ -840,6 +854,54 @@ conflated the zero-cost arm (which stops well above the floor) with the
 start-at-the-floor arm (which had a cost). It is recorded here rather than
 quietly deleted because the mistake is instructive — the arms were not a
 factorial design, and the two factors got read off each other.
+
+### What makes complexity accumulate: a 2×2×2 factorial
+
+The absence of growth is not mysterious. Constructive Neutral Evolution names
+four conditions under which complexity fails to accumulate, and this model
+violated two outright: **selection too strong** (populations of 20,000–30,000
+purge neutral additions) and **mutation unbiased** (`p_node_add` equalled
+`p_node_del` exactly, giving no directional ratchet). Lynch's mutational hazard
+hypothesis says the same from the other side — genome expansion needs small
+effective population size so drift can overwhelm purifying selection.
+
+Both are one-parameter changes. Full factorial, 3 seeds per cell, 150k ticks,
+reporting final mean genome size:
+
+| small pop | mutation bias | gene cost | final `ng` |
+|---|---|---|---|
+| — | — | yes | **13.0** |
+| — | ✓ | yes | 13.4 |
+| ✓ | — | yes | 14.8 |
+| ✓ | ✓ | yes | 15.0 |
+| — | — | no | 15.1 |
+| — | ✓ | no | 17.0 |
+| ✓ | — | no | 20.0 |
+| **✓** | **✓** | **no** | **21.5** |
+
+**Complexity is sustained at 21.5 against a baseline of 13.0** — 1.7×, held flat
+across 150k ticks rather than decaying. This is the first configuration in which
+genome size does not collapse.
+
+**The gene cost gates everything.** With a real per-gene cost, selection purges
+additions regardless of anything else: small populations buy **+1.8** and
+mutation bias buys **+0.4**. Remove the cost so additions are neutral and the
+same two factors become potent: small populations buy **+4.9**, bias **+1.9**.
+
+That gating is the whole result, and it is mechanistically obvious in hindsight.
+**Mutational bias changes the supply of additions, not their fate.** If every
+extra gene carries a fitness cost, selection removes them however fast they
+arrive — which is why the CNE condition about insertion bias does nothing here
+until the additions are actually neutral. Drift can only preserve what selection
+is indifferent to.
+
+So the earlier framing — that the environment is too simple to reward complexity
+— was at best half the story. The population was also far too large and every
+gene was taxed. Under **large populations with efficient purifying selection,
+streamlining is the predicted outcome**, and the literature says so explicitly:
+prokaryotic ribosomes are streamlined precisely because prokaryotic populations
+are huge. This model's organisms are prokaryote-like with enormous populations,
+so shedding genome was never a failure — it was the textbook result.
 
 The likeliest explanation for the absence of growth remains that **this
 environment does not demand regulatory complexity**: mapping six inputs to
