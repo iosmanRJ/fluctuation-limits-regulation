@@ -109,6 +109,31 @@ using Test, Random, Statistics
         @test all(total_resource(s0.env, r) >= 0.0 for r in 1:NRES)
     end
 
+    # Saturating uptake: off by default and EXACTLY the old model at 0, so every
+    # earlier result still reproduces. It was added to test whether compressing
+    # the abundance advantage would make conditional specialisation pay; it does
+    # the opposite (see README), but it stays because it is the standard
+    # consumer-resource form and the negative result is worth keeping.
+    @test Params().uptake_half == 0.0f0
+    let a = Sim(Params(seed = 5, grid = 16)),
+        b2 = Sim(Params(seed = 5, grid = 16, uptake_half = 0.0f0))
+        for _ in 1:300; step!(a); step!(b2); end
+        @test a.pop.n == b2.pop.n
+        @test a.pop.phen == b2.pop.phen          # bit-identical, not merely close
+    end
+    # with saturation on, the two forms agree at avail = uptake_half and the
+    # saturating one is strictly lower above it
+    let kh = 2.0f0
+        conc(av) = 2.0f0 * kh * av / (kh + av)
+        @test conc(kh) ≈ kh                      # they cross at the half point
+        @test conc(6.0f0) < 6.0f0                # flattens above
+        @test conc(0.5f0) > 0.5f0                # and is steeper below
+    end
+    let s5 = Sim(Params(seed = 5, grid = 24, uptake_half = 2.0f0))
+        for _ in 1:400; step!(s5); end
+        @test s5.pop.n > 0
+    end
+
     # a full run with the condition on stays alive and reproducible
     s1 = Sim(Params(seed = 3, grid = 24, cond_states = 6, cond_period = 500))
     s2 = Sim(Params(seed = 3, grid = 24, cond_states = 6, cond_period = 500))

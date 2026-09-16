@@ -180,6 +180,23 @@ Base.@kwdef mutable struct Params
     # system is energy-poorer and a backup channel is worth more than
     # committing. Left exposed as a knob, but the hypothesis it was added for
     # is disproved; do not raise it expecting niche partitioning.
+    # --- saturating uptake ----------------------------------------------------
+    # Capture was strictly PROPORTIONAL to local concentration, and that is what
+    # made conditional specialisation unprofitable: concentrating the allocation
+    # budget on the best-paying channel forfeited access to the other five, and
+    # the yield premium (1.0 against a mean of ~0.48) never covered the abundance
+    # lost. Breadth beat rate, so a hand-built conditional genome was eliminated
+    # even with mutation switched off (energy 0.52-0.64 of its neighbours).
+    #
+    # Monod saturation compresses that abundance advantage: capture goes as
+    # avail / (uptake_half + avail), so a channel ten times richer is no longer
+    # worth ten times as much and the yield premium can decide. This is also the
+    # standard consumer-resource form; strict proportionality was the unusual
+    # choice.
+    #
+    # 0 disables it and restores exact proportional capture, so every earlier
+    # result in this README reproduces bit-for-bit.
+    uptake_half::Float32    = 0.0f0
     uptake_exponent::Float32 = 1.0f0
     maint_base::Float32     = 0.0800f0
     maint_size::Float32     = 0.2200f0 # charged on size^2

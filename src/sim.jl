@@ -148,6 +148,7 @@ function organism_step!(sim::Sim)
     cond_states   = p.cond_states
     uptake_rate   = p.uptake_rate
     uptake_exp    = p.uptake_exponent
+    up_half       = p.uptake_half
     maint_base    = p.maint_base
     maint_size    = p.maint_size
     maint_motil   = p.maint_motil
@@ -204,9 +205,16 @@ function organism_step!(sim::Sim)
             # waste channels inhibit growth wherever they accumulate
             r > 1 && (toxic += avail)
             aff <= 0.0f0 && continue
-            # Proportional, not capped: more allocation always captures more,
-            # and co-located organisms compete for shares of the same pool.
-            got = avail * uptake_rate * (aff^uptake_exp) * rate_mult
+            # More allocation always captures more, and co-located organisms
+            # compete for shares of the same pool. With uptake_half > 0 the
+            # concentration term saturates, so being on the richest channel
+            # stops being decisive and yield can matter instead.
+            # Normalised so the two forms AGREE at avail = uptake_half: below it
+            # capture is near-proportional, above it flattens. Without this the
+            # cap sits at uptake_rate and the dish starves (population 434 -> 5).
+            conc = up_half > 0.0f0 ?
+                   2.0f0 * up_half * avail / (up_half + avail) : avail
+            got = conc * uptake_rate * (aff^uptake_exp) * rate_mult
             got <= 0.0f0 && continue
             got > avail && (got = avail)
             res[r, xi, yi] = avail - got
