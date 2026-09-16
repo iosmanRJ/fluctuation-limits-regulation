@@ -1196,10 +1196,54 @@ Caveat: 3/16, 3/16 and 1/16 seeds finished at or above `ng` 31 against a cap of
 32, so the top of the distribution is mildly compressed. That is symmetric
 across arms and does not bias the comparison.
 
-**This is the cleanest negative in the project, because it is the only one whose
-control holds ecology constant.** A task that genuinely requires a conditional
-response does not move the complexity plateau. What moves it is how small and
-how hard-pressed the population is.
+**The control is the only one in this project that holds ecology constant**, and
+on its own terms it is clean: the rise is ecology, not task.
+
+### But the null does not mean what it looks like — checked, and it failed
+
+The conclusion above was written first as "a task that genuinely requires a
+conditional response does not move the plateau." That claim needs organisms in
+the informative arm to have actually *read* the cue. They did not.
+
+Probing each organism with all six cue values, resources held uniform:
+
+| arm | switchers | profile spread | matched | top channel by state |
+|---|---|---|---|---|
+| informative | 0.0 / 0.2 / 0.0 / 0.4 % | 0.157 / 0.047 / 0.019 / 0.003 | 1/6 all seeds | `ch1 ch1 ch1 ch1 ch1 ch1` |
+| scrambled | 6.1 / 0.0 / 0.0 / 8.7 % | 0.018 / 0.000 / 0.037 / 0.099 | 1/6 all seeds | `ch1 ch1 ch1 ch1 ch1 ch1` |
+| flat (no cue at all) | 96.8 / 15.7 / 0.1 / 0.0 % | 0.360 / 0.113 / 0.076 / 0.031 | 1/6 all seeds | mixed |
+
+**Nobody reads the cue.** The informative arm shifts its uptake profile by
+essentially nothing across the full range of the signal, and answers the same
+channel in all six states. It is in fact *less* cue-sensitive than the flat arm,
+whose organisms never experienced a varying cue at all — what little response
+the flat arm shows is an unused node being perturbed, not adaptation.
+
+So the comparison was **an ignored cue against a useless one**, which are the
+same situation. The null is real but uninformative about the hypothesis: it
+shows that an unread signal changes nothing, which was never in doubt.
+
+What the experiment does establish is narrower and still worth recording:
+**conditional response did not evolve at all** — not with a cue that is abiotic,
+undepleteable, and carries 2.585 bits about the rotation, and not when tracking
+it should pay. A rough accounting says the conditional strategy is worth ~38%
+more than the fixed one at `cond_inflow_frac = 0.4` (40% of inflow at yield 1.0,
+against 60% of inflow at a mean yield of ~0.48), so the advantage is there and
+goes untaken.
+
+Two candidate reasons, neither tested. The GRN may have no incremental path to a
+conditional map — partial responsiveness could be worse than none, making it a
+fitness valley rather than a slope. Or the useful fraction of inflow may be
+unreachable: raising `cond_inflow_frac` past 0.4 is what makes the advantage
+decisive, and 0.4 is already near the edge where the dish dies (at 1.0, 48 of 48
+runs went extinct). If that window is genuinely empty, the model cannot pose
+this question at all.
+
+**Status: the hypothesis remains untested.** Twice now — first because the cue
+was illegible, now because it went unread. What is settled is that population
+size and gene cost drive genome size; what is not settled is whether a task that
+organisms actually solve conditionally would add anything, because in this model
+they never solve one.
 
 ## The long run: what actually happens after 120,000 generations
 
@@ -1246,9 +1290,12 @@ Every result in this project resolves to the same two variables:
 | large population + gene cost | floor: `ng` 12, fully connected |
 | small population, no gene cost | plateau ~21 |
 | harsher ecology → smaller population | ~25–26 |
-| task genuinely demanding conditional response | **no additional effect** |
+| task demanding conditional response | **untestable — the response never evolved** |
 
-Genome size is set by population size and by whether genes are taxed. Task
-difficulty does not enter. That is Lynch's mutational hazard hypothesis, and the
-scrambled-cue control is what makes it a measurement here rather than an
-assumption.
+Genome size is set by population size and by whether genes are taxed — that much
+is measured, and Lynch's mutational hazard hypothesis accounts for all of it.
+Whether task difficulty *would* enter is unknown, because no arm of any
+experiment here ever evolved the conditional behaviour that would test it. The
+scrambled-cue control remains the useful piece: holding the world fixed and
+destroying only the information is the right shape for this question, and it is
+what exposed the fact that the cue was being ignored.
