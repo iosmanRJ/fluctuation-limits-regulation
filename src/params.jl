@@ -118,6 +118,29 @@ Base.@kwdef mutable struct Params
     # removed is the information. If genome size rises with an informative cue
     # and not with a useless one, the task is what did it.
     cond_scramble::Bool    = false
+
+    # --- reversible plasticity -----------------------------------------------
+    # Development is cached at birth and never revisited, which makes plasticity
+    # here IRREVERSIBLE. Levins' rule is that irreversible developmental
+    # plasticity needs a COARSE-grained environment while fine-grained ones call
+    # for REVERSIBLE responses instead, and every experiment in this project used
+    # the irreversible form.
+    #
+    # It is also why the regime theory points at is lethal. At 1-4 generations
+    # per environmental state nothing survived (0/6): an organism committed at
+    # birth simply starves when the world switches under it. Re-developing during
+    # life removes exactly that failure, so this is the one change with a
+    # specific prediction behind it rather than a guess.
+    #
+    # 0 keeps the cached-at-birth behaviour and reproduces every earlier result
+    # bit-for-bit. A positive value re-expresses every living organism from its
+    # CURRENT surroundings every that-many ticks. Generation time is ~26 ticks,
+    # so 25 is roughly one re-expression per lifetime and 5 is several.
+    #
+    # Deliberately FREE of any cost. Plasticity is normally costly (DeWitt et
+    # al.), but giving the hypothesis its most favourable case makes a negative
+    # result decisive rather than a matter of how the cost was tuned.
+    redevelop_every::Int   = 0
     diff_rate::Float32   = 0.12f0
     # Per-channel diffusion falloff: channel r diffuses at
     # diff_rate * diff_falloff^(r-1). 1.0 means every channel diffuses alike.

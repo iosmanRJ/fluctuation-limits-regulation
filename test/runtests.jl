@@ -134,6 +134,50 @@ using Test, Random, Statistics
         @test s5.pop.n > 0
     end
 
+    # Reversible plasticity: off by default and bit-identical when off, so every
+    # earlier result reproduces. When on it re-expresses the phenotype from
+    # current surroundings, which is the difference between Levins' irreversible
+    # developmental plasticity and a reversible response.
+    @test Params().redevelop_every == 0
+    let a = Sim(Params(seed = 8, grid = 16)),
+        b3 = Sim(Params(seed = 8, grid = 16, redevelop_every = 0))
+        for _ in 1:250; step!(a); step!(b3); end
+        @test a.pop.n == b3.pop.n
+        @test a.pop.phen == b3.pop.phen        # bit-identical, not merely close
+        @test a.pop.W == b3.pop.W
+    end
+    # with a varying cue, re-expression must actually move the phenotype
+    let on = Sim(Params(seed = 8, grid = 16, redevelop_every = 5,
+                        cond_states = 6, cond_period = 300)),
+        off = Sim(Params(seed = 8, grid = 16, cond_states = 6, cond_period = 300))
+        for _ in 1:250; step!(on); step!(off); end
+        @test on.pop.n > 0
+        @test on.pop.phen != off.pop.phen
+    end
+    # it draws no randomness, so determinism must survive it
+    let r1 = Sim(Params(seed = 4, grid = 16, redevelop_every = 3,
+                        cond_states = 6, cond_period = 300)),
+        r2 = Sim(Params(seed = 4, grid = 16, redevelop_every = 3,
+                        cond_states = 6, cond_period = 300))
+        for _ in 1:300; step!(r1); step!(r2); end
+        @test r1.pop.n == r2.pop.n
+        @test r1.pop.phen == r2.pop.phen
+        @test r1.pop.energy == r2.pop.energy
+    end
+    # chan_cost is derived from the phenotype and must be refreshed with it
+    let s6 = Sim(Params(seed = 8, grid = 16, redevelop_every = 1,
+                        cond_states = 6, cond_period = 300))
+        for _ in 1:120; step!(s6); end
+        ok = true
+        for i in 1:high_water(s6.pop)
+            s6.pop.alive[i] || continue
+            v = channel_cost(Float32[s6.pop.phen[k, i] for k in 1:NPHEN],
+                             s6.p.channel_cost_exp)
+            isapprox(v, s6.pop.chan_cost[i]; atol = 1f-5) || (ok = false)
+        end
+        @test ok
+    end
+
     # a full run with the condition on stays alive and reproducible
     s1 = Sim(Params(seed = 3, grid = 24, cond_states = 6, cond_period = 500))
     s2 = Sim(Params(seed = 3, grid = 24, cond_states = 6, cond_period = 500))

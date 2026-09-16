@@ -121,6 +121,7 @@ function step!(sim::Sim)
 
     replenish!(env, p, sim.gen)
     maybe_shock!(sim)
+    redevelop!(sim)
     organism_step!(sim)
     settle_births!(sim)
     diffuse!(env, p)
@@ -129,6 +130,48 @@ function step!(sim::Sim)
         prune_clades!(sim.clades, pop)
     end
     return sim
+end
+
+"""
+    redevelop!(sim)
+
+Re-express every living organism from its CURRENT surroundings, making plasticity
+reversible instead of fixed at birth.
+
+Development is otherwise run once and cached, so an organism is committed for
+life to the conditions it was born into. That is the irreversible form, and
+Levins' rule is that it suits coarse-grained environments while fine-grained ones
+call for reversible responses. `redevelop_every = 0` keeps the cached behaviour
+and reproduces earlier results exactly.
+
+`develop!` draws no randomness, so this changes no RNG stream and determinism is
+preserved.
+"""
+function redevelop!(sim::Sim)
+    p = sim.p
+    every = p.redevelop_every
+    (every <= 0 || sim.gen % every != 0) && return nothing
+    env, pop = sim.env, sim.pop
+    G = env.G
+    plast = p.plasticity
+    chan_exp = p.channel_cost_exp
+    ph = sim.phen_scratch; e = sim.e_scratch; buf = sim.buf_scratch
+    es = sim.env_scratch
+    @inbounds for i in 1:high_water(pop)
+        pop.alive[i] || continue
+        xi = pop.x[i]; yi = pop.y[i]
+        for r in 1:NRES
+            es[r] = env.res[r, xi, yi]
+        end
+        cue = condition_at(p, xi, G, sim.gen)[1]
+        develop!(ph, e, buf, pop.W, pop.bias, i, es, Int(pop.ng[i]);
+                 plasticity = plast, cond = cue)
+        for k in 1:NPHEN
+            pop.phen[k, i] = ph[k]
+        end
+        pop.chan_cost[i] = channel_cost(ph, chan_exp)
+    end
+    return nothing
 end
 
 function organism_step!(sim::Sim)
