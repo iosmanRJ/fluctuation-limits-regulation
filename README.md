@@ -1369,13 +1369,102 @@ ratios are not. And a 3-seed pilot showed A = 1.0 climbing to 0.688, which did
 not survive 12 seeds — the second time in this work that a small-*n* signal
 evaporated, after a 4-seed invasion result did the same.
 
-**Final status: the hypothesis cannot be tested in this model.** Four attempts —
-illegible cue, unread cue, selected-against behaviour, and now a payoff that
-approaches but never reaches parity in any survivable regime. The blocker is not
-the cue, the genome, or the architecture, all of which were eliminated in turn:
-it is that this consumer-resource structure gives conditional specialisation no
-room to pay. `uptake_half`, `uptake_exponent` and the abiotic cue are all kept
-and tested, so the question can be reopened against a different resource model.
+### The axis that was never varied: environmental grain
+
+All of the above searched the *payoff* axis — uptake trade-offs, yield premiums,
+inflow fractions. A literature check found the binding constraint was somewhere
+else entirely.
+
+Levins' framework turns on the **grain** of environmental variation relative to
+generation time. The [Chlamydomonas selection
+experiments](https://www.nature.com/articles/6883290) state the rule directly:
+*versatile generalists capable of reversible responses evolve when the
+environment is fine-grained, whereas plastic generalists that respond
+irreversibly to the conditions of growth evolve when it is coarse-grained.*
+Development here is cached at birth and never updated — irreversible by
+construction — so it needs a coarse-grained world. Measuring whether it had one:
+
+| quantity | measured |
+|---|---|
+| ticks per environmental state | 333 |
+| median lifespan | 346 ticks |
+| **fraction of life spent in the birth state** | **0.334 mean, 0.250 median** |
+| organisms never leaving their birth state | **6.2%** |
+| organisms spending under half their life in it | **80.8%** |
+| evolved motility / band width | 0.960 / 10.7 cells |
+
+Organisms streamed across bands continuously. [Moran's
+condition](https://pmc.ncbi.nlm.nih.gov/articles/PMC6369965/) says the same in
+other words — plasticity evolves only when the environment of *development*
+predicts the environment of *selection*, and when they decouple *the evolved
+plastic response is shallower than the perfect response*. The tilt sweep found
+exactly that shape: shallow tilts best at ~1.017, steep ones falling to 0.719.
+That was read as noise at the time; it is the signature of an unreliable cue.
+High motility with narrow bands is also textbook [gene flow swamping local
+adaptation](https://onlinelibrary.wiley.com/doi/full/10.1111/mec.13606).
+
+### Both failure modes, bracketed
+
+Removing the spatial gradient and slowing the wave produced a genuinely
+coarse-grained world — **96% of life in the birth state**. The conditional
+genome was still eliminated, 12/12 and 9/9. The reason is the *other* failure
+mode: at ~21 generations per state the environment holds still long enough for
+ordinary genetic adaptation to track it, so plasticity is unnecessary. Kussell
+and colleagues measure this directly — [selection for regulation weakens as
+generations per environment rises](https://www.biorxiv.org/content/10.1101/2025.06.23.661119v2.full).
+
+So plasticity is bracketed: **too fine and the cue cannot predict; too coarse
+and genetics suffices.** Mapping the axis between them, 3 seeds per cell:
+
+| period | viable | grain | generations/state | payoff |
+|---|---|---|---|---|
+| 3000 | 5/6 | 0.960 | 15.1 | 0.954 |
+| 6000 | 4/6 | 0.982 | 13.2 | 0.705 |
+| 12000 | 6/6 | 0.987 | 26.9 | 0.967 |
+| 24000 | 6/6 | 1.000 | 92.7 | 0.845 |
+| 48000 | 6/6 | 1.000 | 47.4 | **0.991** |
+
+No systematic dependence on grain — the payoff hovers just under parity
+throughout, and the fast cells start dying.
+
+### The strongest result available, stated at its true strength
+
+The best cell (period 48000) re-run at 12 seeds per arm against the scrambled
+control:
+
+| | informative | scrambled |
+|---|---|---|
+| energy ratio | **1.103** (SE 0.064, n = 7) | 0.429 (n = 3) |
+| **carriers retained past first sample** | **9/12** | **3/12** |
+
+- Against parity: t = +1.61 — **indistinguishable from 1.0**, not above it.
+- Informative vs scrambled energy: **+0.674, permutation p = 0.0084**.
+- Carrier retention: **Fisher exact p = 0.0391**.
+
+Retention is the cleaner statistic, since the energy figure excludes runs whose
+carriers died early and 9 scrambled runs dropped out against 3 informative ones
+— a bias that flatters the scrambled arm.
+
+So: **an informative cue measurably helps a conditional genome persist, and that
+survives a matched-ecology control. It still does not make it invade.** The
+conditional genome reaches parity and stops there.
+
+**Final status.** The hypothesis is still not demonstrated, but the reason is now
+specific rather than mysterious: conditional response in this model is
+*approximately neutral at best*, and neutrality does not build complexity — which
+is the same conclusion the rest of this README reaches from population size and
+gene cost. Recent GRN simulation work lands in the same place, finding that
+[regulatory complexity may reflect sampling from networks satisfying expression
+constraints, with minimal direct selection on complexity
+itself](https://academic.oup.com/gbe/article/18/8/evag196/8753180).
+
+What is *not* closed, and would be the honest next step: every result here tests
+irreversible development. Theory says a fine-grained world of this kind calls for
+**reversible** plasticity — re-development during life — which this architecture
+cannot express, and which the 2025 *Evolution Letters*
+[treatment](https://academic.oup.com/evlett/article/9/4/491/8193125) explicitly
+flags as unaddressed for within-lifetime change. That is a change to the
+development model, not a parameter sweep.
 
 ## The long run: what actually happens after 120,000 generations
 
