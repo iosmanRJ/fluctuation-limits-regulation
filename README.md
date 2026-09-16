@@ -1703,6 +1703,26 @@ heterogeneity manipulation the H sweep above reproduces.
 **So "fluctuation raises complexity" is not a finding of this work.** It is a
 reproduction, in a different model, of an established result.
 
+### The control has a name, and a known critique
+
+The scrambled-cue design is a **[yoked
+control](https://en.wikipedia.org/wiki/Yoked_control_design)** — matched
+stimuli, different contingency — standard in operant conditioning since the
+1950s. It is not a new design, only a new application of an old one.
+
+It carries **Church's 1964 critique**: in the classic form the yoked subject
+receives a *copy* of its partner's stimulus schedule, so the two are not
+statistically independent, and that correlated-error structure can produce
+apparent group differences from nothing but between-subject noise.
+
+**That critique does not apply to the design used here**, and the reason should
+be stated up front rather than left for a reviewer to raise. The scrambled arm
+does not replay a paired informative run: its cue is generated independently
+(7 temporal turns against 5 spatial, chosen to drive mutual information to
+0.0000 bits), every run is an independent replicate, and arms are compared
+between independent samples rather than as matched pairs. There is no
+master–yoke coupling to induce correlated errors.
+
 ### What does appear to be new
 
 None of those studies **separates the variation from its information content**.
@@ -1736,6 +1756,41 @@ is no detectable fitness advantage to information here.
 So the defensible statement is narrower: an informative cue reliably changes
 **behaviour** (switchers, p < 10⁻⁵ in three independent regimes) and changes
 neither genome size nor survival.
+
+### A population-size result this may conflict with
+
+[LaBar & Adami 2016, *PLOS Computational
+Biology*](https://journals.plos.org/ploscompbiol/article?id=10.1371%2Fjournal.pcbi.1005066)
+report a **U-shape**: both small *and* large populations evolve larger genomes,
+by different routes — small populations fix slightly deleterious insertions
+(drift), large populations fix rare beneficial ones — concluding that *purifying
+selection is not powerful enough to prevent the evolution of complexity in large
+populations*.
+
+The data here are **monotonic, not U-shaped**: the largest world tested sits at
+the floor (`ng` = 12.0, grid 128, populations 6,800–34,400, flat for 285,000
+generations) and raising grid 64 → 192 *reduced* `ng` from 27.8 to 23.1. That is
+the opposite of their large-population arm.
+
+This is recorded as an open discrepancy rather than resolved. Their populations,
+genome architecture and mutational regime all differ substantially, and nothing
+here tests their mechanism directly. But it is the one place where this work
+appears to disagree with a published result, and it should not be glossed.
+
+### The empirical literature agrees with the effect too
+
+Beyond simulation: terrestrial environments show two to three orders of magnitude
+greater variation than marine ones, and terrestrial cyanobacteria carry genomes
+at the larger end (6.0–8.0 Mb) *enriched in regulatory, transport and motility
+genes*. Across bacteria generally, [regulatory genes are disproportionately
+enriched in larger
+genomes](https://www.pnas.org/doi/10.1073/pnas.0308653100), and [genome size
+tracks ecosystem type and trophic
+strategy](https://www.frontiersin.org/journals/microbiology/articles/10.3389/fmicb.2021.761869/full),
+with streamlining in nutrient-limited settings.
+
+So the fluctuation effect holds in real organisms as well as in models — which
+strengthens the reproduction and further weakens any novelty claim attached to it.
 
 ### Also already established, and not claimed here
 
