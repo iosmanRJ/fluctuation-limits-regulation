@@ -1295,13 +1295,87 @@ in every arm. A genome marker fixed it. **Every one of these was caught by a
 control that had a known correct answer** — which is the argument for always
 including one.
 
-**Status: the hypothesis cannot be tested in this model, and now we know why.**
-Not because the cue was illegible (attempt one) or unread (attempt two), but
-because the behaviour the cue would enable is selected against. A task demanding
-conditional response cannot raise complexity here, since the conditional
-response itself never pays. Testing the idea properly needs a model where
-specialisation is not dominated by breadth — a saturating or interference-based
-uptake function rather than proportional capture.
+### Rebuilding uptake, and the trade-off that closes the question
+
+The obvious fix was to stop specialisation being dominated by breadth.
+`uptake_half` adds Monod saturation — off by default, bit-identical to
+proportional capture at 0, with a test pinning that.
+
+**It is the wrong lever, in an instructive direction.** Saturation compresses
+channel values *toward each other*: a channel ten times richer stops being worth
+ten times more, so spreading across many thin channels gains relative value. It
+rewards generalism. The seeded conditional genome did *worse* with saturation on
+than off — energy ratio 0.388 against 0.833 — and measured specialisation moved
+the same way (top-share 0.76 → 0.70).
+
+What decides this is the shape of the **allocation trade-off**, not the shape of
+the concentration response. Levins: a convex trade-off selects specialists, a
+concave one generalists. `aff^uptake_exponent` with the exponent above 1 makes
+concentrating the budget pay superlinearly, and that knob already existed.
+At 1.5 it produces genuinely specialist populations (top-share 0.955) that still
+survive the travelling wave.
+
+**And in that regime, information finally has a measurable fitness effect.**
+Carrier energy against non-carriers, averaged over ticks 250–2000, 12 seeds:
+
+| cue | energy ratio |
+|---|---|
+| informative (2.585 bits) | **0.896** |
+| scrambled (0.000 bits) | **0.492** |
+
+**+0.404, t = 3.88, permutation p = 0.0006**, ecology matched. Reading the cue
+nearly doubles a carrier's energy. (The scrambled *n* is 9 rather than 12 because
+three seeds lost their carriers before the first sample, which biases the
+scrambled mean *upward* — so the true gap is wider.)
+
+It is still below 1.0, so the carrier remains net deleterious and is eliminated.
+
+### The window is empty
+
+Mapping payoff against viability across 18 cells — `uptake_exponent` ×
+`cond_inflow_frac` × grid, 2 seeds each:
+
+| `uptake_exponent` | burn-in survival | mean energy ratio |
+|---|---|---|
+| 1.0 (original) | 12/12 | 0.707 |
+| 1.5 (convex) | 12/12 | 0.929 |
+| 1.7 | **7/12** | 0.898 |
+
+Best single cell 0.976. **Not one of the eighteen reaches parity.** The payoff
+climbs steeply with convexity and then viability collapses before it can cross:
+`exp` 1.9 survives 0/8 burn-ins. The conditions that make specialisation pay and
+the conditions that impose a moving target do not overlap — the more
+specialisation pays, the more lethal a moving target becomes.
+
+A tilt-strength sweep under the convex trade-off says the same, 12 seeds,
+carriers seeded at 0.5, frequency after 12,000 ticks:
+
+| tilt `A` | final frequency | vs no-op |
+|---|---|---|
+| 0.0 (verified no-op) | 0.286 | — |
+| 0.5 | 0.446 | +0.160, p = 0.27 |
+| 1.0 | 0.460 | +0.173, p = 0.26 |
+| 1.5 | 0.225 | −0.061, p = 0.57 |
+
+Nothing reaches significance, and the effect is non-monotonic — 1.5 goes the
+other way. Drift dominates: most seeds fix or lose outright, so detecting a
+difference this size would need on the order of 60 seeds per arm.
+
+Two caveats recorded against these numbers. The no-op control reads an energy
+ratio of **1.070** rather than 1.000, because carriers are seeded by slot index
+and slot order correlates with age and lineage — a non-random sample. The
+comparison is still fair (every arm carries the same bias) but the absolute
+ratios are not. And a 3-seed pilot showed A = 1.0 climbing to 0.688, which did
+not survive 12 seeds — the second time in this work that a small-*n* signal
+evaporated, after a 4-seed invasion result did the same.
+
+**Final status: the hypothesis cannot be tested in this model.** Four attempts —
+illegible cue, unread cue, selected-against behaviour, and now a payoff that
+approaches but never reaches parity in any survivable regime. The blocker is not
+the cue, the genome, or the architecture, all of which were eliminated in turn:
+it is that this consumer-resource structure gives conditional specialisation no
+room to pay. `uptake_half`, `uptake_exponent` and the abiotic cue are all kept
+and tested, so the question can be reopened against a different resource model.
 
 ## The long run: what actually happens after 120,000 generations
 
@@ -1348,7 +1422,7 @@ Every result in this project resolves to the same two variables:
 | large population + gene cost | floor: `ng` 12, fully connected |
 | small population, no gene cost | plateau ~21 |
 | harsher ecology → smaller population | ~25–26 |
-| task demanding conditional response | **untestable — the response never evolved** |
+| task demanding conditional response | **untestable — it never pays in any survivable regime** |
 
 Genome size is set by population size and by whether genes are taxed — that much
 is measured, and Lynch's mutational hazard hypothesis accounts for all of it.
