@@ -1575,6 +1575,81 @@ another. It took the larger sample to resolve.
 size and gene cost do, which is where every independent line of evidence in this
 README arrives.
 
+## What the literature already says, and where that leaves this
+
+A late literature check — run *after* the result was written up, which was the
+wrong order — found that most of this ground is taken.
+
+### Prior art that this collides with
+
+**The central question has been asked with evolvable network size, and answered
+the other way.** [*Adaptive Dynamics of Regulatory Networks: Size
+Matters*](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3171436/) ran both fixed
+and evolvable network sizes and reports that *"optimal network size increased
+with environmental heterogeneity"*, larger networks winning over longer
+timescales. That is this hypothesis, with size free to evolve, reported
+positive. So the work here is not filling a gap — it contradicts a published
+result.
+
+**The architecture is not new either.** [Sakamoto & Innan
+2024](https://academic.oup.com/g3journal/article/14/9/jkae144/7710408) evolve
+discrete plasticity through a dedicated sensor gene feeding a regulatory
+network — the same design as `P_SENSE` — though with gene number fixed and no
+randomized-cue control. [Jorritsma & van den Berg,
+*Evolution* 2026](https://academic.oup.com/evolut/article-abstract/80/1/230/8297131)
+work in the same parameter space, finding plasticity evolves under fast erratic
+change with reliable cues, and evolvability under intermediate variability with
+unreliable ones.
+
+**"Rewiring rather than adding" is established empirical biology**, not an
+observation this model contributes: [rewired bacterial
+networks](https://www.nature.com/articles/nature06847) where >95% of promoter
+swaps are tolerated, [Ndt80 regulon
+rewiring](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5391208/), [echinoid
+GRNs](https://www.pnas.org/doi/10.1073/pnas.1509845112).
+
+**Even the "complexity is not directly selected" conclusion is published.** Van
+Nimwegen's [quadratic scaling of transcription factors with genome
+size](https://academic.oup.com/nar/article/45/13/7615/3865434) is explained by
+per-category addition/deletion rates rather than environmental demand, and [GBE
+2026](https://academic.oup.com/gbe/article/18/8/evag196/8753180) concludes
+regulatory complexity may reflect sampling from viable networks with minimal
+direct selection on complexity.
+
+The one element with no precedent found is the **matched-ecology zero-information
+control** — holding the world fixed and destroying only the cue's information,
+verified at 2.585 vs 0.0000 bits.
+
+### And the check found something in this data that had been missed
+
+[Individual-based fluctuating-selection
+work](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2916849/) reports that complex
+GRNs are promoted under *unpredictably* fluctuating conditions. The three arms
+here map directly onto that axis, and testing it changes the picture:
+
+| condition | `ng` | n |
+|---|---|---|
+| no fluctuation (`cond_states` = 1) | **23.43** | 12 |
+| fluctuating, **unpredictable** (scrambled, 0 bits) | **30.55** | 83 |
+| fluctuating, **predictable** (informative, 2.585 bits) | **30.81** | 88 |
+
+**Fluctuation raises complexity by ~7 nodes (30%), p = 0.008 and 0.002. Whether
+it is predictable makes no difference (p = 0.84).**
+
+The informative-vs-scrambled comparison reported above as a null was measuring
+the wrong contrast: *both* arms sit 7 nodes above a non-fluctuating world. The
+environment does drive complexity here — through fluctuation itself, not through
+the conditional task. That reproduces the published claim and sharpens it: the
+information content of the fluctuation is irrelevant.
+
+**This is not yet established**, because the no-fluctuation arm uses
+`cond_states = 1`, which also changes the inflow routing — the same
+manipulation-moves-two-things confound that spoiled the zoned task, the abiotic
+cue, and the grain experiments. A frozen control (rotation machinery on,
+`cond_period` = 10⁹ so the state never changes within a run — verified: one state
+visited, cue constant at −1.0) is what decides it. If frozen sits near 23,
+fluctuation is real; if near 30, the effect was ecology all along.
+
 ## Predictions, recorded before the runs that tested them
 
 Every substantive prediction in this work was written into the repository
