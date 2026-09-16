@@ -1239,11 +1239,69 @@ decisive, and 0.4 is already near the edge where the dish dies (at 1.0, 48 of 48
 runs went extinct). If that window is genuinely empty, the model cannot pose
 this question at all.
 
-**Status: the hypothesis remains untested.** Twice now — first because the cue
-was illegible, now because it went unread. What is settled is that population
-size and gene cost drive genome size; what is not settled is whether a task that
-organisms actually solve conditionally would add anything, because in this model
-they never solve one.
+### Why it goes unread: conditional specialisation is deleterious
+
+Rather than guess, the conditional genome was **built by hand and competed**.
+
+**The architecture can represent it perfectly.** Five hidden units on top of the
+sensor — threshold units at the band boundaries, each uptake channel driven by
+the difference of two adjacent steps — give a **6/6 match**, with the allocation
+essentially one-hot on the correct channel at every cue value. Representability
+is not the obstacle.
+
+**But it loses, and not because mutation erodes it.** Seeded at 20% into an
+established population, the conditional type is gone within ~500 ticks. With
+**mutation switched off entirely** it still disappears, and its energy runs at
+**0.52–0.64 of its neighbours'**. That rules out mutational erosion and
+unreachability alike: the behaviour is simply worse.
+
+A tilt sweep says the same thing monotonically — 50/50 competition, mutation off,
+three seeds, final carrier frequency per seed:
+
+| tilt `A` | per-seed outcome | reading |
+|---|---|---|
+| 0.0 (no-op control) | 1.0 / 0.0 / 0.0 | drifts to fixation or loss — neutral |
+| 0.5 | 0.0 / 1.0 / 0.0 | drifts — no detectable benefit |
+| 1.5 | 0.0 / 0.0 / 0.07 | losing |
+| 4.0 | 0.0 / 0.0 / 0.0 | eliminated |
+
+The stronger the conditional response, the worse it does. No tilt is beneficial.
+
+**The mechanism.** Uptake is an *allocation* across channels and capture is
+proportional to local availability: `got = avail × uptake_rate × aff^exp`.
+Concentrating the budget on the best-paying channel forfeits access to the other
+five — including the waste channels the ladder keeps stocked — and the yield
+premium (1.0 against a mean of ~0.48) does not cover the abundance lost. Breadth
+beats rate. The earlier "conditional is worth ~38% more" estimate counted the
+yield gain and ignored the opportunity cost, and was simply wrong.
+
+#### Three grafts failed their own control before one passed
+
+Worth recording, because each failure was invisible until the control was
+checked. The first graft zeroed the uptake nodes' incoming weights — which also
+changed what those nodes *output* to nodes 7:12, wrecking every other trait
+(`repair` 0.995 → 0.127, `leak` 0.002 → 0.723, `divide` 0.002 → 0.695). It was
+measuring a broken organism. The second cut that coupling and re-tuned the
+downstream biases, preserving all other traits to within 0.001 — that one is
+sound, and it is the basis of the 0.52–0.64 result. The third, for the tilt
+sweep, cannibalised five evolved hidden nodes, and its A = 0 control went to
+**zero** when a no-op must hold at 0.5. Only a graft that *extends* the genome
+with five fresh nodes is bit-identical at A = 0 (max phenotype change
+0.000000), and only then is the sweep interpretable.
+
+An index-based lineage tag also had to be thrown away: dead slots are recycled,
+so the tag leaked to unrelated organisms and the A = 0 control reached fixation
+in every arm. A genome marker fixed it. **Every one of these was caught by a
+control that had a known correct answer** — which is the argument for always
+including one.
+
+**Status: the hypothesis cannot be tested in this model, and now we know why.**
+Not because the cue was illegible (attempt one) or unread (attempt two), but
+because the behaviour the cue would enable is selected against. A task demanding
+conditional response cannot raise complexity here, since the conditional
+response itself never pays. Testing the idea properly needs a model where
+specialisation is not dominated by breadth — a saturating or interference-based
+uptake function rather than proportional capture.
 
 ## The long run: what actually happens after 120,000 generations
 
