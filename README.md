@@ -1678,6 +1678,66 @@ marginally. And `ng` *falls* at grid 192 (27.8 → 23.1), which is the Lynch eff
 reasserting itself — larger populations, more efficient selection, smaller
 genomes.
 
+## Did the states have to share structure? No.
+
+The most plausible explanation for the task null was that the six environmental
+states were **cyclic rotations of one yield vector** — six views of a single
+mapping. Knowing one gives you all six, and "find the abundant channel and eat
+it" covers every case, so no extra genome would be needed however many states
+there are. Kashtan & Alon and the continual-learning literature both point at
+shared structure as the relevant variable.
+
+`independent_states` removes the sharing: each state gets its own random
+permutation, preserving the yield set (and therefore the energy on offer)
+exactly. Under rotation state 2 is state 1 shifted; under independent
+permutations they are unrelated.
+
+**2×2, structure × information, 30 seeds per cell:**
+
+| cell | n | extinct | `ng` | switchers | distinct optima |
+|---|---|---|---|---|---|
+| rotation / informative | 28 | 2 | 31.12 | 0.642 | 6.0 |
+| rotation / scrambled | 24 | 6 | 29.73 | 0.313 | 6.0 |
+| independent / informative | 18 | **12** | 32.59 | 0.275 | 4.0 |
+| independent / scrambled | 19 | **11** | 34.00 | 0.246 | 3.9 |
+
+Structure: **+1.47 (p = 0.52)** informative, **+4.27 (p = 0.10)** scrambled.
+Information: null under both structures (p = 0.45, 0.66).
+
+**The hypothesis was wrong.** Making the states genuinely independent does not
+raise complexity.
+
+### Three caveats, and why the null survives them
+
+**Extinction is heavy in the independent arms** — 12/30 and 11/30 against 2/30
+and 6/30 — so those cells are a selected subset and the +4.27 in particular
+should not be leaned on.
+
+**The manipulation was diluted.** Random permutations collide, so the
+independent arms presented **4.0 distinct optima on average, not 6**, ranging as
+low as 2.
+
+**But dilution does not explain the null.** Within the independent arms,
+`corr(distinct optima, ng) = −0.059` across 37 runs. Runs that genuinely
+presented six distinct tasks show no complexity gain either, which rules out
+"the manipulation was too weak."
+
+### What the organisms did instead
+
+Switchers **fell** in the independent arms, 0.642 → 0.275. When states stopped
+sharing structure, organisms tracked the cue *less*, not more, while extinction
+roughly doubled. They did not learn six mappings; they stopped trying and paid
+the cost.
+
+### Standing of the task null
+
+It now survives rotation vs independent structure, informative vs scrambled
+information, three parameter regimes, a five-point heterogeneity gradient, up to
+100 seeds per arm, and detection floors of 2–4 nodes. **Genome size here responds
+to how much the environment changes, and to population size and gene cost — and
+to nothing about the task.** Four distinct task manipulations have now failed,
+the last two with adequate power.
+
 ## Novelty audit: what is actually new here
 
 Run *after* writing the result up, which was the wrong order and is the fourth
