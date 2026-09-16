@@ -1575,11 +1575,15 @@ another. It took the larger sample to resolve.
 size and gene cost do, which is where every independent line of evidence in this
 README arrives.
 
-## The actual finding: fluctuation raises complexity, information does not
+## Fluctuation raises complexity — a reproduction, plus one new control
 
 After five failed attempts to show that a *task* demanding conditional response
 raises genome complexity, the controls that were built to test that hypothesis
 answered a different question, and answered it cleanly.
+
+**Read the novelty audit below before quoting any of this as new.** The main
+effect here is published — three times over — and what this work adds is one
+control the prior studies did not run.
 
 ### The result
 
@@ -1674,47 +1678,88 @@ marginally. And `ng` *falls* at grid 192 (27.8 → 23.1), which is the Lynch eff
 reasserting itself — larger populations, more efficient selection, smaller
 genomes.
 
-## What the literature already says, and where that leaves this
+## Novelty audit: what is actually new here
 
-A literature check — run *after* the result was written up, which was the wrong
-order — found most of this ground is taken.
+Run *after* writing the result up, which was the wrong order and is the fourth
+time in this project a novelty claim has had to be cut back.
 
-**The heterogeneity result has precedent.** [*Size
-Matters*](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3171436/) ran fixed and
-evolvable network sizes and reports optimal size increasing with environmental
-heterogeneity. The H sweep above reproduces it. What is added here is the
-zero-information control showing the rise does not require the variation to be
-predictable.
+### The main effect is published, three times over
 
-**The architecture is not new.** [Sakamoto & Innan
-2024](https://academic.oup.com/g3journal/article/14/9/jkae144/7710408) evolve
-discrete plasticity through a dedicated sensor gene feeding a regulatory
-network — the `P_SENSE` design — with gene number fixed and no randomized-cue
-control. [Jorritsma & van den Berg, *Evolution*
-2026](https://academic.oup.com/evolut/article-abstract/80/1/230/8297131) occupy
-the same parameter space.
+[Bentkowski, van Oosterhout & Mock 2015,
+*GBE*](https://pmc.ncbi.nlm.nih.gov/articles/PMC4558865/) is essentially this
+result: greater environmental variability produces larger genomes, expanding from
+2 genes in a constant environment to 15–16 under turbulence, with both
+transcription-factor count and metabolic-network size rising. Their proposed
+mechanism is **relaxed selection on metabolic efficiency** rather than selection
+for plasticity — which is what the data here show too, since the scrambled arm
+rises just as much as the informative one.
 
-**"Rewiring rather than adding" is established empirical biology**: [rewired
-bacterial networks](https://www.nature.com/articles/nature06847), [Ndt80 regulon
-rewiring](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5391208/), [echinoid
-GRNs](https://www.pnas.org/doi/10.1073/pnas.1509845112).
+[Fluctuating selection and intrinsic constraints
+(2010)](https://journals.plos.org/ploscompbiol/article?id=10.1371%2Fjournal.pcbi.1000873)
+reports the same direction, as does [*Size
+Matters* (2011)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3171436/), whose
+heterogeneity manipulation the H sweep above reproduces.
 
-**"Complexity is not directly selected" is published too.** Van Nimwegen's
-[quadratic scaling of transcription factors with genome
-size](https://academic.oup.com/nar/article/45/13/7615/3865434) is explained by
-addition/deletion rates rather than environmental demand, and [GBE
-2026](https://academic.oup.com/gbe/article/18/8/evag196/8753180) concludes
-regulatory complexity may reflect sampling from viable networks.
+**So "fluctuation raises complexity" is not a finding of this work.** It is a
+reproduction, in a different model, of an established result.
 
-**[Fluctuating-selection GRN
-work](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2916849/)** reports complex
-networks promoted under *unpredictably* fluctuating conditions — which is the
-claim that prompted the test above, and which the predictable arm now shows is
-not specifically about unpredictability.
+### What does appear to be new
 
-The element with no precedent found is the **matched-ecology zero-information
-control**, and the frozen control that separates fluctuation from the ecology
-carrying it.
+None of those studies **separates the variation from its information content**.
+Bentkowski et al. drive the environment with a bounded random walk and never
+manipulate predictability; the others likewise have no zero-information control.
+
+Two controls here do separate them, and both are what any claim rests on:
+
+- the **scrambled cue** — identical world, identical rotation, identical
+  ecology, mutual information with the environmental state driven from 2.585
+  bits to 0.0000;
+- the **frozen arm** — `cond_period` = 10⁹, so the rotation machinery still
+  routes inflow exactly as in the fluctuating arms while the state never changes.
+
+Together they show the complexity rise **does not require the fluctuation to
+carry usable information**. That is a refinement of a published effect, not a
+discovery.
+
+### A dissociation that does NOT hold, and was nearly claimed
+
+[Kussell & Leibler 2005](https://www.science.org/doi/10.1126/science.1114383)
+established that information about a fluctuating environment has quantifiable
+fitness value — the KL divergence is the penalty paid for poor information. That
+made an attractive story available: information buys fitness and behaviour but
+not genome complexity.
+
+Testing it on this data kills it. Across **640 runs**, extinction was **6.9% with
+an informative cue and 8.8% with a scrambled one — Fisher exact p = 0.46**. There
+is no detectable fitness advantage to information here.
+
+So the defensible statement is narrower: an informative cue reliably changes
+**behaviour** (switchers, p < 10⁻⁵ in three independent regimes) and changes
+neither genome size nor survival.
+
+### Also already established, and not claimed here
+
+- **The architecture.** [Sakamoto & Innan
+  2024](https://academic.oup.com/g3journal/article/14/9/jkae144/7710408) evolve
+  discrete plasticity via a dedicated sensor gene feeding a GRN — the `P_SENSE`
+  design — with gene number fixed. [Jorritsma & van den Berg, *Evolution*
+  2026](https://academic.oup.com/evolut/article-abstract/80/1/230/8297131)
+  occupy the same parameter space.
+- **"Rewiring rather than adding"**: [rewired bacterial
+  networks](https://www.nature.com/articles/nature06847), [Ndt80
+  regulon](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5391208/), [echinoid
+  GRNs](https://www.pnas.org/doi/10.1073/pnas.1509845112).
+- **"Complexity is not directly selected"**: van Nimwegen's [quadratic TF
+  scaling](https://academic.oup.com/nar/article/45/13/7615/3865434), explained by
+  addition/deletion rates rather than environmental demand; [GBE
+  2026](https://academic.oup.com/gbe/article/18/8/evag196/8753180).
+
+### Standing
+
+A published effect reproduced, with one new control showing it does not depend on
+the information content of the variation, and a fitness dissociation explicitly
+checked and rejected. That is a short note refining Bentkowski et al., not a
+headline result.
 
 ## Predictions, recorded before the runs that tested them
 
