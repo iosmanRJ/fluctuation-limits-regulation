@@ -55,6 +55,17 @@ function Sim(p::Params = Params())
     env = Environment(p)
     pop = Population(p)
     nt = Threads.nthreads()
+    # Independent per-state yield permutations, drawn from a stream of their own
+    # so they do not perturb the main RNG and a run stays reproducible.
+    if p.independent_states && size(p.yield_perm, 2) != max(1, p.cond_states)
+        prng = Xoshiro(p.seed ⊻ 0x5EEDBEEF)
+        ns = max(1, p.cond_states)
+        perm = zeros(Int32, NRES, ns)
+        for s_ in 1:ns
+            perm[:, s_] = Int32.(randperm(prng, NRES))
+        end
+        p.yield_perm = perm
+    end
     sim = Sim(p, env, pop, CladeTable(), rng, 0,
               Int32[], zeros(Float32, NG_MAX), zeros(Float32, NG_MAX),
               zeros(Float32, NPHEN), zeros(Float32, NRES),
@@ -188,6 +199,8 @@ function organism_step!(sim::Sim)
     # zones for the YIELD rotation specifically; 1 disables it while leaving the
     # inflow rotation (and hence the spatial structure) untouched
     yzones        = p.rotate_yield ? nzones : 1
+    indep         = p.independent_states && !isempty(p.yield_perm)
+    yperm         = p.yield_perm
     cond_states   = p.cond_states
     uptake_rate   = p.uptake_rate
     uptake_exp    = p.uptake_exponent
@@ -261,7 +274,11 @@ function organism_step!(sim::Sim)
             got <= 0.0f0 && continue
             got > avail && (got = avail)
             res[r, xi, yi] = avail - got
-            gained += got * rot_yield(yields, yoff, r) * (1.0f0 - leak)
+            # Rotations share structure across states; independent permutations
+            # do not, so each state must be handled on its own terms.
+            yv = indep ? @inbounds(yields[yperm[r, cstate]]) :
+                         rot_yield(yields, yoff, r)
+            gained += got * yv * (1.0f0 - leak)
 
             # --- the conversion ladder ---------------------------------------
             # Channel r's byproduct is channel r+1, always. A resource is never

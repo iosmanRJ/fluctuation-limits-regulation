@@ -178,6 +178,49 @@ using Test, Random, Statistics
         @test ok
     end
 
+    # Independent per-state yield permutations: off by default, bit-identical when
+    # off, and each state a genuine permutation so the SET of yields -- and hence
+    # the total energy on offer -- is unchanged.
+    @test Params().independent_states == false
+    @test isempty(Params().yield_perm)
+    let a = Sim(Params(seed = 6, grid = 16)),
+        b4 = Sim(Params(seed = 6, grid = 16, independent_states = false))
+        for _ in 1:200; step!(a); step!(b4); end
+        @test a.pop.n == b4.pop.n
+        @test a.pop.phen == b4.pop.phen
+        @test a.pop.W == b4.pop.W
+    end
+    let pi2 = Params(seed = 6, grid = 16, cond_states = 6, cond_period = 300,
+                     independent_states = true)
+        Sim(pi2)
+        @test size(pi2.yield_perm) == (NRES, 6)
+        allperm = true; allset = true
+        for c in 1:6
+            sort(pi2.yield_perm[:, c]) == Int32.(1:NRES) || (allperm = false)
+            sort([pi2.yield_perm[r, c] for r in 1:NRES]) == Int32.(1:NRES) || (allset = false)
+        end
+        @test allperm                      # every column is a permutation
+        @test allset                       # so every state offers the same yields
+        # and it is reproducible from the seed
+        pi3 = Params(seed = 6, grid = 16, cond_states = 6, cond_period = 300,
+                     independent_states = true)
+        Sim(pi3)
+        @test pi3.yield_perm == pi2.yield_perm
+    end
+    # inflow must follow the permutation, or the task is unsolvable rather than
+    # merely harder: the fed channel must be the one the permutation pays best
+    let pf2 = Params(seed = 6, grid = 32, cond_states = 6, cond_period = 300,
+                     cond_inflow_frac = 0.3f0, independent_states = true)
+        Sim(pf2)
+        ok = true
+        for st in 1:6
+            bestch = argmax([pf2.yields[pf2.yield_perm[r, st]] for r in 1:NRES])
+            fed = findfirst(r -> pf2.yield_perm[r, st] == Int32(1), 1:NRES)
+            bestch == fed || (ok = false)
+        end
+        @test ok
+    end
+
     # a full run with the condition on stays alive and reproducible
     s1 = Sim(Params(seed = 3, grid = 24, cond_states = 6, cond_period = 500))
     s2 = Sim(Params(seed = 3, grid = 24, cond_states = 6, cond_period = 500))

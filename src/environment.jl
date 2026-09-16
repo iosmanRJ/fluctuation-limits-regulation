@@ -31,6 +31,7 @@ function replenish!(env::Environment, p::Params, gen::Int)
     # uniform in space, so it shifts the whole dish at once.
     cfrac = (p.cond_states > 1) ? clamp(p.cond_inflow_frac, 0.0f0, 1.0f0) : 0.0f0
     coff  = cfrac > 0.0f0 ? condition_at(p, Int32(1), G, gen)[2] - 1 : 0
+    indep = p.independent_states && !isempty(p.yield_perm)
     infl = p.inflow * season(p, gen)
     if env.famine > 0
         infl *= p.famine_factor
@@ -56,7 +57,18 @@ function replenish!(env::Environment, p::Params, gen::Int)
             zoff = (nz > 1 && p.rotate_inflow) ? zone_of(nz, Int32(i), G) - 1 : 0
             base = 1 + mod(-zoff, NRES)
             if cfrac > 0.0f0
-                cue_src = 1 + mod(-(zoff + coff), NRES)
+                # Which channel pays best in the current state. Under rotation
+                # that is the inverse shift; under independent permutations it is
+                # whichever channel the permutation maps to yields[1].
+                cue_src = if indep
+                    best = 1
+                    @inbounds for r in 1:NRES
+                        p.yield_perm[r, coff + 1] == Int32(1) && (best = r; break)
+                    end
+                    best
+                else
+                    1 + mod(-(zoff + coff), NRES)
+                end
                 v = res[base, i, j] + infl * (1.0f0 - cfrac)
                 res[base, i, j] = v > p.res_cap ? p.res_cap : v
                 v = res[cue_src, i, j] + infl * cfrac

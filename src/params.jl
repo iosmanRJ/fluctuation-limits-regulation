@@ -141,6 +141,29 @@ Base.@kwdef mutable struct Params
     # al.), but giving the hypothesis its most favourable case makes a negative
     # result decisive rather than a matter of how the cost was tuned.
     redevelop_every::Int   = 0
+
+    # --- do the environmental states SHARE STRUCTURE? -------------------------
+    # The states have so far been cyclic ROTATIONS of one yield vector, which
+    # means they share everything: knowing one state's mapping gives you all the
+    # others, and a single mechanism -- "find the abundant channel and eat it" --
+    # serves all six. That is almost certainly why no extra genome was ever
+    # needed. The task has six variants that collapse to one.
+    #
+    # Kashtan & Alon (PNAS 2005) found modularity evolves under goals built from
+    # SHARED subgoals and not under randomly varying ones; the continual-learning
+    # literature makes the same point from the other side, that networks need
+    # capacity growth only when tasks DO NOT share structure.
+    #
+    # With `independent_states` each state gets its own INDEPENDENT permutation
+    # of the yield vector instead of a rotation. The set of yields on offer is
+    # unchanged, so total energy is untouched, but no single mapping covers the
+    # states and each must be learned separately. If genome size grows here and
+    # not under rotation, the null is a property of the task's structure rather
+    # than of complexity evolution.
+    independent_states::Bool = false
+    # Filled in by `Sim` when the above is set; NRES x cond_states, each column a
+    # permutation of 1:NRES. Kept here so a run is reproducible from its Params.
+    yield_perm::Matrix{Int32} = zeros(Int32, 0, 0)
     diff_rate::Float32   = 0.12f0
     # Per-channel diffusion falloff: channel r diffuses at
     # diff_rate * diff_falloff^(r-1). 1.0 means every channel diffuses alike.
