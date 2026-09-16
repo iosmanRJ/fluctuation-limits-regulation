@@ -13,13 +13,21 @@
 const NRES   = 6                  # resource channels
 const NPHEN  = NRES + 6           # 12 phenotype outputs
 const NG_MAX = 32                 # array bound: most regulatory nodes possible
-const NG_MIN = NPHEN              # fewest: the fixed input/output interface
+# Node NPHEN+1 is a SENSOR: it receives an abiotic environmental signal and is
+# not read off as a phenotype. Resource concentrations are a poor context cue
+# because a consumer flattens exactly the field it would have to read — see the
+# zoned-task post-mortem in the README. An abiotic signal cannot be depleted, so
+# it stays legible however hard the population exploits the dish.
+const P_SENSE = NPHEN + 1         # 13   abiotic condition input, no readout
+const N_IO    = NPHEN + 1         # 13   fixed interface: outputs + the sensor
+const NG_MIN = N_IO               # fewest: the fixed input/output interface
 
-# Genome SIZE is variable. Nodes 1:NPHEN are a fixed interface — nodes 1:NRES
-# receive environmental input and nodes 1:NPHEN are read off as the phenotype —
-# so they cannot be added or removed without breaking the mapping. Nodes
-# NPHEN+1 : ng are HIDDEN units, and their number evolves by duplication and
-# deletion. An organism's `ng` therefore ranges over NG_MIN:NG_MAX.
+# Genome SIZE is variable. Nodes 1:N_IO are a fixed interface — nodes 1:NRES
+# receive resource input, node P_SENSE receives the abiotic signal, and nodes
+# 1:NPHEN are read off as the phenotype — so they cannot be added or removed
+# without breaking the mapping. Nodes N_IO+1 : ng are HIDDEN units, and their
+# number evolves by duplication and deletion. An organism's `ng` therefore
+# ranges over NG_MIN:NG_MAX.
 #
 # This exists to ask whether genomic complexity grows. With a fixed node count
 # the question is unanswerable: connectivity saturated at ~392 of 400 possible
@@ -56,7 +64,7 @@ allocates nothing.
 function develop!(phen::Vector{Float32}, e::Vector{Float32}, buf::Vector{Float32},
                   W::Array{Float32,3}, bias::Matrix{Float32}, i::Int,
                   env::Vector{Float32}, ng::Int; niter::Int = 8,
-                  plasticity::Float32 = 1.0f0)
+                  plasticity::Float32 = 1.0f0, cond::Float32 = 0.0f0)
     @inbounds for k in 1:ng
         e[k] = 0.1f0
     end
@@ -69,6 +77,10 @@ function develop!(phen::Vector{Float32}, e::Vector{Float32}, buf::Vector{Float32
             # resource concentrations feed the first NRES nodes -> plasticity
             if k <= NRES
                 s += plasticity * env[k]
+            elseif k == P_SENSE
+                # the abiotic cue. Zero when the feature is off, which makes the
+                # sensor an ordinary node and leaves behaviour unchanged.
+                s += plasticity * cond
             end
             buf[k] = tanh(s)
         end
@@ -186,7 +198,7 @@ function mutate!(W::Array{Float32,3}, bias::Matrix{Float32}, i::Int, rng, p,
     end
 
     # --- structural: the genome gains or loses a hidden node ------------------
-    # Only hidden nodes (NPHEN+1:ng) can be added or removed; nodes 1:NPHEN are
+    # Only hidden nodes (N_IO+1:ng) can be added or removed; nodes 1:N_IO are
     # the fixed input/output interface.
     if rand(rng, Float32) < p.p_node_add && ng < NG_MAX
         ng += 1
@@ -204,7 +216,7 @@ function mutate!(W::Array{Float32,3}, bias::Matrix{Float32}, i::Int, rng, p,
     elseif rand(rng, Float32) < p.p_node_del && ng > NG_MIN
         # remove a random HIDDEN node by swapping it with the last one and
         # shrinking; hidden nodes carry no fixed meaning, so a swap is free
-        h = rand(rng, (NPHEN + 1):ng)
+        h = rand(rng, (N_IO + 1):ng)
         if h != ng
             @inbounds for m in 1:ng
                 W[m, h, i] = W[m, ng, i]

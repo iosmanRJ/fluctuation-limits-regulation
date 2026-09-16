@@ -65,6 +65,59 @@ Base.@kwdef mutable struct Params
     yield_zones::Int        = 1
     rotate_inflow::Bool     = true     # zone r also receives its inflow on the rotated channel
     rotate_yield::Bool      = true     # zone r also rotates which channel pays best
+
+    # --- the abiotic condition -----------------------------------------------
+    # The zoned task failed for a structural reason: an organism had to infer
+    # its context from resource concentrations, but a consumer FLATTENS exactly
+    # the field it would need to read. Consumption plus the excretion ladder put
+    # the realised peak downstream of whatever was actually supplied, so the
+    # zones were never legible and organisms solved the dish with a fixed
+    # strategy. No amount of diffusion, grid or decay tuning fixed that.
+    #
+    # An abiotic condition cannot be eaten, so it stays readable however hard
+    # the population exploits the dish. It cycles through `cond_states` discrete
+    # states, each rotating which channel pays best exactly as the zones did,
+    # and it is fed to the genome through the sensor node P_SENSE. With
+    # `cond_states = 1` nothing rotates and the signal is constant: the control.
+    #
+    # It varies in TIME, not just space, so there is no region to sit in and no
+    # lineage that can opt out. Development happens once at birth, so an
+    # organism is committed to the state it was born into; the GENOME therefore
+    # has to encode a map from cue to phenotype that works in every state, which
+    # is the conditional task hidden units are supposed to be for. A genome that
+    # ignores the cue is right 1/cond_states of the time.
+    cond_states::Int       = 1
+    cond_period::Int       = 2000     # ticks for a full cycle through all states
+    # Adds a spatial ramp on top of the temporal cycle, making the condition a
+    # travelling wave rather than uniform. Off by default: uniform-in-space is
+    # the escape-proof version, since a gradient lets a lineage track its
+    # preferred band instead of learning to respond.
+    cond_gradient::Bool    = false
+    cond_strength::Float32 = 1.0f0    # gain of the cue into the sensor node
+    # Making the cue legible was not enough. Channel 1 is the sole recipient of
+    # external inflow, so it is the most ABUNDANT channel whatever the cue says,
+    # and "always eat channel 1" stayed good enough: at 6 states the evolved
+    # populations still answered ch1 in every state (1/6 matched). The reward has
+    # to move with the cue, not just the exchange rate -- the same lesson the
+    # zones taught, arrived at from the other side.
+    #
+    # Routing ALL of the inflow to the cue channel kills the dish: development
+    # is fixed at birth, so at the instant the cue moves every adult is
+    # mis-adapted at once and intake collapses before new births can adapt.
+    # Median extinction came at the first or second switch (~2.5-4.6k ticks) in
+    # 48 of 48 runs. So only a FRACTION follows the cue and the rest keeps
+    # feeding channel 1: no channel is ever starved outright, the transition is
+    # survivable, and tracking the cue still pays.
+    cond_inflow_frac::Float32 = 0.0f0   # 0 = all inflow to channel 1, 1 = all to the cue
+    # THE CONTROL THAT MATTERS. Every comparison in this project has been spoiled
+    # by the manipulation changing population size as well as the task, and
+    # population size drives genome size on its own. Scrambling decouples the cue
+    # from the rotation it is supposed to predict, using an incommensurate period
+    # so the two never lock. The dish is then ecologically IDENTICAL -- same
+    # rotation, same inflow, same energy, same population -- and the only thing
+    # removed is the information. If genome size rises with an informative cue
+    # and not with a useless one, the task is what did it.
+    cond_scramble::Bool    = false
     diff_rate::Float32   = 0.12f0
     # Per-channel diffusion falloff: channel r diffuses at
     # diff_rate * diff_falloff^(r-1). 1.0 means every channel diffuses alike.

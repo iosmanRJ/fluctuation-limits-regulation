@@ -29,10 +29,10 @@ export Params, Sim, Environment, Population, CladeTable,
        develop!, inherit!, mutate!, seed_genome!, seed_fast!, channel_cost, genome_structure,
        StatLog, record!, flush_stats!, read_stats, stat_index, STAT_NAMES,
        snapshot_schedule, write_snapshot, read_snapshot,
-       replenish!, diffuse!, total_resource, zone_of, zone_yield,
+       replenish!, diffuse!, total_resource, zone_of, zone_yield, rot_yield, condition_at,
        claim!, kill!, place!, high_water, resolved_capacity, founder_count, nclades, new_clade!, prune_clades!,
        phen_dist2,
-       NG_MAX, NG_MIN, NRES, NPHEN, NSTAT,
-       P_UPTAKE, P_SIZE, P_MOTIL, P_DIVIDE, P_REPAIR, P_STRESS, P_LEAK
+       NG_MAX, NG_MIN, N_IO, NRES, NPHEN, NSTAT,
+       P_UPTAKE, P_SIZE, P_MOTIL, P_DIVIDE, P_REPAIR, P_STRESS, P_LEAK, P_SENSE
 
 end # module

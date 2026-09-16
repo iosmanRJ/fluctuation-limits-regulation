@@ -99,7 +99,8 @@ function seed_population!(sim::Sim, n::Int)
         end
         develop!(sim.phen_scratch, sim.e_scratch, sim.buf_scratch,
                  pop.W, pop.bias, i, sim.env_scratch, Int(pop.ng[i]);
-                 plasticity = p.plasticity)
+                 plasticity = p.plasticity,
+                 cond = condition_at(p, pop.x[i], env.G, sim.gen)[1])
         @inbounds for k in 1:NPHEN
             pop.phen[k, i] = sim.phen_scratch[k]
         end
@@ -144,6 +145,7 @@ function organism_step!(sim::Sim)
     # zones for the YIELD rotation specifically; 1 disables it while leaving the
     # inflow rotation (and hence the spatial structure) untouched
     yzones        = p.rotate_yield ? nzones : 1
+    cond_states   = p.cond_states
     uptake_rate   = p.uptake_rate
     uptake_exp    = p.uptake_exponent
     maint_base    = p.maint_base
@@ -184,6 +186,11 @@ function organism_step!(sim::Sim)
         # only a cost and evolution trivially drives it to zero; with both it
         # has an interior optimum that shifts as conditions change.
         zone = zone_of(nzones, xi, G)
+        # The zone and the abiotic condition both rotate the yield vector; their
+        # offsets add. The condition cannot be depleted, so unlike the zone it
+        # stays legible however hard the dish is exploited.
+        cstate = condition_at(p, xi, G, sim.gen)[2]
+        yoff = (yzones > 1 ? zone - 1 : 0) + (cond_states > 1 ? cstate - 1 : 0)
         size_gain = 0.5f0 + pop.phen[P_SIZE, i]
         # Rate/yield trade-off: leaking more lets a cell pull resource in faster
         # but extract less from each unit of it.
@@ -203,7 +210,7 @@ function organism_step!(sim::Sim)
             got <= 0.0f0 && continue
             got > avail && (got = avail)
             res[r, xi, yi] = avail - got
-            gained += got * zone_yield(yields, yzones, zone, r) * (1.0f0 - leak)
+            gained += got * rot_yield(yields, yoff, r) * (1.0f0 - leak)
 
             # --- the conversion ladder ---------------------------------------
             # Channel r's byproduct is channel r+1, always. A resource is never
@@ -368,8 +375,13 @@ function settle_births!(sim::Sim)
                 for r in 1:NRES
                     envs[r] = env.res[r, pop.x[child], pop.y[child]]
                 end
+                # pure in (p, x, G, tick), so safe to call from the parallel phase
+                ccue = condition_at(p, pop.x[child], G, sim.gen)[1]
+                # An organism develops under the condition it is BORN into and
+                # is committed to it for life, so the genome -- not the
+                # individual -- has to hold a map that works in every state.
                 develop!(phen, e, buf, pop.W, pop.bias, child, envs, ng_c;
-                         plasticity = plast)
+                         plasticity = plast, cond = ccue)
                 for kk in 1:NPHEN
                     pop.phen[kk, child] = phen[kk]
                 end

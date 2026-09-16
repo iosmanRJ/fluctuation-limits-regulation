@@ -1127,3 +1127,128 @@ plausibly a side effect of the zoned dish changing selection intensity, not
 evidence that complexity was demanded. `rotate_inflow` and `rotate_yield` are
 kept so the experiment can be redone if the ladder is ever replaced by a
 metabolic matrix that does not pile waste into a terminal sink.
+
+### A cue that cannot be eaten
+
+The zoned task failed because organisms had to read a field they were actively
+flattening. So the cue was moved out of the resource system entirely: node
+`P_SENSE` (index 13) receives an **abiotic condition** that rotates which
+channel pays best, is not consumable, and is fed straight to the genome. With
+`cond_states = 1` the cue is constant and development is bit-identical to the
+model without the feature, so the control arm is the old model rather than a
+differently-tuned one.
+
+Development happens once at birth, so an individual is committed to the state it
+was born into. The *genome* therefore has to hold a cue → phenotype map that
+works in every state; one that ignores the cue is right 1/`cond_states` of the
+time.
+
+**First attempt: the cue was legible but the reward was not.** `ng` came out
+21.05 / 22.44 / 21.07 / **27.64** for 1/2/3/6 states — flat, then a jump at 6.
+But the diagnostic showed `matched = 1/6` in *every* arm: the 6-state
+populations answered `ch1 ch1 ch1 ch1 ch1 ch1` against a target of
+`ch1 ch6 ch5 ch4 ch3 ch2`. Channel 1 holds the inflow monopoly, so it stays the
+most abundant channel whatever the cue says and "always eat ch1" remains good
+enough. Only 6 states moved anything because it is the sole setting where every
+channel receives every yield exactly once, so no fixed diet keeps an edge.
+
+**Second attempt: routing inflow to the cue channel killed the dish.** 48 of 48
+runs extinct, median at the first or second switch (~2.5–4.6k ticks). The cause
+is architectural: with development cached at birth, a discrete global switch
+mis-adapts every adult simultaneously and intake collapses before new births can
+adapt. Fractional inflow did not rescue it — at `cond_inflow_frac = 0.2` only
+2 of 4 survived, and the survivors sat at `ng` = 32.00, exactly `NG_MAX`, which
+is a tiny population drifting into the cap rather than a result.
+
+**What worked: a travelling wave.** With `cond_gradient` the cue varies in space
+as well as time, so the dish is never globally starved — some region always
+suits somebody — while the drift means no lineage can park in a favourable band.
+At `cond_inflow_frac = 0.4` this survives 4/4.
+
+### The control that finally controls
+
+Every comparison in this project had been spoiled the same way: the
+manipulation changed population size as well as the task, and population size
+drives genome size on its own. The fix is a **scrambled cue** — same rotation,
+same inflow, same energy, same ecology, same population, with only the
+*information* removed. Measured mutual information between cue and state is
+**2.585 bits informative against 0.0000 bits scrambled**, at identical range and
+smoothness. (A golden-ratio scramble was tried first and leaked 0.72 bits,
+because cue and state then share the spatial term; 7 temporal turns against 5
+spatial ones gives a clean zero.)
+
+16 seeds per arm, 150k ticks:
+
+| arm | final `ng` | SE | population |
+|---|---|---|---|
+| flat — no rotation | 21.36 | ±1.40 | 1020 |
+| **informative cue** — 2.585 bits | 25.44 | ±1.03 | 497 |
+| **scrambled cue** — 0.000 bits | 26.09 | ±1.02 | 469 |
+
+Informative against scrambled: **−0.65, t = −0.45, permutation p = 0.65**, with
+populations matched at 497 and 469.
+
+Both wave arms sit well above flat — but **the arm whose cue predicts nothing
+rises just as much as the arm whose cue predicts everything.** The increase is
+the ecology, not the task. Information contributes zero.
+
+Caveat: 3/16, 3/16 and 1/16 seeds finished at or above `ng` 31 against a cap of
+32, so the top of the distribution is mildly compressed. That is symmetric
+across arms and does not bias the comparison.
+
+**This is the cleanest negative in the project, because it is the only one whose
+control holds ecology constant.** A task that genuinely requires a conditional
+response does not move the complexity plateau. What moves it is how small and
+how hard-pressed the population is.
+
+## The long run: what actually happens after 120,000 generations
+
+8 seeds, 25M ticks each, grid 128, default parameters — which means the gene
+cost is **on** (`maint_gene = 0.0015`) and populations are large (6,800–34,400).
+At ~4.6–5.0M ticks and ~120,000 generations:
+
+| seed | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
+|---|---|---|---|---|---|---|---|---|
+| mean `ng` | 13.0 | 15.0 | 12.0 | 12.0 | 14.0 | 12.0 | 12.0 | 12.0 |
+
+`NG_MIN` is 12. **Five of eight seeds sit exactly at the minimum legal genome
+size**, with `mean_nonzero_w` = 144.1 ≈ 12² — every available weight nonzero.
+The networks minimised their node count and then saturated connectivity inside
+the floor.
+
+| tick | generations | mean `ng` | population |
+|---|---|---|---|
+| 92,875 | 2,958 | 13.94 | 29,679 |
+| 464,500 | 12,937 | 12.77 | 18,178 |
+| 1,858,000 | 49,816 | 12.76 | 8,841 |
+| 3,251,625 | 85,077 | 12.76 | 6,290 |
+| 4,645,125 | 120,355 | 12.75 | 7,044 |
+
+It fell to the floor by generation ~13,000 and has not moved in the 107,000
+generations since. Last-quarter slope: **−0.0005 `ng` per million ticks** over
+1.2M ticks — a dead-flat line.
+
+So the answer to "what happens if you run it for millions of generations" is
+**streamlining to the minimum, then nothing**. Note this is not the ~21 plateau
+reported above: that figure belongs to the complexity-permissive regime (small
+population, no gene cost). Under default settings, with a gene cost and a large
+population, complexity does not plateau at a moderate value — it is driven to
+the absolute floor and pinned there. Large populations with efficient purifying
+selection streamline, exactly as the mutational hazard hypothesis predicts, now
+confirmed at roughly ten times the scale of anything else tested here.
+
+### Putting it together
+
+Every result in this project resolves to the same two variables:
+
+| condition | outcome |
+|---|---|
+| large population + gene cost | floor: `ng` 12, fully connected |
+| small population, no gene cost | plateau ~21 |
+| harsher ecology → smaller population | ~25–26 |
+| task genuinely demanding conditional response | **no additional effect** |
+
+Genome size is set by population size and by whether genes are taxed. Task
+difficulty does not enter. That is Lynch's mutational hazard hypothesis, and the
+scrambled-cue control is what makes it a measurement here rather than an
+assumption.

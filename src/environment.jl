@@ -27,6 +27,10 @@ famine) and apply decay to every channel.
 function replenish!(env::Environment, p::Params, gen::Int)
     G = env.G
     nz = p.yield_zones
+    # The abiotic cue's rotation, if it is also steering the inflow. This is
+    # uniform in space, so it shifts the whole dish at once.
+    cfrac = (p.cond_states > 1) ? clamp(p.cond_inflow_frac, 0.0f0, 1.0f0) : 0.0f0
+    coff  = cfrac > 0.0f0 ? condition_at(p, Int32(1), G, gen)[2] - 1 : 0
     infl = p.inflow * season(p, gen)
     if env.famine > 0
         infl *= p.famine_factor
@@ -46,12 +50,20 @@ function replenish!(env::Environment, p::Params, gen::Int)
             end
         end
         for i in 1:G
-            src = if nz <= 1 || !p.rotate_inflow
-                1
-            else
-                z = zone_of(nz, Int32(i), G)
-                1 + mod(1 - 1 - (z - 1), NRES)     # inverse of the yield rotation
+            # Feed whichever channel the current rotation makes best-paying, so
+            # yield and abundance move together and a fixed diet loses ground.
+            # The offsets compose exactly as rot_yield composes them.
+            zoff = (nz > 1 && p.rotate_inflow) ? zone_of(nz, Int32(i), G) - 1 : 0
+            base = 1 + mod(-zoff, NRES)
+            if cfrac > 0.0f0
+                cue_src = 1 + mod(-(zoff + coff), NRES)
+                v = res[base, i, j] + infl * (1.0f0 - cfrac)
+                res[base, i, j] = v > p.res_cap ? p.res_cap : v
+                v = res[cue_src, i, j] + infl * cfrac
+                res[cue_src, i, j] = v > p.res_cap ? p.res_cap : v
+                continue
             end
+            src = base
             v = res[src, i, j] + infl
             res[src, i, j] = v > p.res_cap ? p.res_cap : v
         end
@@ -118,6 +130,58 @@ everywhere — the task changes, the total energy on offer does not.
 @inline function zone_yield(yields::Vector{Float32}, nzones::Int, zone::Int, r::Int)
     nzones <= 1 && return yields[r]
     @inbounds yields[1 + mod(r - 1 + (zone - 1), NRES)]
+end
+
+"""
+    rot_yield(yields, off, r) -> Float32
+
+Yield of channel `r` under a rotation of `off` steps. The zone and the abiotic
+condition are both rotations of the same vector, so they compose by ADDING their
+offsets rather than by multiplying yields — which would change the total energy
+on offer and stop being the same manipulation.
+"""
+@inline function rot_yield(yields::Vector{Float32}, off::Int, r::Int)
+    off == 0 && return @inbounds yields[r]
+    @inbounds yields[1 + mod(r - 1 + off, NRES)]
+end
+
+"""
+    condition_at(p, x, G, t) -> (cue, state)
+
+The abiotic condition at column `x` and tick `t`. `cue` is the signal the genome
+senses through `P_SENSE`, in [-1, 1]; `state` in 1:cond_states selects which
+rotation of the yield vector applies, exactly as a zone did.
+
+Unlike a resource field this is not consumed, so it stays legible no matter how
+hard the population exploits the dish — which is the whole point, since the
+zoned task failed precisely because consumers flatten the field they must read.
+"""
+@inline function condition_at(p::Params, x::Int32, G::Int, t::Int)
+    ns = p.cond_states
+    ns <= 1 && return (0.0f0, 1)
+    phase = Float32(mod(t, p.cond_period)) / Float32(p.cond_period)
+    if p.cond_gradient
+        phase += Float32(Int(x) - 1) / Float32(G)
+    end
+    phase -= floor(phase)
+    state = 1 + min(ns - 1, unsafe_trunc(Int, phase * ns))
+    if p.cond_scramble
+        # Drive the cue from an incommensurate period so it stays bounded and
+        # smoothly varying -- the sensor sees a signal of the same shape and
+        # magnitude -- but carries no usable information about `state`.
+        # 7 temporal turns against 5 spatial ones: same shape, same range, same
+        # smoothness as the real cue, but measured mutual information with
+        # `state` is 0.0000 bits. A golden-ratio scramble was tried first and
+        # leaked 0.72 bits, because cue and state then share the spatial term.
+        q = Float32(mod(t, p.cond_period) * 7.0f0) / Float32(p.cond_period)
+        if p.cond_gradient
+            q += Float32(Int(x) - 1) * 5.0f0 / Float32(G)
+        end
+        q -= floor(q)
+        return (p.cond_strength * (2.0f0 * q - 1.0f0), state)
+    end
+    # a signed cue, so a genome that ignores it is not merely mis-scaled
+    (p.cond_strength * (2.0f0 * phase - 1.0f0), state)
 end
 
 total_resource(env::Environment, r::Int) = begin

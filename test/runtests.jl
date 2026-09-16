@@ -1,6 +1,123 @@
 using EvoSim
 using Test, Random, Statistics
 
+@testset "abiotic condition" begin
+    # The point of the sensor is that development reacts to a cue the organism
+    # cannot deplete. If it does not, the conditional task is untestable.
+    W = zeros(Float32, NG_MAX, NG_MAX, 2); bias = zeros(Float32, NG_MAX, 2)
+    rng = MersenneTwister(4)
+    seed_genome!(W, bias, 1, rng)
+    env = fill(0.5f0, NRES)
+    e = zeros(Float32, NG_MAX); buf = zeros(Float32, NG_MAX)
+    pa = zeros(Float32, NPHEN); pb = zeros(Float32, NPHEN); pc = zeros(Float32, NPHEN)
+
+    develop!(pa, e, buf, W, bias, 1, env, NG_MAX; cond = -1.0f0)
+    develop!(pb, e, buf, W, bias, 1, env, NG_MAX; cond = +1.0f0)
+    develop!(pc, e, buf, W, bias, 1, env, NG_MAX; cond = -1.0f0)
+    @test pa != pb              # the cue reaches the phenotype
+    @test pa == pc              # and does so deterministically
+    @test @allocated(develop!(pa, e, buf, W, bias, 1, env, NG_MAX; cond = 0.5f0)) == 0
+
+    # cond = 0 must reproduce the pre-feature behaviour exactly, so the control
+    # arm is the old model rather than a differently-tuned one
+    pd = zeros(Float32, NPHEN); pe_ = zeros(Float32, NPHEN)
+    develop!(pd, e, buf, W, bias, 1, env, NG_MAX)
+    develop!(pe_, e, buf, W, bias, 1, env, NG_MAX; cond = 0.0f0)
+    @test pd == pe_
+
+    # the sensor is interface, not a hidden unit: it must survive deletion
+    @test P_SENSE == NPHEN + 1
+    @test NG_MIN == N_IO == NPHEN + 1
+
+    # cond_states = 1 means no cue and no rotation anywhere
+    p1 = Params(cond_states = 1)
+    for x in Int32(1):Int32(8), t in (0, 137, 999)
+        @test condition_at(p1, x, 8, t) == (0.0f0, 1)
+    end
+
+    # with several states the cue is bounded, and every state is reachable
+    p6 = Params(cond_states = 6, cond_period = 600)
+    seen = Set{Int}()
+    for t in 0:599
+        cue, st = condition_at(p6, Int32(1), 8, t)
+        @test -1.0f0 <= cue <= 1.0f0
+        @test 1 <= st <= 6
+        push!(seen, st)
+    end
+    @test seen == Set(1:6)
+
+    # uniform in space unless the gradient is on -- the escape-proof default
+    @test condition_at(p6, Int32(1), 8, 10) == condition_at(p6, Int32(7), 8, 10)
+    pg = Params(cond_states = 6, cond_period = 600, cond_gradient = true)
+    @test condition_at(pg, Int32(1), 8, 10) != condition_at(pg, Int32(5), 8, 10)
+
+    # rotations compose by offset and never change the SET of yields on offer
+    ys = Float32[1.0, 0.60, 0.45, 0.35, 0.28, 0.22]
+    for off in 0:5
+        @test sort([rot_yield(ys, off, r) for r in 1:NRES]) == sort(ys)
+    end
+    @test [rot_yield(ys, 0, r) for r in 1:NRES] == ys
+    @test rot_yield(ys, 6, 3) == ys[3]           # a full turn is the identity
+
+    # inflow follows the cue: the fed channel is the one the rotation makes
+    # best-paying, in every state. Without this a fixed "eat channel 1" diet
+    # stays good enough and the task is not conditional at all.
+    pc = Params(cond_states = 6, cond_period = 600, cond_inflow_frac = 0.5f0)
+    for st in 1:6
+        tt = round(Int, (st - 0.5) / 6 * 600)
+        _, got_state = condition_at(pc, Int32(1), 24, tt)
+        @test got_state == st
+        best = argmax([rot_yield(pc.yields, st - 1, r) for r in 1:NRES])
+        @test best == 1 + mod(-(st - 1), NRES)
+    end
+
+    # The scrambled cue must be ecologically invisible: same states, same
+    # rotation, same range and smoothness -- only the information is gone.
+    pi_ = Params(cond_states = 6, cond_period = 2000, cond_gradient = true)
+    ps_ = Params(cond_states = 6, cond_period = 2000, cond_gradient = true,
+                 cond_scramble = true)
+    J = zeros(Int, 6, 6); Js = zeros(Int, 6, 6)
+    same_state = true; in_range = true
+    for tt in 0:4999, x in Int32(1):Int32(32)
+        ci, si = condition_at(pi_, x, 32, tt)
+        cs, ss = condition_at(ps_, x, 32, tt)
+        si == ss || (same_state = false)
+        -1.0f0 <= cs <= 1.0f0 || (in_range = false)
+        J[1 + min(5, floor(Int, (ci + 1) / 2 * 6)), si] += 1
+        Js[1 + min(5, floor(Int, (cs + 1) / 2 * 6)), ss] += 1
+    end
+    @test same_state                         # the WORLD is untouched
+    @test in_range                           # and the cue has the same range
+    function mutinf(M)
+        N = sum(M); acc = 0.0
+        for a in 1:6, b in 1:6
+            M[a, b] == 0 && continue
+            pab = M[a, b] / N
+            acc += pab * log2(pab / ((sum(M[a, :]) / N) * (sum(M[:, b]) / N)))
+        end
+        acc
+    end
+    @test mutinf(J)  > 2.0                   # informative cue: ~2.585 bits
+    @test mutinf(Js) < 0.01                  # scrambled cue: no usable signal
+
+    # fractional conditional inflow splits supply rather than starving a channel
+    @test Params().cond_inflow_frac == 0.0f0
+    let pf = Params(cond_states = 6, cond_inflow_frac = 0.4f0, grid = 16),
+        s0 = Sim(pf)
+        for _ in 1:200; step!(s0); end
+        @test s0.pop.n > 0
+        @test all(total_resource(s0.env, r) >= 0.0 for r in 1:NRES)
+    end
+
+    # a full run with the condition on stays alive and reproducible
+    s1 = Sim(Params(seed = 3, grid = 24, cond_states = 6, cond_period = 500))
+    s2 = Sim(Params(seed = 3, grid = 24, cond_states = 6, cond_period = 500))
+    for _ in 1:400; step!(s1); step!(s2); end
+    @test s1.pop.n > 0
+    @test s1.pop.n == s2.pop.n
+    @test s1.pop.phen == s2.pop.phen
+end
+
 @testset "EvoSim" begin
 
 # =============================================================================
