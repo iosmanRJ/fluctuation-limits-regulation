@@ -1575,80 +1575,146 @@ another. It took the larger sample to resolve.
 size and gene cost do, which is where every independent line of evidence in this
 README arrives.
 
+## The actual finding: fluctuation raises complexity, information does not
+
+After five failed attempts to show that a *task* demanding conditional response
+raises genome complexity, the controls that were built to test that hypothesis
+answered a different question, and answered it cleanly.
+
+### The result
+
+| condition | mean `ng` | n |
+|---|---|---|
+| **frozen** — rotation machinery on, state never changes | **23.77** | 20 |
+| no cue at all (`cond_states` = 1) | 23.43 | 12 |
+| **fluctuating, unpredictable** (scrambled cue, 0.000 bits) | **30.55** | 83 |
+| **fluctuating, predictable** (informative cue, 2.585 bits) | **30.81** | 88 |
+
+**Environmental fluctuation raises genome complexity by ~7 nodes (~30%).
+Whether that fluctuation is predictable makes no difference at all.**
+
+- frozen → scrambled: **+6.78, p = 0.0013**
+- frozen → informative: **+7.04, p = 0.0002**
+- scrambled → informative: +0.25, **p = 0.836**
+
+### Why the frozen control is what makes this a result
+
+Every earlier comparison in this project was spoiled the same way: the
+manipulation moved the ecology as well as the thing being tested. The
+no-fluctuation arm (`cond_states` = 1) has that flaw — it also changes how
+inflow is routed.
+
+The frozen arm removes it. `cond_period` = 10⁹ leaves the rotation machinery
+running and routing inflow exactly as the fluctuating arms do, while the state
+never changes within a run (verified: one state visited, cue constant at −1.0).
+It lands at 23.77 — **statistically identical to the no-cue arm (p = 0.88)** and
+~7 nodes below both fluctuating arms. So the effect is fluctuation itself, not
+the inflow structure.
+
+### It holds across a five-point heterogeneity gradient
+
+Reproducing the manipulation from [*Adaptive Dynamics of Regulatory Networks:
+Size Matters*](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3171436/), whose
+variable H = 2–8 is the direct analogue of `cond_states`:
+
+| states | `ng` informative | `ng` scrambled | p |
+|---|---|---|---|
+| 2 | 26.75 | 27.79 | 0.61 |
+| 3 | 26.59 | 28.03 | 0.57 |
+| 4 | 29.51 | 26.76 | 0.30 |
+| 6 | 31.15 | 30.45 | 0.74 |
+| 8 | 29.81 | 29.06 | 0.81 |
+
+`ng` rises with the number of states — **+2.13 nodes per doubling informative,
++1.04 scrambled** — which is the direction that paper reports. But the
+informative-scrambled difference is null at **every single H**. The rise tracks
+how much the environment varies, not how solvable the variation is.
+
+That reconciles this work with the prior result rather than contradicting it.
+The 2011 study varied heterogeneity and saw optimal network size rise; with no
+zero-information control, reading that as the task demanding complexity was
+natural. Add the control and the same rise appears when the cue predicts nothing.
+
+Caveat: the 8-state cell has switchers at 0.014 — organisms stopped tracking the
+cue there entirely, and `ng` fell from 31.15 to 29.81. The gradient is not
+monotone at the top, and the slope rests on the 2→6 range.
+
+### The task result, restated correctly
+
+Across three independent regimes, an informative cue reliably produces
+conditional *behaviour* and no extra genome:
+
+| regime | `ng` scram → info | p | switchers | p |
+|---|---|---|---|---|
+| A: exp 1.5, per 600, 6 states | 30.55 → 30.81 | 0.836 | 0.229 → 0.645 | <10⁻⁵ |
+| B: exp 1.0, per 1200, rd 5 | 22.46 → 21.73 | 0.357 | 0.103 → 0.433 | <10⁻⁵ |
+| C: exp 1.5, per 600, 3 states | 29.62 → 26.43 | 0.036 | 0.109 → 0.226 | 0.0004 |
+
+Detection floors 3.41, 2.21 and 4.19 nodes, so these are measured nulls rather
+than underpowered ones. Regime C is nominally significant and *negative*, but
+does not survive Bonferroni across three regimes (needs p < 0.017). Within-arm
+correlations between how well a population tracks the cue and how large its
+genome is: −0.189, +0.066, −0.062 — scattered around zero.
+
+**So: complexity responds to environmental change, not to solvable environmental
+change.** Behavioural complexity and genomic complexity dissociate.
+
+### Two weaker results, stated as such
+
+**The sensor knockout does not isolate a mechanism.** Ablating `P_SENSE` costs
+~15% energy and drives carriers from 50% to 5.8% (informative) and 0.6%
+(scrambled), so it is clearly deleterious — but in *both* arms, with no
+significant difference between them (p = 0.64). Cutting a node's outgoing
+weights disrupts the network whether or not the cue matters. A sham ablation on
+a random non-sensor node is the control this needed and it was not built.
+
+**A bigger world barely rescues the fast regime.** At 1.9 generations per state:
+0/3 viable at grid 64, 0/3 at 128, 2/3 at 192. Tripling the world helps only
+marginally. And `ng` *falls* at grid 192 (27.8 → 23.1), which is the Lynch effect
+reasserting itself — larger populations, more efficient selection, smaller
+genomes.
+
 ## What the literature already says, and where that leaves this
 
-A late literature check — run *after* the result was written up, which was the
-wrong order — found that most of this ground is taken.
+A literature check — run *after* the result was written up, which was the wrong
+order — found most of this ground is taken.
 
-### Prior art that this collides with
+**The heterogeneity result has precedent.** [*Size
+Matters*](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3171436/) ran fixed and
+evolvable network sizes and reports optimal size increasing with environmental
+heterogeneity. The H sweep above reproduces it. What is added here is the
+zero-information control showing the rise does not require the variation to be
+predictable.
 
-**The central question has been asked with evolvable network size, and answered
-the other way.** [*Adaptive Dynamics of Regulatory Networks: Size
-Matters*](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3171436/) ran both fixed
-and evolvable network sizes and reports that *"optimal network size increased
-with environmental heterogeneity"*, larger networks winning over longer
-timescales. That is this hypothesis, with size free to evolve, reported
-positive. So the work here is not filling a gap — it contradicts a published
-result.
-
-**The architecture is not new either.** [Sakamoto & Innan
+**The architecture is not new.** [Sakamoto & Innan
 2024](https://academic.oup.com/g3journal/article/14/9/jkae144/7710408) evolve
 discrete plasticity through a dedicated sensor gene feeding a regulatory
-network — the same design as `P_SENSE` — though with gene number fixed and no
-randomized-cue control. [Jorritsma & van den Berg,
-*Evolution* 2026](https://academic.oup.com/evolut/article-abstract/80/1/230/8297131)
-work in the same parameter space, finding plasticity evolves under fast erratic
-change with reliable cues, and evolvability under intermediate variability with
-unreliable ones.
+network — the `P_SENSE` design — with gene number fixed and no randomized-cue
+control. [Jorritsma & van den Berg, *Evolution*
+2026](https://academic.oup.com/evolut/article-abstract/80/1/230/8297131) occupy
+the same parameter space.
 
-**"Rewiring rather than adding" is established empirical biology**, not an
-observation this model contributes: [rewired bacterial
-networks](https://www.nature.com/articles/nature06847) where >95% of promoter
-swaps are tolerated, [Ndt80 regulon
+**"Rewiring rather than adding" is established empirical biology**: [rewired
+bacterial networks](https://www.nature.com/articles/nature06847), [Ndt80 regulon
 rewiring](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5391208/), [echinoid
 GRNs](https://www.pnas.org/doi/10.1073/pnas.1509845112).
 
-**Even the "complexity is not directly selected" conclusion is published.** Van
-Nimwegen's [quadratic scaling of transcription factors with genome
+**"Complexity is not directly selected" is published too.** Van Nimwegen's
+[quadratic scaling of transcription factors with genome
 size](https://academic.oup.com/nar/article/45/13/7615/3865434) is explained by
-per-category addition/deletion rates rather than environmental demand, and [GBE
+addition/deletion rates rather than environmental demand, and [GBE
 2026](https://academic.oup.com/gbe/article/18/8/evag196/8753180) concludes
-regulatory complexity may reflect sampling from viable networks with minimal
-direct selection on complexity.
+regulatory complexity may reflect sampling from viable networks.
 
-The one element with no precedent found is the **matched-ecology zero-information
-control** — holding the world fixed and destroying only the cue's information,
-verified at 2.585 vs 0.0000 bits.
+**[Fluctuating-selection GRN
+work](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2916849/)** reports complex
+networks promoted under *unpredictably* fluctuating conditions — which is the
+claim that prompted the test above, and which the predictable arm now shows is
+not specifically about unpredictability.
 
-### And the check found something in this data that had been missed
-
-[Individual-based fluctuating-selection
-work](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2916849/) reports that complex
-GRNs are promoted under *unpredictably* fluctuating conditions. The three arms
-here map directly onto that axis, and testing it changes the picture:
-
-| condition | `ng` | n |
-|---|---|---|
-| no fluctuation (`cond_states` = 1) | **23.43** | 12 |
-| fluctuating, **unpredictable** (scrambled, 0 bits) | **30.55** | 83 |
-| fluctuating, **predictable** (informative, 2.585 bits) | **30.81** | 88 |
-
-**Fluctuation raises complexity by ~7 nodes (30%), p = 0.008 and 0.002. Whether
-it is predictable makes no difference (p = 0.84).**
-
-The informative-vs-scrambled comparison reported above as a null was measuring
-the wrong contrast: *both* arms sit 7 nodes above a non-fluctuating world. The
-environment does drive complexity here — through fluctuation itself, not through
-the conditional task. That reproduces the published claim and sharpens it: the
-information content of the fluctuation is irrelevant.
-
-**This is not yet established**, because the no-fluctuation arm uses
-`cond_states = 1`, which also changes the inflow routing — the same
-manipulation-moves-two-things confound that spoiled the zoned task, the abiotic
-cue, and the grain experiments. A frozen control (rotation machinery on,
-`cond_period` = 10⁹ so the state never changes within a run — verified: one state
-visited, cue constant at −1.0) is what decides it. If frozen sits near 23,
-fluctuation is real; if near 30, the effect was ecology all along.
+The element with no precedent found is the **matched-ecology zero-information
+control**, and the frozen control that separates fluctuation from the ecology
+carrying it.
 
 ## Predictions, recorded before the runs that tested them
 
