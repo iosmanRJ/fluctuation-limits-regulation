@@ -1508,6 +1508,92 @@ cannot express, and which the 2025 *Evolution Letters*
 flags as unaddressed for within-lifetime change. That is a change to the
 development model, not a parameter sweep.
 
+## The hypothesis, finally tested properly
+
+Five attempts failed before the experiment could even run: the cue was
+illegible, then unread, then the behaviour it enabled was selected against, then
+the regime where it should pay was uninhabitable. Reversible plasticity
+(`redevelop_every`) removed the last of those, and the test finally ran.
+
+**Regime A: 100 seeds per arm**, informative against scrambled cue, ecologically
+identical, 150k ticks, `NG_MAX` = 64 so nothing is censored.
+
+| measure | scrambled | informative | p |
+|---|---|---|---|
+| **`ng`** | **30.55** | **30.81** | **0.836** |
+| switchers | 0.229 | **0.645** | **< 10⁻⁵** |
+| profile spread | 0.107 | **0.374** | **< 10⁻⁵** |
+| matched | 0.976 | **1.545** | **< 10⁻⁵** |
+
+n = 88 and 83 after extinctions. **Organisms decisively evolve to read the cue,
+and genome size does not follow.**
+
+The cue-usage result is anchored by a third arm with no cue at all
+(`cond_states = 1`, nothing varies): switchers 0.133, spread 0.060, matched
+**exactly 1.00/6** — which is the non-responsive baseline derived analytically,
+since an unresponsive population answers one fixed channel and each channel is
+best-paying in exactly one of six states. The scrambled arm is statistically
+indistinguishable from that no-cue baseline (p = 0.26, 0.34), which is correct:
+neither carries usable information. Only the informative arm departs from it.
+
+### The null is now a measurement, not an absence
+
+The first version of this test used 12 seeds, and a power analysis showed it
+could only have detected an **8.7-node (27%) rise** — a 95% CI of [−6.4, +5.7].
+That is not evidence of absence. At 100 seeds per arm:
+
+| | n = 12 | **n = 100** |
+|---|---|---|
+| minimum detectable rise (80% power) | 8.67 nodes (27%) | **3.41 nodes (11.1%)** |
+| 95% CI on the difference | [−6.44, +5.70] | **[−2.13, +2.64]** |
+
+**Any rise larger than 2.64 nodes is excluded by the data.** Sample size also
+turned the cue-usage effects from marginal (p = 0.006–0.09 at n = 12) into
+decisive — they were real all along and merely underpowered, which is the
+argument for doing this properly the first time.
+
+### The sharpest result: solving the task does not require a bigger genome
+
+Between-arm comparisons can always be argued about. The within-arm test cannot:
+among the 88 populations that all received the *same* informative cue, does
+responding more strongly go with carrying more regulatory nodes?
+
+| arm | corr(switchers, `ng`) | n | p |
+|---|---|---|---|
+| informative | **−0.189** | 88 | 0.077 |
+| scrambled | +0.049 | 83 | 0.665 |
+
+If anything it is negative. So the finding is not merely that the task failed to
+raise complexity — **the populations that solved it best did not need extra
+machinery to do so.** Conditional response here is achieved by rewiring, not by
+adding parts.
+
+At n = 12 this test was uninformative, giving +0.481 in one batch and −0.040 in
+another. It took the larger sample to resolve.
+
+**Conclusion: task difficulty does not set the complexity plateau.** Population
+size and gene cost do, which is where every independent line of evidence in this
+README arrives.
+
+## Predictions, recorded before the runs that tested them
+
+Every substantive prediction in this work was written into the repository
+*before* the experiment that tested it, so the git history is a usable
+pre-registration record rather than a reconstruction. The claims and the commits
+that predate their tests:
+
+| prediction, made in advance | outcome |
+|---|---|
+| `ng` rises with task complexity → the plateau is task-limited; `ng` flat → drift–selection sets it regardless of task | **flat** |
+| rotating yields alone will make the task conditional | **wrong** — channel 1's inflow monopoly kept a fixed diet good enough |
+| an abiotic cue will be read because it cannot be depleted | **wrong** — legible but unread, for the same inflow reason |
+| the conditional genome is adaptive but unreachable by mutation | **wrong** — it is adaptive-looking but *selected against* |
+| reversible plasticity will rescue the regime that irreversible development cannot survive | **correct** — 0/3 → 3/3 viable |
+| conditional response, once it evolves, will raise genome size | **wrong** — response evolves, complexity does not follow |
+
+Five of six predictions were wrong, which is the honest summary of the work and
+the reason the controls matter more than the hypotheses.
+
 ## The long run: what actually happens after 120,000 generations
 
 8 seeds, 25M ticks each, grid 128, default parameters — which means the gene
