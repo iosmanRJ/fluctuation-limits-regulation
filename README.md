@@ -1427,36 +1427,78 @@ and genetics suffices.** Mapping the axis between them, 3 seeds per cell:
 No systematic dependence on grain — the payoff hovers just under parity
 throughout, and the fast cells start dying.
 
-### The strongest result available, stated at its true strength
+### The strongest result available — and an audit that cut it down
 
-The best cell (period 48000) re-run at 12 seeds per arm against the scrambled
-control:
+The best cell (period 48000) re-run at 12 seeds per arm. **Four errors in the
+first write-up were found by auditing it; all four are recorded here because
+three of them changed the number and one changed the conclusion.**
 
-| | informative | scrambled |
-|---|---|---|
-| energy ratio | **1.103** (SE 0.064, n = 7) | 0.429 (n = 3) |
-| **carriers retained past first sample** | **9/12** | **3/12** |
+| | informative | scrambled | **no-op (marker only)** |
+|---|---|---|---|
+| energy ratio, mean | 1.103 | 0.429 | **0.902** |
+| energy ratio, median | 1.099 | 0.257 | **0.999** |
+| **carriers retained** | **7/9** | **3/12** | **12/12** |
 
-- Against parity: t = +1.61 — **indistinguishable from 1.0**, not above it.
-- Informative vs scrambled energy: **+0.674, permutation p = 0.0084**.
-- Carrier retention: **Fisher exact p = 0.0391**.
+**Error 1 — the Fisher table counted extinctions as retentions.** Reported as
+9/12 vs 3/12; the informative arm actually had 2 burn-in extinctions and 1
+post-seeding population collapse, so "12 − 3 carrier-losses = 9" was wrong.
+Restricted to runs whose population survived, the correct table is 7/9 vs 3/12:
+**Fisher exact p = 0.0300**, slightly *stronger* than the 0.0391 first reported.
+The retention result survives.
 
-Retention is the cleaner statistic, since the energy figure excludes runs whose
-carriers died early and 9 scrambled runs dropped out against 3 informative ones
-— a bias that flatters the scrambled arm.
+**Error 2 — the energy mean rests on one seed.** Values are 0.983, 1.105, 1.001,
+1.149, 0.937, **1.444**, 1.100. Dropping the outlier gives 1.046. Median 1.099.
 
-So: **an informative cue measurably helps a conditional genome persist, and that
-survives a matched-ecology control. It still does not make it invade.** The
-conditional genome reaches parity and stops there.
+**Error 3 — generations-per-state was wrong by a factor of ~3.** It was computed
+from a forward-tracked median lifespan of 95 ticks, which oversamples long-lived
+survivors. Measuring generation time properly, as the slope of mean lineage depth
+against tick, gives **26.1 ticks**. So the real figures are 14 generations per
+state at period 2000, **77** at 12000, and **307** at 48000 — not 21 and 47.
+Every configuration tested was temporally *coarse*.
 
-**Final status.** The hypothesis is still not demonstrated, but the reason is now
-specific rather than mysterious: conditional response in this model is
-*approximately neutral at best*, and neutrality does not build complexity — which
-is the same conclusion the rest of this README reaches from population size and
-gene cost. Recent GRN simulation work lands in the same place, finding that
-[regulatory complexity may reflect sampling from networks satisfying expression
-constraints, with minimal direct selection on complexity
-itself](https://academic.oup.com/gbe/article/18/8/evag196/8753180).
+**Error 4 — the no-op control was never run for this configuration.** It matters
+because carriers are seeded by slot index, which correlates with age and lineage.
+Running it (additive graft at A = 0, phenotype change 3.8×10⁻⁶): mean 0.902,
+median 0.999, and **12/12 carrier retention**.
+
+That last one changes the reading. Retention orders as **no-op 12/12 >
+informative 7/9 > scrambled 3/12**. The conditional genome is retained *less
+well than a marker carrying no function at all*.
+
+So the honest statement is narrower than "information helps":
+
+> Carrying the conditional machinery costs something. An informative cue recovers
+> most of that cost — decisively more than a scrambled cue (energy permutation
+> p = 0.0084; retention p = 0.0300) — but it does not make the machinery better
+> than not having it.
+
+### The predicted window is lethal — now tested rather than assumed
+
+With generation time known to be 26 ticks, the regime theory actually points at —
+one to four generations per environmental state, fast enough that genetic
+tracking cannot keep up — turns out never to have been tested. It is:
+
+| period | generations/state | viable | payoff |
+|---|---|---|---|
+| 300 | 1.9 | **0/6** | — |
+| 600 | 3.8 | **0/6** | — |
+| 1200 | 7.7 | 3/6 | 0.53–0.75 |
+| 2000 | 12.8 | 3/6 | 0.92–0.98 |
+| 12000 | 76.6 | 6/6 | 0.967 |
+| 48000 | 306.9 | 6/6 | 0.991 |
+
+**The window where plasticity should win is uninhabitable.** Everything
+survivable is 13+ generations per state, where genetic tracking suffices. And the
+best payoff sits at the *slowest* end — 307 generations per state — which is
+where plasticity should matter least, so the payoff gradient is not about
+plasticity at all.
+
+One further correction to the grain diagnosis: holding position fixed, the
+*temporal* cue agreement is **0.907**. The 0.334 figure is produced almost
+entirely by **movement** — motility evolved to 0.99 across bands 10.7 cells wide.
+The environment is fine-grained spatially and coarse-grained temporally, which is
+the worst combination: an unreliable cue *and* slow enough change that genetics
+can track it.
 
 What is *not* closed, and would be the honest next step: every result here tests
 irreversible development. Theory says a fine-grained world of this kind calls for
