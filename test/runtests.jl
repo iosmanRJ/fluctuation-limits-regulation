@@ -221,6 +221,41 @@ using Test, Random, Statistics
         @test ok
     end
 
+    # Edge silencing and the per-edge cost: off by default, bit-identical when
+    # off, and together they must actually let density fall. Point mutations are
+    # additive, so without edge silencing a non-zero weight can never return to
+    # zero and density ratchets to 1 whatever selection prefers.
+    @test Params().p_edge_silence == 0.0f0
+    @test Params().maint_edge == 0.0f0
+    let a = Sim(Params(seed = 9, grid = 16)),
+        b5 = Sim(Params(seed = 9, grid = 16, p_edge_silence = 0.0f0, maint_edge = 0.0f0))
+        for _ in 1:250; step!(a); step!(b5); end
+        @test a.pop.n == b5.pop.n
+        @test a.pop.W == b5.pop.W
+    end
+    # silencing must create exact zeros
+    let W = zeros(Float32, NG_MAX, NG_MAX, 1), bs = zeros(Float32, NG_MAX, 1),
+        rng = MersenneTwister(2)
+        seed_genome!(W, bs, 1, rng)
+        for m in 1:NG_MAX, k in 1:NG_MAX; W[m, k, 1] = 1.0f0; end
+        pz = Params(p_edge_silence = 1.0f0, mut_rate = 0.0f0, p_silence = 0.0f0,
+                    p_duplicate = 0.0f0, p_node_add = 0.0f0, p_node_del = 0.0f0)
+        before = count(!iszero, @view W[1:NG_MIN, 1:NG_MIN, 1])
+        W2 = copy(W); b2 = copy(bs)
+        mutate!(W2, b2, 1, MersenneTwister(7), pz, 0.0f0, NG_MIN)
+        after = count(!iszero, @view W2[1:NG_MIN, 1:NG_MIN, 1])
+        @test after < before          # at p = 1.0 exactly one edge is zeroed
+    end
+    # and density must actually fall over a run when both are on
+    let s7 = Sim(Params(seed = 9, grid = 32, p_edge_silence = 0.2f0,
+                        maint_edge = 0.0005f0, maint_gene = 0.0f0))
+        for _ in 1:4000; step!(s7); end
+        @test s7.pop.n > 0
+        lv = [i for i in 1:high_water(s7.pop) if s7.pop.alive[i]]
+        dens = sum(s7.pop.nzw[i] / (s7.pop.ng[i]^2) for i in lv) / length(lv)
+        @test dens < 0.95            # saturation is escapable
+    end
+
     # a full run with the condition on stays alive and reproducible
     s1 = Sim(Params(seed = 3, grid = 24, cond_states = 6, cond_period = 500))
     s2 = Sim(Params(seed = 3, grid = 24, cond_states = 6, cond_period = 500))

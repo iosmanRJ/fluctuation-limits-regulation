@@ -211,6 +211,7 @@ function organism_step!(sim::Sim)
     maint_stress  = p.maint_stress
     maint_repair  = p.maint_repair
     maint_gene    = p.maint_gene
+    maint_edge    = p.maint_edge
     maint_chan    = p.maint_channel
     maint_crowd   = p.maint_crowd
     maint_load    = p.maint_load
@@ -304,6 +305,7 @@ function organism_step!(sim::Sim)
 
                  maint_repair * pop.phen[P_REPAIR, i] +
                  maint_gene   * Float32(pop.ng[i] - NG_MIN) +  # cost of extra genes
+                 maint_edge   * Float32(pop.nzw[i]) +          # cost of connections
                  maint_chan   * pop.chan_cost[i] +   # proteome cost of breadth
                  maint_crowd  * crowd +
                  maint_load   * Float32(pop.load[i]) +  # genetic deterioration bites here

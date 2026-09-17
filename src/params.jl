@@ -160,6 +160,21 @@ Base.@kwdef mutable struct Params
     # states and each must be learned separately. If genome size grows here and
     # not under rotation, the null is a property of the task's structure rather
     # than of complexity evolution.
+    # --- can connectivity evolve at all? --------------------------------------
+    # Measured: evolved networks sit at ~99.6% edge density in EVERY condition,
+    # which made Newman modularity unmeasurable (Q is defined by ABSENT edges).
+    #
+    # The cause is mutational, not selective. Point mutations are ADDITIVE
+    # (`W[m,k] += d`), so a weight that becomes non-zero never returns to exactly
+    # zero, and `p_silence` knocks out a whole ROW rather than an edge. Density
+    # therefore ratchets to 1 regardless of selection, and `nzw` has been
+    # counting "weights touched since the founder" rather than anything evolvable.
+    #
+    # Making sparsity achievable needs BOTH of these. A cost with no mechanism to
+    # produce zeros would just tax everyone equally with no escape.
+    p_edge_silence::Float32 = 0.0f0   # per birth: set ONE random weight to zero
+    maint_edge::Float32     = 0.0f0   # upkeep per non-zero weight, per tick
+
     independent_states::Bool = false
     # Filled in by `Sim` when the above is set; NRES x cond_states, each column a
     # permutation of 1:NRES. Kept here so a run is reproducible from its Params.

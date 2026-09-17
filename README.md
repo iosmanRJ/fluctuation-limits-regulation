@@ -1055,7 +1055,15 @@ Six seeds per condition, 150k ticks, complexity-permissive regime (grid 32,
 `ng ~ log2(zones)`: **+1.74 per doubling** (t = 4.17, R² = 0.44). Spearman
 ρ = +0.66, permutation p = 0.00066. Controlling for population the slope is
 +1.86 (t = 2.90) while `log2(pop)` contributes nothing (t = −0.24). Weights per
-node rise too, 21.0 → 25.5, so the networks are denser rather than padded.
+node rise too, 21.0 → 25.5.
+
+> **Retracted.** That last inference does not hold. `nzw` counts weights that are
+> non-zero, and point mutations are *additive* (`W[m,k] += d`), so a weight that
+> once becomes non-zero never returns to exactly zero. Density therefore ratchets
+> upward with lineage depth regardless of selection — measured: 0.25 at founding,
+> 0.777 by depth 304, 0.862 by depth 1396. "Weights per node" tracks how long a
+> lineage has been mutating, not how densely it is wired, so it cannot support
+> "denser rather than padded". See the connectivity section below.
 
 It is a **higher plateau, not open-ended growth** — every condition flattens by
 25–50% through the run and holds. And it is not a ceiling artifact: re-running
@@ -1807,6 +1815,64 @@ stochasticity long before it appears as differential extinction.
 **So the experiment was never powered to see the effect theory predicts.** The
 null is consistent with Kussell–Leibler rather than evidence against it, and the
 earlier phrasing is withdrawn.
+
+## Connectivity could not evolve — and that invalidates a measure
+
+The modularity attempt above found every arm at ~99.6% edge density. Chasing
+that turned up a structural fault rather than a tuning problem.
+
+### Why the networks saturate
+
+Point mutations are **additive**: `W[m, k, i] += d`. Nothing ever sets an
+individual weight back to exactly zero, and `p_silence` knocks out an entire
+*row* — a node — not an edge. Founders start at 25% density by construction, and
+from there density only ever climbs.
+
+Measured against lineage depth, with no per-edge selection at all:
+
+| mean lineage depth | edge density |
+|---|---|
+| 0 (founders) | 0.25 |
+| 304 | 0.777 |
+| 569 | 0.828 |
+| 1,122 | 0.846 |
+| 1,396 | 0.862 |
+
+**Saturation is mutationally inevitable, not a selective outcome.**
+
+### The measure this invalidates
+
+`nzw` counts non-zero weights, so it counts *weights touched since the founder* —
+which tracks how long a lineage has been mutating, not how densely it is wired.
+Any inference from `nzw` or from "weights per node" is therefore unsound, and one
+such inference earlier in this README (that zoned networks were "denser rather
+than padded") is retracted where it appears.
+
+It also means **complexity in this model has only ever had one evolvable
+dimension: node count.** Connectivity was fixed by construction, so every result
+above — the fluctuation effect included — concerns `ng` alone.
+
+### Making sparsity achievable
+
+Two parameters, both off by default and bit-identical when off, because a cost
+with no mechanism to produce zeros would only tax everyone equally with no escape:
+
+- `p_edge_silence` — per birth, set one random weight to exactly zero. The only
+  route back from non-zero, given additive point mutations.
+- `maint_edge` — upkeep per non-zero weight, so sparsity can pay.
+
+Measured effect, grid 48, 30k ticks:
+
+| `p_edge_silence` | `maint_edge` | density | `ng` | pop |
+|---|---|---|---|---|
+| 0 | 0 | 0.824 | 19.7 | 1872 |
+| 0.05 | 0 | 0.629 | 18.0 | 1848 |
+| 0.05 | 0.0002 | 0.614 | 17.0 | 1557 |
+| 0.2 | 0.0005 | **0.426** | 17.0 | 1370 |
+
+Density now responds, and populations stay healthy. Connectivity becomes a second
+evolvable dimension alongside node count, which is what the modularity question
+and any topology question needs.
 
 ## Novelty audit: what is actually new here
 

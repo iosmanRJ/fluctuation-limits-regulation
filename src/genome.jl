@@ -171,6 +171,19 @@ function mutate!(W::Array{Float32,3}, bias::Matrix{Float32}, i::Int, rng, p,
         dload += classify_mutation(rng, p)
     end
 
+    # edge silencing: the only route back to an exact zero. Point mutations are
+    # additive, so without this a weight that is once non-zero stays non-zero and
+    # density ratchets to 1 whatever selection prefers.
+    if p.p_edge_silence > 0.0f0 && rand(rng, Float32) < p.p_edge_silence
+        m = rand(rng, 1:ng)
+        k = rand(rng, 1:ng)
+        if W[m, k, i] != 0.0f0
+            W[m, k, i] = 0.0f0
+            nmut += 1
+            dload += classify_mutation(rng, p)
+        end
+    end
+
     # structural: gene silencing
     if rand(rng, Float32) < p.p_silence
         k = rand(rng, 1:ng)
