@@ -2027,6 +2027,87 @@ per-iteration sign-flipping are one phenomenon. In Kauffman's terms these
 networks sit firmly on the chaotic side rather than at criticality, which is
 where dense networks are expected to be.
 
+## Aevol: the same conclusion by a different mechanism
+
+A late sweep of genome-architecture literature — searched with different terms
+than the GRN work above — found the Aevol platform (Knibbe, Beslon and
+colleagues), which has been asking this question with explicit sequence-level
+genomes since 2007.
+
+**Their conclusion is this project's conclusion.** [Luiselli et al.
+2024](https://academic.oup.com/gbe/article/16/12/evae250/7905804) find larger
+populations drive genome size down (coding density ~80% at 4× population, ~88% at
+16×) through a trade-off between direct selection for adaptation and **indirect
+selection for replicative robustness**. [Knibbe et al.
+2007](https://academic.oup.com/mbe/article/24/10/2344/1074262) show that
+robustness to large duplications and deletions *bounds* genome size, with Drake's
+rule emerging spontaneously and log-log fits at r² = 0.99.
+
+So "genome size is set by mutational and population-genetic pressure rather than
+functional demand" is established, quantified, and older than this work. The long
+run here reproduces their streamlining result.
+
+### But their mechanism cannot operate in this model
+
+Knibbe et al. are explicit: the mechanism *"would collapse without rearrangements
+— point mutations alone wouldn't couple genome size to mutational variability."*
+Their organisms tune noncoding DNA to hold roughly **one neutral offspring per
+generation**, and that works only because larger genomes suffer proportionally
+more deleterious rearrangements.
+
+This model has **no chromosomal rearrangements**. Node duplication copies a node
+with its weights; it creates no size-proportional mutational exposure. So the
+Aevol explanation is unavailable here, and the two models reach the same
+conclusion by different routes — convergent evidence rather than duplication.
+
+It also explains a difference: the floor here is **hard** (`ng` = 12 exactly, six
+of eight seeds) while theirs is a stabilised distribution, because without the
+equilibrium-producing pressure selection simply runs to the minimum.
+
+### Their compound parameter does not govern here — tested
+
+Luiselli et al. report that **N×μ** governs coding density: constant N×μ gives
+similar architecture. Tested directly, scaling μ with inverse grid area so
+population × mutation rate is held constant:
+
+| cell | grid | μ | pop | `ng` | N×μ |
+|---|---|---|---|---|---|
+| N/4, μ×4 | 32 | 0.004 | 1,257 | 20.72 | 5.03 |
+| baseline | 64 | 0.001 | 6,778 | 19.98 | 6.78 |
+| N×4, μ/4 | 128 | 0.00025 | 30,616 | 22.87 | 7.65 |
+| **N, μ×4** | 64 | 0.004 | 4,651 | 19.68 | **18.60** |
+
+Constant-N×μ cells should match and the 4× cell should differ. **Both fail**:
+`large` differs from baseline despite matched N×μ (+2.89, p = 0.022), while
+`refhigh` at nearly 4× the product is indistinguishable (−0.30, p = 0.77).
+
+**N×μ does not govern architecture in this model**, exactly as Knibbe's own
+caveat predicts for a model without rearrangements. Their framework is
+rearrangement-specific rather than general.
+
+## `niter` sensitivity: direction robust, magnitude not
+
+The headline was re-run across `dev_iters` ∈ {4, 8, 12, 20}, 10 seeds per arm:
+
+| `niter` | Δ`ng` | p | Δ edges | p | edges % |
+|---|---|---|---|---|---|
+| 4 | +12.48 | 0.008 | +780.2 | 0.010 | +98% |
+| 8 | +3.60 | 0.217 | +159.9 | 0.331 | +23% |
+| 12 | +10.77 | 0.005 | +586.2 | 0.005 | +112% |
+| 20 | +5.16 | 0.077 | +241.0 | 0.127 | +42% |
+
+**Direction survives everywhere — all four positive. Magnitude does not**: edges
+span +23% to +112% and significance swings from p = 0.005 to p = 0.33. The
+information null is the most robust thing in the table, holding at every value
+(p = 0.087, 0.518, 0.355, 0.209).
+
+**Caveat, and it is a flaw in the test.** This runner sets neither
+`p_edge_silence` nor `maint_edge`, so the networks saturate and "edges" merely
+tracks `ng²`. It therefore probes the *saturated* regime, not the sparse one
+where the edge/node decomposition was measured. The fluctuation effect and the
+information null are shown `niter`-robust; **the edge decomposition is not yet**,
+and a corrected run needs the sparsity parameters on.
+
 ## Novelty audit: what is actually new here
 
 Run *after* writing the result up, which was the wrong order and is the fourth
