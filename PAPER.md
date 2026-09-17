@@ -60,6 +60,30 @@ The fluctuation term survives, and the population term carries the **expected
 negative sign**, consistent with Lynch and with §1.4. The density effect is
 essentially population-independent.
 
+**It is robust to development time.** `dev_iters` controls the phenotype
+completely — changing it 8 → 9 or 8 → 10 flips the top uptake channel in 100% of
+organisms (§3) — so it is the sharpest available test of whether the result is an
+artefact of one setting. Re-run at 20 seeds per arm with sparsity on:
+
+| `dev_iters` | Δ`ng` | p | Δ density | p | excess over `ng²` |
+|---|---|---|---|---|---|
+| 4 | +6.28 | <0.0001 | **+0.144** | <0.0001 | +38% |
+| 8 | +5.81 | <0.0001 | **+0.138** | <0.0001 | +37% |
+| 12 | +5.71 | <0.0001 | **+0.118** | <0.0001 | +31% |
+| 20 | +5.36 | <0.0001 | **+0.120** | <0.0001 | +30% |
+
+`ng` spans +5.4 to +6.3, density +0.118 to +0.144, excess +30% to +38% — all at
+p < 0.0001. **Across a parameter that reshuffles every phenotype, the effect
+barely moves.** This is also the answer to "development never converges, so why
+should the phenotype mean anything": the result does not depend on where in the
+oscillation the state is sampled.
+
+*(An earlier version of this test appeared to show instability, +23% to +112%.
+That run set no sparsity parameters, so networks saturated and "edges" merely
+tracked `ng²`. The corrected version is above; the flawed one is recorded in §3
+because the failure mode — measuring a proxy instead of the quantity — is worth
+stating.)*
+
 *Caveat to carry:* the largest effects come from the mildest sparsity regimes. At
 the sparsest setting the magnitude is measured on survivors (see §1.3), so treat
 existence as established and magnitude at high extinction as approximate.
@@ -74,6 +98,19 @@ Established with a **yoked control**: identical world, identical rotation,
 identical ecology, with only the cue's mutual information with the environmental
 state removed (2.585 bits → ~0.067). A third arm with no cue at all anchors the
 baseline, and the scrambled arm is statistically indistinguishable from it.
+
+**It also holds across development time.** The one comparison that had suggested
+otherwise (`dev_iters` = 4, +2.98, p = 0.009) does not replicate at 8, 12 or 20
+(p = 0.47, 0.73, 0.48). On density the pattern is the same and the isolated hit
+is *negative* (`dev_iters` = 8, p = 0.021). Two isolated hits in eight
+comparisons, pointing opposite ways, is noise.
+
+| `dev_iters` | Δ`ng` | p |
+|---|---|---|
+| 4 | +2.98 | **0.009** |
+| 8 | +0.90 | 0.47 |
+| 12 | +0.54 | 0.73 |
+| 20 | +0.70 | 0.48 |
 
 *This is the most robust finding in the work.* Complexity responds to change, not
 to *solvable* change.
@@ -209,7 +246,7 @@ this in the paper — it is more defensible than discovering it in review.
 
 | caveat | detail |
 |---|---|
-| **Development never converges** | Activations saturate (mean \|e\| 0.846) and ~92% of nodes flip sign every iteration. The phenotype is a snapshot of an oscillation, not a fixed point. `dev_iters` changes the top uptake channel in 100% of organisms. Direction of results is `niter`-robust; magnitude is not (edges +23% to +112% across `niter` ∈ {4,8,12,20}). |
+| **Development never converges** | Activations saturate (mean \|e\| 0.846) and ~92% of nodes flip sign every iteration. The phenotype is a snapshot of an oscillation, not a fixed point, and `dev_iters` changes the top uptake channel in 100% of organisms. **But the result is robust to it**: density effect +0.118 to +0.144 across `dev_iters` ∈ {4,8,12,20}, all p < 0.0001 (§1.1). An earlier version of this test appeared unstable (+23% to +112%) because it ran *without* sparsity, so "edges" tracked `ng²` rather than connectivity — a proxy measured in place of the quantity. |
 | **Scramble leaked 0.067 bits** | The zero-information control was verified with a spatial gradient but used without one, where an integer multiplier locks to the cycle. 2.585 vs 0.067 is still 39×, and residual signal makes the null *conservative*. Fixed (irrational multiplier); pre-fix runs not bit-reproducible. |
 | **Survivorship in sparse regimes** | Frozen 0/60 extinct vs fluctuating 37/60. Effect size *falls* as extinction rises (+122% → +55%), so survivorship does not manufacture it — but magnitudes at high extinction are approximate. |
 | **Modularity is not properly testable** | Q is measurable only at low density (0.146 at 0.60 vs 0.06 at saturation), and that regime kills 55–62% of fluctuating populations. Q null has a detection floor of 0.022 (~15%). |
@@ -258,8 +295,6 @@ this in the paper — it is more defensible than discovering it in review.
 
 ## 6. Still open
 
-- `niter` 12 and 20 in the sparse regime (running at time of writing) — decides
-  whether the edge decomposition is development-time-robust.
 - The LaBar & Adami discrepancy.
 - Independent replication, ideally in Aevol.
 - Modularity, which needs a regime that is both sparse and survivable.

@@ -2261,30 +2261,59 @@ Constant-N×μ cells should match and the 4× cell should differ. **Both fail**:
 caveat predicts for a model without rearrangements. Their framework is
 rearrangement-specific rather than general.
 
-## `niter` sensitivity: direction robust, magnitude not
+## `dev_iters` sensitivity, corrected: the result barely moves
 
-The headline was re-run across `dev_iters` ∈ {4, 8, 12, 20}, 10 seeds per arm:
+The first version of this test set neither sparsity parameter, so networks
+saturated and "edges" merely tracked `ng²` — it probed the saturated regime
+rather than the sparse one where connectivity is a real measurement. That run is
+retained below as a methods note; this is the corrected one, sparsity on, 20
+seeds per arm.
 
-| `niter` | Δ`ng` | p | Δ edges | p | edges % |
+`dev_iters` controls the phenotype completely — changing it 8 → 9, or 8 → 10,
+flips the top uptake channel in **100%** of organisms — so it is the sharpest
+available test of whether these results are an artefact of one setting.
+
+| `dev_iters` | Δ`ng` | p | Δ density | p | excess over `ng²` |
 |---|---|---|---|---|---|
-| 4 | +12.48 | 0.008 | +780.2 | 0.010 | +98% |
-| 8 | +3.60 | 0.217 | +159.9 | 0.331 | +23% |
-| 12 | +10.77 | 0.005 | +586.2 | 0.005 | +112% |
-| 20 | +5.16 | 0.077 | +241.0 | 0.127 | +42% |
+| 4 | +6.28 | <0.0001 | **+0.144** | <0.0001 | +38% |
+| 8 | +5.81 | <0.0001 | **+0.138** | <0.0001 | +37% |
+| 12 | +5.71 | <0.0001 | **+0.118** | <0.0001 | +31% |
+| 20 | +5.36 | <0.0001 | **+0.120** | <0.0001 | +30% |
 
-**Direction survives everywhere — all four positive. Magnitude does not**: edges
-span +23% to +112% and significance swings from p = 0.005 to p = 0.33. The
-information null is the most robust thing in the table, holding at every value
-(p = 0.087, 0.518, 0.355, 0.209).
+**The effect barely moves.** `ng` spans +5.4 to +6.3, density +0.118 to +0.144,
+excess over the `ng²` baseline +30% to +38%, every cell at p < 0.0001. Across a
+parameter that reshuffles every phenotype in the population, the result is
+stable.
 
-**Caveat, and it is a flaw in the test.** This runner sets neither
-`p_edge_silence` nor `maint_edge`, so the networks saturate and "edges" merely
-tracks `ng²`. It therefore probes the *saturated* regime, not the sparse one
-where the edge/node decomposition was measured. The fluctuation effect and the
-information null are shown `niter`-robust; **the edge decomposition is not yet**,
-and a corrected run needs the sparsity parameters on.
+That is also the answer to the obvious objection raised by the non-convergence
+finding above — if development is a snapshot of an oscillation, why should the
+phenotype mean anything? Because the result does not depend on where in the
+oscillation it is sampled.
 
-## Novelty audit: what is actually new here
+### And the information null holds here too
+
+One cell had suggested otherwise. It does not replicate:
+
+| `dev_iters` | Δ`ng` informative − scrambled | p |
+|---|---|---|
+| 4 | +2.98 | **0.009** |
+| 8 | +0.90 | 0.47 |
+| 12 | +0.54 | 0.73 |
+| 20 | +0.70 | 0.48 |
+
+On density the pattern repeats and the single hit is *negative* (`dev_iters` = 8,
+p = 0.021). Two isolated hits in eight comparisons pointing opposite ways is
+noise, and it matches what the pooled meta-analysis already indicated.
+
+### The methods note worth keeping
+
+The flawed first version reported the fluctuation effect on "edges" swinging
++23% to +112% across `dev_iters`, and that instability was entirely an artefact
+of measuring `ng²` under another name. **A proxy substituted for the quantity of
+interest produced an apparent result about robustness that was not about
+robustness at all.**
+
+## Novelty audit: what is actually new here## Novelty audit: what is actually new here
 
 Run *after* writing the result up, which was the wrong order and is the fourth
 time in this project a novelty claim has had to be cut back.
