@@ -12,22 +12,57 @@ Two independent code reviews. One defect found and fixed.
 
 ## 1. What to claim, ranked by strength
 
-### 1.1 Fluctuation raises complexity, and acts far more on connectivity than on gene count
+### 1.1 Fluctuation raises connection density, not just network size
 
-The central result. **7 of 7 independent comparisons positive, every one significant.**
+The central result. **7 of 7 independent comparisons positive on node count,
+every one significant.**
 
 | measure | comparisons | mean effect | range |
 |---|---|---|---|
-| node count `ng` | 7/7 positive | **+6.32** | +2.64 to +10.15 |
+| node count `ng` | 7/7 positive | **+6.32** (~+32%) | +2.64 to +10.15 |
 | edge count | 6/6 positive | **+104%** | +63% to +122% |
+| **connection density** | **5/6 significant** | **+0.09 to +0.14** | see below |
 
-Nodes rise ~31%; edges **more than double**. Holds across edge densities from
-0.99 to 0.60, across two development-time settings, and across separate
-experiments.
+**State the claim as density, not as raw edge count.** Edges scale as `ng²`, so a
+32% rise in nodes mechanically yields ~75% more edges *at constant density*. The
+raw "+104% edges against +32% nodes" comparison therefore overstates the case,
+and a reviewer will say so immediately. The measured excess over that arithmetic
+baseline:
 
-*Caveat to carry:* the largest effects come from the mildest sparsity regimes.
-At the sparsest setting the magnitude is measured on survivors (see 1.3), so
-treat existence as established and magnitude at high extinction as approximate.
+| experiment | `ng` % | predicted from `ng²` | observed | excess | density frozen → fluctuating | p |
+|---|---|---|---|---|---|---|
+| SP | +32% | +75% | +112% | +37% | 0.827 → 0.916 | <0.0001 |
+| SWA | +42% | +102% | +98% | **−4%** | 0.987 → 0.988 | 0.64 |
+| SWB | +35% | +82% | +122% | +41% | 0.823 → 0.922 | <0.0001 |
+| SWC | +16% | +36% | +63% | +27% | 0.618 → 0.722 | 0.009 |
+| N2-4 | +34% | +78% | +116% | +38% | 0.606 → 0.750 | <0.0001 |
+| N2-8 | +32% | +75% | +112% | +37% | 0.592 → 0.730 | <0.0001 |
+
+Mean excess **+29 percentage points**, and density rises significantly in 5 of 6.
+
+**The exception is the evidence.** SWA is the saturated regime (density 0.987),
+where density *cannot* rise — and there the excess is −4%, i.e. the edge increase
+is exactly what node growth predicts and nothing more. Where density can move it
+does; where it cannot, the effect reduces to arithmetic. That internal
+consistency is worth reporting explicitly.
+
+**It is not a population artefact.** Frozen populations are larger (3,238 vs
+2,583), and this work's own results have population driving genome size, so the
+confound must be addressed. Regressing on both:
+
+| response | fluctuating | log₂(population) |
+|---|---|---|
+| `ng` | **+4.76 (t = +4.76)** | −2.80 (t = −2.15) |
+| density (SP) | **+0.084 (t = +9.88)** | −0.013 (t = −1.15, n.s.) |
+| density (N2-8) | **+0.127 (t = +10.89)** | −0.028 (t = −1.85, n.s.) |
+
+The fluctuation term survives, and the population term carries the **expected
+negative sign**, consistent with Lynch and with §1.4. The density effect is
+essentially population-independent.
+
+*Caveat to carry:* the largest effects come from the mildest sparsity regimes. At
+the sparsest setting the magnitude is measured on survivors (see §1.3), so treat
+existence as established and magnitude at high extinction as approximate.
 
 ### 1.2 The information content of the fluctuation is irrelevant
 
@@ -180,6 +215,8 @@ this in the paper — it is more defensible than discovering it in review.
 | **Modularity is not properly testable** | Q is measurable only at low density (0.146 at 0.60 vs 0.06 at saturation), and that regime kills 55–62% of fluctuating populations. Q null has a detection floor of 0.022 (~15%). |
 | **`nzw` was a bad measure before sparsity existed** | Point mutations are additive, so density ratchets with lineage depth (0.25 → 0.86) regardless of selection. One earlier inference retracted. |
 | **Single model, single architecture** | No independent replication. Aevol is the obvious platform. |
+| **Edge count is not independent of node count** | Edges scale as `ng²`. Always report density alongside, and show the excess over the `ng²` baseline (mean +29 points, 5/6 significant). |
+| **Arms differ in population size** | Frozen 3,238 vs fluctuating 2,583. Addressed by regression: the fluctuation term survives and population carries the expected negative sign. Report the regression, not just the means. |
 
 ---
 
@@ -203,8 +240,10 @@ this in the paper — it is more defensible than discovering it in review.
 
 ## 5. Figures to produce
 
-1. **Fluctuation effect, nodes vs edges** — paired bars across the sparsity
-   sweep, showing edges responding ~3× more.
+1. **Fluctuation raises density** — observed edge increase against the `ng²`
+   prediction at each sparsity level, with the saturated regime (SWA) shown as
+   the case where the excess vanishes. This is the figure that answers the
+   "edges scale as `ng²`" objection pre-emptively.
 2. **The yoked control** — three arms (no cue / scrambled / informative) on
    cue usage *and* on `ng`, showing behaviour responds and complexity does not.
 3. **Extinction cost** — survival by arm at each sparsity level, with the
@@ -256,7 +295,23 @@ reconstruction. **Five of six were wrong.**
   measurement functions.
 - **Scale:** ~1,835 runs across 25 experiments, plus 8 × 25M ticks.
 
-## 9. Suggested framing
+## 9. Anticipated reviewer objections
+
+Written out so they can be answered in the paper rather than in a rebuttal.
+
+| objection | answer | where |
+|---|---|---|
+| "Edges scale as `ng²` — your edge effect is just node growth." | Density is measured directly and rises +0.09–0.14, significant in 5/6, a mean +29 points above the `ng²` baseline. The saturated regime shows −4% excess, exactly as it should. | §1.1 |
+| "Your arms differ in population size, and you say population drives genome size." | Regression: fluctuation +4.76 (t = +4.76) on `ng` and +0.084/+0.127 (t ≈ 10) on density; population carries the expected negative sign and is n.s. for density. | §1.1 |
+| "Absence of evidence is not evidence of absence — what is your power?" | Detection floors stated for every null: 2.21, 3.41, 4.19 nodes; Q floor 0.022 (~15%); and the information null pooled to t = −0.30 over 15 comparisons. | §1.2, §1.4 |
+| "Survivorship — 37/60 of your fluctuating runs died." | Effect size *falls* as extinction rises (+122% → +55%), the opposite of what survivorship would produce. Magnitudes at high extinction reported as approximate. | §1.3, §3 |
+| "Your organisms only reach `matched` 1.55/6 — maybe they never solved the task well enough for information to matter." | Granted, and quantified: they exploit ~10.9% of available information, so the realised advantage is ≤0.28 bits against a 5.9-point detection floor. The fitness null is *consistent with* Kussell–Leibler, not evidence against it. | §3 |
+| "Development never reaches a fixed point — why does the phenotype mean anything?" | It is deterministic, heritable, and robust to small weight perturbations; evolution acts on a well-defined trait. Direction of every result is `niter`-robust; magnitude is not, and that is stated. | §3 |
+| "Aevol already showed this." | Agreed for the population/mutation result, and cited. Their mechanism requires chromosomal rearrangements, which this model lacks, and their N×μ law is tested here and fails. Convergent evidence from different architectures. | §2 |
+| "Single model." | Conceded. Independent replication in Aevol named as the priority next step. | §2, §6 |
+| "Why these parameter values?" | Every regime was chosen by a documented viability pilot, not tuned to a result; extinction boundaries are reported alongside effects. | §4 |
+
+## 10. Suggested framing
 
 **Venue:** ALIFE conference or a short contribution to *Artificial Life*. Not a
 general evolution journal — the science is two modest refinements of established
