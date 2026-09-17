@@ -2027,6 +2027,58 @@ per-iteration sign-flipping are one phenomenon. In Kauffman's terms these
 networks sit firmly on the chaotic side rather than at criticality, which is
 where dense networks are expected to be.
 
+## Meta-analysis: pooling every comparison in this project
+
+Before any write-up, every comparison run here was pooled rather than reported
+cell by cell. Reporting sixteen experiments individually invites picking the
+flattering ones; pooling shows whether the pattern holds.
+
+### The fluctuation effect — 7 comparisons, all positive
+
+| experiment | `ng` frozen → fluctuating | p | edges | p |
+|---|---|---|---|---|
+| edges experiment | 18.01 → 23.82 (+5.81) | <0.0001 | +112% | <0.0001 |
+| sparse level A | 24.04 → 34.20 (+10.15) | 0.010 | +98% | 0.022 |
+| sparse level B | 18.60 → 25.06 (+6.47) | 0.0001 | +122% | 0.0001 |
+| sparse level C | 16.04 → 18.68 (+2.64) | 0.005 | +63% | 0.002 |
+| modularity experiment | 23.77 → 30.83 (+7.06) | 0.0003 | — | — |
+| `niter` 4 (sparse) | 18.71 → 24.99 (+6.28) | <0.0001 | +116% | <0.0001 |
+| `niter` 8 (sparse) | 18.01 → 23.82 (+5.81) | <0.0001 | +112% | <0.0001 |
+
+**Every comparison positive, every one significant.** `ng` mean +6.32 (range
++2.64 to +10.15); edges mean **+104%** (range +63% to +122%). Edges respond
+roughly **3.3× more than nodes**, across sparsity levels, `niter` values and
+separate experiments.
+
+### The information null — 15 comparisons, centred on zero
+
+Pooling every informative-vs-scrambled comparison on `ng`:
+
+- **9 positive, 6 negative**
+- mean difference **−0.171**, SE 0.562 → **t = −0.30** against zero
+- sign test: 9/15 positive, **p = 0.61**
+- significant at p < 0.05: **2/15**, against a chance expectation of 0.8
+
+And the two significant results point in **opposite directions** — regime C at
+−3.19 (p = 0.037) and `niter` 4 at +2.98 (p = 0.009). That is what noise looks
+like, not a suppressed effect. It also defuses the `niter` = 4 result flagged
+above: one of two hits in fifteen, with its counterpart going the other way.
+
+### Code-level claims, verified together
+
+All nine "off by default, bit-identical when off" claims checked against a common
+baseline on population, phenotypes **and** weight matrices: `uptake_half`,
+`cond_states`, `redevelop_every`, `independent_states`, `p_edge_silence`,
+`maint_edge`, `dev_iters`, `cond_scramble`, `rotate_yield` — **9/9 pass**, with
+every default matching what this README states, and a negative control
+confirming the check can detect divergence.
+
+The first version of that check silently passed regardless of failures: the
+accumulator hit Julia's soft-scope rule, became a new local, and the script
+printed the untouched global. It is the trap already documented in this
+README's development notes, written again anyway — which is the argument for the
+negative control that now accompanies it.
+
 ## The cost of complexity: fluctuation is lethal when wiring is expensive
 
 The sparse regime was re-run at 60 seeds per arm on a second machine, because the
