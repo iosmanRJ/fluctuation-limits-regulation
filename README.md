@@ -2027,6 +2027,79 @@ per-iteration sign-flipping are one phenomenon. In Kauffman's terms these
 networks sit firmly on the chaotic side rather than at criticality, which is
 where dense networks are expected to be.
 
+## The cost of complexity: fluctuation is lethal when wiring is expensive
+
+The sparse regime was re-run at 60 seeds per arm on a second machine, because the
+first pass gave only 3 and 2 survivors — the sample size that has produced three
+false signals in this work.
+
+| arm | n | extinct | `ng` | edges | density | Q | pop |
+|---|---|---|---|---|---|---|---|
+| frozen | 60 | **0/60** | 15.99 | 98.9 | 0.604 | 0.146 | 3091 |
+| informative | 23 | **37/60** | 17.42 | **153.4** | 0.735 | 0.138 | 2296 |
+| scrambled | 27 | **33/60** | 16.97 | **147.6** | 0.729 | 0.140 | 2225 |
+
+### The strongest single result in this project
+
+**Frozen dies in 0 of 60 runs. Fluctuating dies in 37 and 33 of 60. Fisher exact
+p = 3.6×10⁻¹³.**
+
+The arms differ *only* in `cond_period` (10⁹ against 600) — same grid, same
+sparsity, same inflow fraction, and the frozen arm still routes 20% of inflow by
+the rotation, merely to a fixed state. There is no confound; the comparison is
+exactly what it claims.
+
+And it is information-independent: 37/60 against 33/60 is indistinguishable
+whether or not the cue predicts anything. **What kills these populations is
+change itself, not unpredictable change.**
+
+### It also explains the edge result mechanistically
+
+Organisms meet fluctuation by **adding wiring** — edges +55% and +49%
+(p < 0.0001) against nodes +1.4 and +1.0 (p = 0.001, 0.008). Put a price on
+wiring and they cannot mount that response, so they die. The complexity increase
+is not decorative: **it is what surviving a changing environment costs**, and
+under a per-edge tax most populations cannot pay it.
+
+Information remains null on every measure — `ng` p = 0.37, edges p = 0.62,
+density p = 0.76, Q p = 0.92.
+
+### Audit of these numbers
+
+**Survivorship was the obvious threat and it does not explain the edge effect.**
+Frozen is unselected at 0/60 while the fluctuating survivors are a filtered
+sample, so the comparison could in principle be an artefact of selection. But the
+pattern runs the wrong way:
+
+| level | density | info extinct | edge effect |
+|---|---|---|---|
+| 0.05 / 0 | 0.987 | 1/10 | +62% |
+| 0.2 / 5e-5 | 0.823 | 1/10 | **+122%** |
+| 0.3 / 2e-4 | 0.618 | 7/10 | +66% |
+| 0.3 / 2e-4, n = 60 | 0.604 | **37/60** | **+55%** |
+
+Extinction rises from 10% to 62% while the effect *falls* from +122% to +55%. If
+survivorship were manufacturing it, the effect would be largest where selection
+is hardest; it is smallest there.
+
+The qualification stands, though: **the +55% is measured on survivors** and is
+not directly comparable to the +122% at lower extinction. Treat the existence of
+the effect as established and its magnitude at high extinction as approximate.
+
+**The Q null needs its detection floor attached.** Q is now measurable — 0.146 at
+density 0.60, against 0.06 at saturation — and shows no fluctuation effect
+(p = 0.31, 0.48). But with n = 23 in the informative arm the minimum detectable
+difference is **0.022, roughly 15% of the frozen mean**. So the correct statement
+is "no effect larger than 15%", not "no effect". Kashtan & Alon's reported effects
+are larger than that, so it remains informative.
+
+### What this closes
+
+The regime sparse enough for modularity to be meaningful is the regime where
+fluctuating environments kill 55–62% of populations. Testing Kashtan & Alon
+properly here is therefore not a matter of tuning — it is blocked by a measured
+trade-off, backed by 180 runs.
+
 ## Aevol: the same conclusion by a different mechanism
 
 A late sweep of genome-architecture literature — searched with different terms
