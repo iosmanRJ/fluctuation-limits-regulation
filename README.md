@@ -2027,6 +2027,57 @@ per-iteration sign-flipping are one phenomenon. In Kauffman's terms these
 networks sit firmly on the chaotic side rather than at criticality, which is
 where dense networks are expected to be.
 
+## Code review: one real defect, found and fixed
+
+A systematic review of the paths the claims rest on. Most held; one did not.
+
+### The scrambled cue was not at zero bits in the runs that used it
+
+The scramble was tuned and verified **with a spatial gradient**, where it
+measured 0.0000 bits. But `cond_gradient = false` drops the spatial term, and the
+remaining integer temporal multiplier (7 turns per cycle) is commensurate with
+the cycle, so the phases lock:
+
+| multipliers | no gradient | with gradient |
+|---|---|---|
+| 7.0 / 5.0 (as used) | **0.0666 bits** | 0.0000 bits |
+| 6.1803399 / 5.0 (fixed) | **0.0004 bits** | 0.0014 bits |
+
+**Every experiment after the grain work used `cond_gradient = false`**, so their
+scrambled arms carried ~0.067 bits rather than the 0.000 claimed here and in the
+commit messages.
+
+**Does it change any conclusion? No.** The comparison remains 2.585 bits against
+0.067 — a **39× difference** — so "informative versus effectively uninformative"
+still holds, and any residual signal in the scrambled arm makes the information
+null *conservative* rather than inflated. But the figure quoted was wrong, and
+statements of "0.000 bits" for non-gradient runs are corrected to 0.067.
+
+The multiplier is now **irrational** (5 + φ), which cannot lock in either mode,
+with a test covering gradient and non-gradient. Note this changes the scrambled
+cue stream, so scrambled runs from before this fix are not bit-reproducible under
+the current code.
+
+### What the review checked and cleared
+
+- **Determinism under threading.** Identical population, mean `ng` to six
+  decimals, total `nzw` and phenotype sum at **1, 4 and 8 threads**, on the full
+  feature set — sparsity, reversible plasticity, abiotic cue and all.
+- **Sparsity is real disconnection, not an accounting artefact.** `maint_edge`
+  charges for `|w| > 1e-4`, so weights could in principle hide below the
+  threshold. Measured: **0.0%** of weights fall in that band, 28.7% are exactly
+  zero, and density by exact-zero and by threshold agree to four decimals
+  (0.7133 both ways).
+- **The frozen arm is genuinely frozen** — one state visited across 150,000
+  ticks, cue constant to within 3×10⁻⁴.
+- **Inflow follows the best-paying channel 6/6** under both rotation and
+  independent permutations.
+- **`redevelop!` keeps `chan_cost` consistent** with the phenotype it derives
+  from — zero stale entries across a run.
+- **Maintenance accounting** applies `maint_edge` to the cached `nzw`, which is
+  refreshed at birth and stays valid because the genome does not change during
+  life.
+
 ## Meta-analysis: pooling every comparison in this project
 
 Before any write-up, every comparison run here was pooled rather than reported

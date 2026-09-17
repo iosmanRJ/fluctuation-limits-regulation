@@ -100,6 +100,22 @@ using Test, Random, Statistics
     @test mutinf(J)  > 2.0                   # informative cue: ~2.585 bits
     @test mutinf(Js) < 0.01                  # scrambled cue: no usable signal
 
+    # The scramble must be clean in BOTH gradient modes. An earlier integer
+    # multiplier was 0.000 bits with a gradient and 0.067 without, because
+    # without the spatial term the phases are commensurate and lock.
+    for grad in (false, true)
+        pia = Params(cond_states = 6, cond_period = 600, cond_gradient = grad)
+        psa = Params(cond_states = 6, cond_period = 600, cond_gradient = grad,
+                     cond_scramble = true)
+        M = zeros(Int, 6, 6)
+        for tt in 0:2999, x in Int32(1):Int32(16)
+            cs, ss = condition_at(psa, x, 16, tt)
+            @assert condition_at(pia, x, 16, tt)[2] == ss
+            M[1 + min(5, floor(Int, (cs + 1) / 2 * 6)), ss] += 1
+        end
+        @test mutinf(M) < 0.02               # clean with AND without a gradient
+    end
+
     # fractional conditional inflow splits supply rather than starving a channel
     @test Params().cond_inflow_frac == 0.0f0
     let pf = Params(cond_states = 6, cond_inflow_frac = 0.4f0, grid = 16),

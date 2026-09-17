@@ -181,11 +181,14 @@ zoned task failed precisely because consumers flatten the field they must read.
         # Drive the cue from an incommensurate period so it stays bounded and
         # smoothly varying -- the sensor sees a signal of the same shape and
         # magnitude -- but carries no usable information about `state`.
-        # 7 temporal turns against 5 spatial ones: same shape, same range, same
-        # smoothness as the real cue, but measured mutual information with
-        # `state` is 0.0000 bits. A golden-ratio scramble was tried first and
-        # leaked 0.72 bits, because cue and state then share the spatial term.
-        q = Float32(mod(t, p.cond_period) * 7.0f0) / Float32(p.cond_period)
+        # The temporal multiplier must be IRRATIONAL. An integer one is
+        # commensurate with the cycle: 7.0 measured 0.000 bits WITH a spatial
+        # gradient but leaked 0.067 bits without one, because with `cond_gradient
+        # = false` the spatial term drops out and the two phases lock. 5 + phi
+        # never locks, and measures 0.0004 bits without a gradient and 0.0014
+        # with one. (A pure golden-ratio pair was tried earlier and leaked 0.72
+        # bits, because cue and state then SHARE the spatial term.)
+        q = Float32(mod(t, p.cond_period) * 6.1803399f0) / Float32(p.cond_period)
         if p.cond_gradient
             q += Float32(Int(x) - 1) * 5.0f0 / Float32(G)
         end
