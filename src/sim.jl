@@ -110,7 +110,7 @@ function seed_population!(sim::Sim, n::Int)
         end
         develop!(sim.phen_scratch, sim.e_scratch, sim.buf_scratch,
                  pop.W, pop.bias, i, sim.env_scratch, Int(pop.ng[i]);
-                 plasticity = p.plasticity,
+                 plasticity = p.plasticity, niter = p.dev_iters,
                  cond = condition_at(p, pop.x[i], env.G, sim.gen)[1])
         @inbounds for k in 1:NPHEN
             pop.phen[k, i] = sim.phen_scratch[k]
@@ -176,7 +176,7 @@ function redevelop!(sim::Sim)
         end
         cue = condition_at(p, xi, G, sim.gen)[1]
         develop!(ph, e, buf, pop.W, pop.bias, i, es, Int(pop.ng[i]);
-                 plasticity = plast, cond = cue)
+                 plasticity = plast, cond = cue, niter = p.dev_iters)
         for k in 1:NPHEN
             pop.phen[k, i] = ph[k]
         end
@@ -451,7 +451,7 @@ function settle_births!(sim::Sim)
                 # is committed to it for life, so the genome -- not the
                 # individual -- has to hold a map that works in every state.
                 develop!(phen, e, buf, pop.W, pop.bias, child, envs, ng_c;
-                         plasticity = plast, cond = ccue)
+                         plasticity = plast, cond = ccue, niter = p.dev_iters)
                 for kk in 1:NPHEN
                     pop.phen[kk, child] = phen[kk]
                 end

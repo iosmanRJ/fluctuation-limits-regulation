@@ -2,7 +2,15 @@
 # Gene-regulatory-network genome.
 #
 # A genome is a weight matrix W (node -> node) plus per-node bias. Development
-# runs the network to an approximate fixed point ONCE at birth; the resulting
+# runs the network for `niter` iterations ONCE at birth and reads off the result.
+# NOTE: this is NOT a fixed point. Measured on evolved networks, activations
+# saturate (mean |e| = 0.85) and ~92% of nodes flip sign every iteration
+# indefinitely, so the phenotype is a snapshot of a saturated oscillation.
+# `dev_iters` therefore has total effect on the phenotype -- changing it 8 -> 9
+# or 8 -> 10 flips the top uptake channel in 100% of organisms -- and it is a
+# parameter to be swept, not an implementation detail. The map is still
+# deterministic, heritable and robust to small weight changes, so evolution has
+# something well-defined to act on.; the resulting
 # expression vector is read off as the phenotype and CACHED for life. That is
 # ~15x cheaper than re-expressing every tick and is the biologically sensible
 # model anyway: develop, then live as an adult.

@@ -256,6 +256,30 @@ using Test, Random, Statistics
         @test dens < 0.95            # saturation is escapable
     end
 
+    # dev_iters: exposed because development does NOT converge. Activations
+    # saturate and ~92% of nodes flip sign every iteration, so the phenotype is a
+    # snapshot of an oscillation and the iteration count has total effect.
+    @test Params().dev_iters == 8
+    let a = Sim(Params(seed = 11, grid = 16)),
+        b6 = Sim(Params(seed = 11, grid = 16, dev_iters = 8))
+        for _ in 1:200; step!(a); step!(b6); end
+        @test a.pop.n == b6.pop.n
+        @test a.pop.phen == b6.pop.phen        # the default is genuinely 8
+    end
+    # and it must actually reach development: a different count gives a different
+    # phenotype, which is the whole reason it needs to be swept
+    let W = zeros(Float32, NG_MAX, NG_MAX, 1), bs = zeros(Float32, NG_MAX, 1)
+        seed_genome!(W, bs, 1, MersenneTwister(5))
+        e = zeros(Float32, NG_MAX); buf = zeros(Float32, NG_MAX)
+        p8 = zeros(Float32, NPHEN); p9 = zeros(Float32, NPHEN); p8b = zeros(Float32, NPHEN)
+        env = fill(0.5f0, NRES)
+        develop!(p8,  e, buf, W, bs, 1, env, NG_MAX; niter = 8)
+        develop!(p9,  e, buf, W, bs, 1, env, NG_MAX; niter = 9)
+        develop!(p8b, e, buf, W, bs, 1, env, NG_MAX; niter = 8)
+        @test p8 == p8b                        # deterministic
+        @test p8 != p9                         # and not a fixed point
+    end
+
     # a full run with the condition on stays alive and reproducible
     s1 = Sim(Params(seed = 3, grid = 24, cond_states = 6, cond_period = 500))
     s2 = Sim(Params(seed = 3, grid = 24, cond_states = 6, cond_period = 500))

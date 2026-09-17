@@ -172,6 +172,20 @@ Base.@kwdef mutable struct Params
     #
     # Making sparsity achievable needs BOTH of these. A cost with no mechanism to
     # produce zeros would just tax everyone equally with no escape.
+    # --- how long development runs -------------------------------------------
+    # develop! iterates the network this many times and the result is read off as
+    # the phenotype. It was described as "an approximate fixed point"; it is not.
+    # Measured: activations saturate (mean |e| = 0.85) and ~92% of nodes flip
+    # sign EVERY iteration, indefinitely -- step size at iteration 24 is 1.03x
+    # that at iteration 8, so nothing is settling. The phenotype is a snapshot of
+    # a saturated global oscillation.
+    #
+    # That makes this a parameter with TOTAL effect: changing it from 8 to 9, or
+    # even to 10, flips the top uptake channel in 100% of organisms. It was
+    # previously hard-coded as a keyword default and never varied, so it is
+    # exposed here to be swept like anything else.
+    dev_iters::Int          = 8
+
     p_edge_silence::Float32 = 0.0f0   # per birth: set ONE random weight to zero
     maint_edge::Float32     = 0.0f0   # upkeep per non-zero weight, per tick
 

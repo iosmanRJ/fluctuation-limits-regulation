@@ -1977,6 +1977,56 @@ sparsity settings had to be mild — the wave arm goes extinct at
 values, while now responsive, remain small. A regime with genuinely sparse
 networks would test Kashtan & Alon properly; this one only shows the direction.
 
+## Development does not converge, and `niter` was a hidden parameter
+
+`develop!` iterates the network and the code described the result as *"an
+approximate fixed point"*. Prompted by the criticality literature — Kauffman's
+ordered/critical/chaotic classification turns on exactly this, and these networks
+run at 0.83–0.99 edge density — that assumption was tested. It is false.
+
+| measurement | value |
+|---|---|
+| mean \|activation\| after settling | **0.846** (1.0 = fully saturated) |
+| nodes flipping sign **every** iteration | **92.1%** |
+| mean \|weight\| | 0.183 |
+| step size, iteration 24 ÷ iteration 8 | **1.03 — no decay at all** |
+
+Activations saturate and then the network oscillates almost globally: nearly
+every node flips sign on every iteration, indefinitely. Step size *grows* from
+0.365 at iteration 1 to ~0.9 and stays there. `develop!` stops at iteration 8 and
+reads off whatever phase of that oscillation it lands on.
+
+### The consequence
+
+Changing the iteration count from 8 to 9 — **or to 10** — flips the top uptake
+channel in **100% of organisms**. Mean phenotype distance from the niter-8 result:
+1.78 at 9, 2.30 at 10, 0.97 at 11, 0.23 at 12, 0.39 at 20, 1.82 at 21. Not even a
+clean parity effect; the trajectory is complex enough that any change reshuffles
+every phenotype.
+
+So the iteration count is a parameter with **total effect on the phenotype**, and
+it had been hard-coded as a keyword default and never varied. It is now exposed
+as `dev_iters` and swept like anything else.
+
+### What this does and does not invalidate
+
+It does **not** invalidate the comparative results. `niter` = 8 throughout, the
+genotype→phenotype map is deterministic and heritable, and it is robust to small
+weight perturbations — sensitivity ≈ 0, because saturation absorbs them.
+Evolution optimises "the state at iteration 8", which is a well-defined trait.
+
+It does mean three things. The description of development in this codebase was
+**wrong** and is corrected. The biological metaphor the design rests on —
+development settling to a stable expression state — is **not what happens**. And
+a parameter with complete control over the phenotype went unexamined through
+every experiment above, which is why the headline result is being re-run across
+`dev_iters` ∈ {4, 8, 12, 20} before anything is written up.
+
+This is the same regime as the saturation finding: 99.6% edge density and 92%
+per-iteration sign-flipping are one phenomenon. In Kauffman's terms these
+networks sit firmly on the chaotic side rather than at criticality, which is
+where dense networks are expected to be.
+
 ## Novelty audit: what is actually new here
 
 Run *after* writing the result up, which was the wrong order and is the fourth
