@@ -1738,6 +1738,76 @@ to how much the environment changes, and to population size and gene cost — an
 to nothing about the task.** Four distinct task manipulations have now failed,
 the last two with adequate power.
 
+## Two follow-ups from adjacent literatures
+
+### Modularity cannot be measured here — the networks are saturated
+
+[Kashtan & Alon (*PNAS* 2005)](https://www.pnas.org/doi/10.1073/pnas.0503610102)
+report that modularity does not evolve under a fixed goal, does not evolve under
+*randomly* varying goals, and does emerge under goals built from shared subgoals.
+Every measurement in this project had been of network *size*; their result says
+the quantity that responds to the structure of environmental variation is
+**modularity**. The arms here map onto their contrast directly.
+
+Newman's Q on the weight graph, 20 seeds per arm:
+
+| arm | n | Q | edge density | `ng` |
+|---|---|---|---|---|
+| frozen (fixed goal) | 20 | 0.0587 | 0.9958 | 23.77 |
+| scrambled (randomly varying) | 17 | 0.0607 | 0.9980 | 30.45 |
+| informative (structured) | 20 | 0.0635 | 0.9947 | 31.15 |
+
+All comparisons null (p = 0.57, 0.80, 0.75).
+
+**This is a failed measurement, not a negative result.** Edge density is **0.9961
+across every arm**, and Newman's Q is defined by the *absence* of edges between
+communities. At that density there are almost no absent edges, so Q is pinned
+near zero by construction and cannot register a difference whatever the
+environment does — Q spans only 0.024–0.144 across all 60 runs. Reporting "no
+modularity effect" would have been wrong.
+
+This is consistent with something already visible in the long runs, where
+`mean_nonzero_w` ≈ `ng²`: these networks saturate. Genome size changes by *node
+count* while connectivity stays near complete. Kashtan & Alon's circuits were
+sparse by construction; these are not, so testing their claim would need sparsity
+to be achievable — a per-edge cost or a hard connectivity cap — which is a model
+change rather than another run.
+
+### The fitness null is consistent with theory, not a contradiction of it
+
+The extinction comparison (6.9% informative against 8.8% scrambled, p = 0.46) was
+written up earlier as "no detectable fitness advantage to information," which
+reads as a finding. Putting numbers on the theory shows it is not one.
+
+[Kussell & Leibler (2005)](https://www.science.org/doi/10.1126/science.1114383)
+and [Rivoire & Leibler
+(2011)](https://link.springer.com/article/10.1007/s10955-011-0166-2) bound the
+growth-rate gain from environmental information by the mutual information between
+cue and state:
+
+| quantity | value |
+|---|---|
+| H(environment) = log₂(6) | 2.585 bits |
+| mutual information, informative cue | 2.585 bits (perfect) |
+| mutual information, scrambled cue | 0.000 bits |
+| **theoretical ceiling on the advantage** | **2.585 bits/generation** |
+
+But that ceiling assumes an organism that reads the cue perfectly *and* converts
+it into a perfectly matched phenotype. Organisms here match the correct channel
+in **1.55 of 6 states** against a non-responsive baseline of 1/6, so they exploit
+**(1.55 − 1)/(6 − 1) = 10.9%** of the available information:
+
+> **realised advantage ≤ 0.282 bits per generation**
+
+Against a detection floor of **5.9 percentage points** in extinction rate, with an
+observed difference of 1.9 points. An edge that small, spread over runs of ~5,700
+generations with populations in the thousands, is absorbed by demographic
+stochasticity long before it appears as differential extinction.
+
+**So the experiment was never powered to see the effect theory predicts.** The
+null is consistent with Kussell–Leibler rather than evidence against it, and the
+earlier phrasing is withdrawn.
+
 ## Novelty audit: what is actually new here
 
 Run *after* writing the result up, which was the wrong order and is the fourth
