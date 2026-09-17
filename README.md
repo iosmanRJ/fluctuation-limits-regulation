@@ -1874,6 +1874,109 @@ Density now responds, and populations stay healthy. Connectivity becomes a secon
 evolvable dimension alongside node count, which is what the modularity question
 and any topology question needs.
 
+## The completed long run: 8 seeds x 25M ticks x ~630,000 generations
+
+The run finished. Final genome sizes: **13.0, 14.0, 12.0, 12.0, 14.0, 12.0, 12.0,
+12.0** — six of eight exactly at `NG_MIN` = 12, with `nzw` ≈ 144 ≈ 12². The
+trajectory ran 12.78 at generation 13,875, 12.75 through the middle, 12.63 at
+generation 634,225, last-quarter slope **−0.0002 per million ticks**. It reached
+the floor by generation ~14,000 and did nothing for the following 620,000.
+
+Digging past the genome size turned up four things.
+
+### Cross-feeding collapses at this timescale
+
+`top_share` for channel 1 is **0.999 throughout**, Shannon diversity 0.006–0.014.
+Essentially the whole population specialises on the primary resource, and the
+waste channels drain with it — res5 falls 20,903 → 1,082 and res6 3,495 → 10.
+
+**This qualifies a headline result above.** The cross-feeding figure reported
+earlier (stable at 0.26–0.30) comes from runs of 150k ticks. Over 630,000
+generations the ecotype structure does not merely weaken, it disappears. Whatever
+maintains cross-feeding on short timescales does not hold on long ones.
+
+### The population swings ~70×, but the cycle is imposed, not emergent
+
+Population ranges from ~500 to ~37,000 with CV 0.48–0.54, and the pattern is
+near-identical in all eight seeds. Autocorrelation gives a period of **exactly
+15,000 ticks, standard deviation 0 across seeds, r ≈ 0.995**.
+
+That exactness is the giveaway: `season_period = 15_000` is a parameter, and
+inflow is driven by `1 + 0.6·sin(2π·gen/15000)`. **This is the imposed seasonal
+forcing, not a discovered limit cycle** — it was nearly written up as one.
+
+What is worth noting is the **amplification**: a ±60% swing in inflow produces a
+~70-fold swing in population. The demographic response is strongly nonlinear.
+
+### Motility tracks the season — genetically, not plastically
+
+Motility swings between 0.002 and 0.994, in near-perfect antiphase with
+population (**r = −0.938 at zero lag**). Low population, high motility, larger
+size, resource-rich; high population, motility off, smaller size, resources drawn
+down.
+
+That looks like evolved plasticity, so it was tested directly: take the standing
+population and develop the *same genomes* across resource levels spanning
+0.05–4.0 per cell. Motility comes out **0.980, 0.994, 0.997, 0.998, 0.987,
+0.941** — essentially flat.
+
+**The swing is genetic turnover between seasons, not plasticity.** At ~27 ticks
+per generation there are ~550 generations per season, ample for selection to
+cycle the population. This is the same conclusion the grain analysis reached from
+the other direction: when the environment changes slowly relative to generation
+time, genetic tracking does the work and plasticity is never needed.
+
+### Genome size is decoupled from all of it
+
+`corr(pop, ng)` is **−0.015, −0.018, −0.030** in the first three seeds. The
+demographic cycle, the motility turnover and the resource swings leave genome
+size untouched. Repair also sits at ~0.001 — effectively switched off — while
+`mean_load` stays flat at 0.25–0.34, so Muller's ratchet is not running despite
+repair being abandoned.
+
+## With connectivity evolvable: fluctuation acts on edges more than nodes
+
+Every result above concerns `ng` alone, because connectivity was saturated by
+construction. With `p_edge_silence` and `maint_edge` making sparsity achievable,
+the three arms were re-run — 20 seeds each, 150k ticks:
+
+| arm | n | `ng` | edges | density | Q | pop |
+|---|---|---|---|---|---|---|
+| frozen (no fluctuation) | 20 | 18.01 | **201.3** | 0.827 | 0.101 | 3238 |
+| fluctuating, 0 bits | 17 | 23.36 | **415.2** | 0.923 | 0.085 | 2284 |
+| fluctuating, 2.585 bits | 18 | 24.26 | **436.3** | 0.909 | 0.090 | 2865 |
+
+Effect of fluctuation (frozen → fluctuating):
+
+| measure | frozen → informative | p | frozen → scrambled | p |
+|---|---|---|---|---|
+| `ng` | **+6.25** | <0.0001 | +5.35 | <0.0001 |
+| **edges** | **+235.0** | **<0.0001** | +213.9 | <0.0001 |
+| density | +0.083 | <0.0001 | +0.096 | <0.0001 |
+| Q | −0.011 | 0.148 | **−0.017** | **0.016** |
+
+**Fluctuation acts on both, and far more strongly on connectivity.** Node count
+rises ~31%; edge count **more than doubles**, +108%. The effect reported earlier
+as "fluctuation raises complexity by ~7 nodes" was measuring the only dimension
+that could move; the larger response was in wiring all along.
+
+Information remains irrelevant on every measure — scrambled against informative
+gives p = 0.47 (`ng`), 0.68 (edges), 0.079 (density), 0.53 (Q). That conclusion
+survives the richer measurement.
+
+### Modularity falls under fluctuation
+
+Q drops from 0.101 frozen to 0.085 scrambled (**p = 0.016**), with the
+informative arm between. That is the *opposite* of what Kashtan & Alon report for
+structured variation, and it follows directly from the density result: fluctuation
+drives networks denser, and denser networks are less modular.
+
+Two caveats. Density is still high in absolute terms (0.83–0.92), because the
+sparsity settings had to be mild — the wave arm goes extinct at
+`maint_edge` = 0.0005, so 0.00005 was the largest survivable cost. And these Q
+values, while now responsive, remain small. A regime with genuinely sparse
+networks would test Kashtan & Alon properly; this one only shows the direction.
+
 ## Novelty audit: what is actually new here
 
 Run *after* writing the result up, which was the wrong order and is the fourth
