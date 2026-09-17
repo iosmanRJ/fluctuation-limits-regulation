@@ -56,18 +56,72 @@ taxing wiring removes the response and they die.
 
 ### 1.4 Task difficulty does not set the complexity plateau
 
-Four distinct manipulations, all null, with detection floors of 2–4 nodes:
+Four distinct manipulations, all null, with detection floors of 2.21, 3.41 and 4.19 nodes:
 zoned environments, an abiotic cue, independent (non-shared) task structure, and
 a five-point heterogeneity gradient (H = 2–8). In the one regime where organisms
 demonstrably *did* evolve to read the cue (switchers 0.645 vs 0.229, p < 10⁻⁵),
 genome size still did not move (p = 0.836, 95% CI [−2.13, +2.64]).
 
-### 1.5 Long-run outcome: the floor, then nothing
+### 1.5 Reversible plasticity is what made the experiment possible
+
+**The one prediction in this work that came out right.** With development fixed
+at birth, the regime theory points at — 1–4 generations per environmental state —
+is uninhabitable. Reversible re-expression removes exactly that failure:
+
+| period | generations/state | fixed at birth | redevelop 5 | redevelop 25 |
+|---|---|---|---|---|
+| 600 | 3.8 | **0/3** | **3/3** | **3/3** |
+| 1200 | 7.7 | 1/3 | 2/3 | **3/3** |
+
+Predicted in advance from Levins' grain argument — irreversible developmental
+plasticity suits coarse-grained environments, fine-grained ones call for
+reversible responses — and confirmed. Worth reporting because the four preceding
+task manipulations failed for reasons that were only diagnosable afterwards; this
+one was diagnosed first and then fixed.
+
+### 1.6 Long-run outcome: the floor, then nothing
 
 8 seeds × 25M ticks ≈ 630,000 generations each. Final `ng`: 13, 14, 12, 12, 14,
 12, 12, 12 — six of eight exactly at `NG_MIN` = 12, with every available weight
 non-zero. Reached the floor by generation ~14,000; last-quarter slope
 **−0.0002 per million ticks** over 6.2M ticks.
+
+### 1.7 Long-run dynamics beyond genome size
+
+Three findings from the completed run that qualify or extend other results:
+
+- **Cross-feeding collapses at this timescale.** `top_share` for channel 1 is
+  **0.999** throughout, Shannon diversity 0.006–0.014, waste channels drained
+  (res5 20,903 → 1,082). The 0.26–0.30 cross-feeding figure that this model
+  produces on 150k-tick runs **does not survive 630,000 generations.** Whatever
+  maintains ecotype structure on short timescales does not hold on long ones.
+- **A ~70× population swing that is imposed, not emergent.** Period exactly
+  15,000 ticks, sd 0 across seeds — because `season_period` is a parameter. Worth
+  reporting only for the **amplification**: ±60% inflow → ~70-fold population
+  swing.
+- **Motility tracks the season genetically, not plastically.** It swings
+  0.002 ↔ 0.994 in antiphase with population (r = −0.938), which looks like
+  evolved plasticity. Developing the *same* genomes across resource levels
+  0.05–4.0 gives a flat 0.94–0.998. Selection cycles the population; nothing
+  plastic happens. Consistent with 1.4.
+
+### 1.8 The no-cue baseline that anchors the yoked control
+
+A third arm where nothing varies (`cond_states` = 1), probed identically:
+
+| arm | switchers | spread | matched |
+|---|---|---|---|
+| no cue | 0.133 | 0.060 | **1.00/6** |
+| scrambled | 0.250 | 0.093 | 1.11/6 |
+| informative | **0.704** | **0.415** | 1.75/6 |
+
+Scrambled is **statistically indistinguishable from no-cue** (p = 0.26, 0.34) —
+correct, since neither carries usable information — while informative departs
+from it at p = 0.0004 / 0.0003 / 0.0014. And `matched` for the no-cue arm lands
+on **exactly 1.00/6**, the analytically derived non-responsive baseline (an
+unresponsive population answers one fixed channel, and each channel is
+best-paying in exactly one of six states). The measure is calibrated, not merely
+relative.
 
 ---
 
@@ -173,7 +227,36 @@ this in the paper — it is more defensible than discovering it in review.
 
 ---
 
-## 7. Suggested framing
+## 7. Pre-registration record
+
+Every substantive prediction was committed to git *before* the run that tested
+it, so the history is a usable pre-registration record rather than a
+reconstruction. **Five of six were wrong.**
+
+| prediction, made in advance | outcome |
+|---|---|
+| `ng` rises with task complexity → plateau is task-limited | **wrong** — flat |
+| rotating yields alone makes the task conditional | **wrong** — inflow monopoly |
+| an abiotic cue will be read because it cannot be depleted | **wrong** — legible but unread |
+| the conditional genome is adaptive but mutationally unreachable | **wrong** — selected against |
+| reversible plasticity rescues the uninhabitable regime | **correct** — 0/3 → 3/3 |
+| conditional response, once evolved, raises genome size | **wrong** — response evolves, complexity does not |
+
+## 8. Data and code availability
+
+- **Code:** the simulator is a stdlib-only Julia package; analysis and plotting
+  live in a separate environment so the core has no plotting dependencies.
+- **Reproducibility:** every run is determined by its `Params`, including the
+  seed. Results are **bit-identical at any thread count** (verified at 1, 4 and
+  8). Nine feature flags are bit-identical when off, so historical results
+  reproduce under current code — with one documented exception: the scrambled cue
+  multiplier was corrected, so pre-fix scrambled runs are not bit-reproducible.
+- **Tests:** 35,297 + 1,304, covering determinism, backward compatibility, the
+  information content of the yoked control in both gradient modes, and the
+  measurement functions.
+- **Scale:** ~1,835 runs across 25 experiments, plus 8 × 25M ticks.
+
+## 9. Suggested framing
 
 **Venue:** ALIFE conference or a short contribution to *Artificial Life*. Not a
 general evolution journal — the science is two modest refinements of established
