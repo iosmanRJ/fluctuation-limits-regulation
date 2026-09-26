@@ -413,20 +413,42 @@ abandoned after 6/6 fluctuating runs and 0/6 frozen runs went extinct. The
 three frozen arms are bit-identical (with one state the cue is zero whatever
 its settings), so EvoSim has one frozen arm and no frozen yoked control.
 `mean_abs_w` is Σ|w| / ng² — a strength *density*, the direct counterpart of
-count density nzw / ng². Interim at n ≈ 13 per arm (to be replaced by n = 30):
+count density nzw / ng². Final, all 180 runs complete (exit 0). Survival: frozen
+30/30; fluctuating 28–29/30. Figures below exclude the 4 extinct runs (n = 28 vs
+30); including them changes no conclusion (count density +25.8%, strength
+density −11.2%, total strength −0.7%, p = 0.92).
 
-| measure, fluctuating (no cue) vs frozen | change | p |
-|---|---|---|
-| count density nzw / ng² | **+28%** | 2e-5 |
-| strength density Σ\|w\| / ng² | **−13%** | 5e-5 |
-| total strength Σ\|w\| | −10% | 0.17 |
-| node count | +1% (at the floor, ~14 vs minimum 13) | 0.65 |
+| measure, fluctuating (no cue) vs frozen | change | p | d |
+|---|---|---|---|
+| count density nzw / ng² | **+25.5%** | 1e-5 | +2.23 |
+| strength density Σ\|w\| / ng² | **−10.9%** | 1e-5 | −1.35 |
+| total strength Σ\|w\| | −1.3% | 0.86 | −0.05 |
+| node count | +4.2% (+0.57; near the floor of 13) | 0.047 | +0.52 |
+| population | −40% | 1e-5 | — |
 
-§1.1's count-density effect replicates (+0.129 here vs +0.118–0.144 before) but
-wiring strength moves the other way: more edges, each weaker. Population is 35%
-smaller under fluctuation and the ranges do not overlap between arms; within
-arms, population tracks count density (r = −0.55) but not strength density in
-the direction needed to explain it.
+The same pattern holds with the informative cue (count density +17.9%,
+strength density −8.5%, p = 0.004, total strength n.s.) and the yoked cue
+(+27.3%, −8.1%, p = 0.003, n.s.).
+
+§1.1's count-density effect replicates (+0.119 here vs +0.118–0.144 before), but
+the wiring it counts is no stronger in total and weaker per possible
+connection: fluctuation adds edges without adding strength.
+
+**Information, EvoSim (C2, informative vs yoked, population matched):** strength
+density identical (p = 0.99), total strength n.s. (p = 0.78); count density
+slightly *lower* with the informative cue (−7.9%, p = 0.009). Consistent with
+organisms that never read the cue — EvoSim cannot host the trackable half of
+the revised claim.
+
+**Population confound.** Population is 40% smaller under fluctuation and the
+ranges do not overlap between arms (8.5k–11.5k vs 12.9k–21.3k), so the two
+cannot be separated formally. Within every arm, however, larger populations have
+*lower* strength density (r = −0.39 frozen, −0.39 pooled fluctuating): taken at
+face value population would predict *higher* strength density in the smaller
+fluctuating populations, the opposite of what is observed. It is not a
+plausible explanation of the strength decline. Count density is more exposed:
+within the fluctuating arms smaller populations are denser (r = −0.65), though
+the frozen arm shows the reverse (+0.24).
 
 ### 11.2 Prior-art check, sixth (2026-09-26)
 
