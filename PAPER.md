@@ -643,3 +643,74 @@ shrinks the genome. Still outstanding before a paper: read Jorritsma & van den
 Berg 2026 in full (§11.2); P5, the EvoSim confirmation of the count/strength
 divergence; and the grain question against Tsuda & Kawata.
 
+
+### 11.8 Pre-registration: the grain experiment (G) — Tsuda & Kawata
+
+Committed before any G run. Code: `replication/raevol/gen_params_grain.py`
+(design), `replication/raevol/analyse_grain.py` (measures, tests, decision
+rules, fixed; measures imported unchanged from `analyse_v2.py`).
+
+**Why.** Tsuda & Kawata 2010 find that cue-free fluctuation of the optimum
+*across generations* promotes GRN complexity. P3/P4 found that cue-free
+switching *within a lifetime* weakens regulation and shrinks the genome. If
+environmental grain decides the sign, both are right in their regimes.
+
+**Hypothesis H_grain.** The sign of the effect of cue-free fluctuation depends on
+grain: negative when fine-grained, non-negative when coarse-grained.
+
+**Design.** R-Aevol, unchanged code. In the SIMD engine the environment is one
+Markov chain over ages that continues across generations, switching with
+probability p at each of the 20 ages; mean dwell = 1/p ages. So grain is a
+single parameter:
+
+| p | mean dwell | grain |
+|---|---|---|
+| 0.1 | 10 ages (half a lifetime) | fine |
+| 0.01 | 100 ages (5 generations) | intermediate |
+| 0.001 | 1,000 ages (50 generations) | coarse |
+| 0.0002 | 5,000 ages (250 generations) | very coarse — Tsuda & Kawata's regime |
+
+Arms: fluc_none at each p, and froz_none (rate-independent). 12 new seeds per
+cell (base 300000), population 1024, 30,000 generations — 60 runs. All other
+settings identical to v2. That the SIMD engine's own switching is what runs was
+checked in the source: the `deterministic` two-environment branch of the
+non-SIMD handler is dead code (flag never set) and `check_simd` is never
+enabled by `aevol_run`.
+
+**Predictions** (coarse = p 0.0002, fine = p 0.1):
+
+| id | prediction |
+|---|---|
+| G1 | genes(fluc_none, coarse) > genes(fluc_none, fine) |
+| G2 | genes(fluc_none, coarse) > genes(froz_none) — Tsuda & Kawata's direction |
+| G3 | S(fluc_none, coarse) > S(fluc_none, fine) |
+| G4 | S(fluc_none, coarse) > S(froz_none) — Tsuda & Kawata's direction |
+
+**Test.** Two-sided permutation, 100,000 permutations, Holm across the four.
+SUPPORTED: predicted sign and Holm p < 0.05. REFUTED: opposite sign, unadjusted
+p < 0.05. INCONCLUSIVE otherwise.
+
+**Interpretation, fixed in advance** (genes G1/G2; regulation G3/G4):
+- both supported → grain reconciles the conflict: cue-free fluctuation costs
+  complexity when fine-grained and pays when coarse;
+- first only → coarse grain removes the fine-grain penalty but gives no gain
+  with two alternating targets; Tsuda & Kawata's gain probably needs novel
+  optima, which this design cannot produce;
+- first not supported → grain is not the reconciler here; the conflict stays
+  unresolved and is reported as a model difference.
+
+**Secondary, no verdicts.** Every cell's means; Spearman correlation of genes
+and S with log10(dwell) across fluc_none runs; fine-grain sanity check (p 0.1
+vs frozen should reproduce P3/P4); metabolic error by cell.
+
+**Limits that travel with the result.**
+- Two alternating targets, i.e. Tsuda & Kawata's *cyclic* case, which they
+  found promotes complexity less than a random walk to new optima.
+- Coarse is not perfectly coarse: a switch can still fall inside a lifetime
+  (~2% of lifetimes at p = 0.001, ~0.4% at p = 0.0002).
+- Population-wide environment, as in Tsuda & Kawata.
+
+**Scheduling.** Runs after P5 on the Mac mini, automatically, via
+`replication/chain_p5_grain.sh`, which also applies the §11.5 pilot rule
+mechanically and runs each pre-registered analysis exactly once. Expected
+~7 h for G.
