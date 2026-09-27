@@ -10,6 +10,11 @@ expected 2026-09-28). References marked [verify] need checking against the
 source before submission. Numbers are taken from `PAPER.md` §11 and the result
 files under `replication/`.
 
+> **The canonical manuscript is now `paper/manuscript.tex`** (PLOS LaTeX, figures from
+> `paper/make_figures.py`). It supersedes this Markdown draft and corrects one
+> overstatement here: counts and strength diverge in EvoSim and in R-Aevol's
+> informative-cue populations, but not in its cue-free ones, where both fall together.
+
 ---
 
 ## Abstract
