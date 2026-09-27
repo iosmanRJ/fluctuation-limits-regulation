@@ -714,3 +714,27 @@ vs frozen should reproduce P3/P4); metabolic error by cell.
 `replication/chain_p5_grain.sh`, which also applies the §11.5 pilot rule
 mechanically and runs each pre-registered analysis exactly once. Expected
 ~7 h for G.
+
+### 11.9 Outcome of P5: not run — no grid met the pre-registered rule (2026-09-27)
+
+Viability pilot, 150k ticks, seeds 1001–1006, applied mechanically by
+`replication/chain_p5_grain.sh`:
+
+| grid | fluc_none survived | froz_none survived | qualifies (6/6 and 6/6) |
+|---|---|---|---|
+| 80 | 2/6 | 6/6 | no |
+| 96 | 2/6 | 6/6 | no |
+| 112 | 5/6 | 6/6 | no |
+
+The rule selects no grid, so the confirmatory P5 runs were not made and P5 has
+**no verdict**. The pre-registration did not specify a fallback, and none was
+taken automatically. The regimes where node count sits above the floor are the
+ones in which fluctuation is lethal under the wiring cost (§1.3), so the
+intended second regime does not exist at these settings. Any rescue (e.g. a
+fresh-seed confirmation at grid 128, or a lower `maint_edge`) would be a new,
+separately pre-registered study, not P5.
+
+Consequence for the claims: in EvoSim the count/strength divergence rests on the
+exploratory 180-run batch (§11.1); its confirmatory support is the R-Aevol
+sweep's secondary result (raw link count gives the wrong sign at every rate,
+§11.7), which carries no verdict.
