@@ -454,7 +454,7 @@ the frozen arm shows the reverse (+0.24).
 
 | claim | status | source |
 |---|---|---|
-| Cue reliability decides whether regulatory plasticity evolves in a fluctuating environment | **Established** | Kussell & Leibler 2005 (*Science*); Botero et al. 2015 (*PNAS*); Jorritsma & van den Berg 2026 (*Evolution* 80:230) — a GRN model: plasticity evolves under fast, erratic change "especially if cues are reliable" |
+| Cue reliability decides whether regulatory plasticity evolves in a fluctuating environment | **Established** | Kussell & Leibler 2005 (*Science*); Botero et al. 2015 (*PNAS*); Jorritsma & van den Berg 2026 (*Evolution* 80(1):230–239, doi:10.1093/evolut/qpaf219; online Oct 2025) — a GRN model: plasticity evolves under fast, erratic change "especially if cues are reliable" |
 | Fluctuating environments can select *for or against* gene regulation | **Established, experimentally** | Pollack, Nozoe & Kussell 2025 (bioRxiv 2025.06.23.661119) — determinant there is metabolic flux, not cue information |
 | Fluctuation without cues *promotes* GRN complexity | **Published, conflicts with v1** | Tsuda & Kawata 2010 (*PLOS CB*): random-walk optimum promotes complex GRNs via duplication. Their fluctuation is across generations and tracked genetically (coarse-grained); ours switches within a lifetime (fine-grained). Grain is the likely reconciling variable — must be addressed, not ignored |
 | Sensing and non-sensing populations diverge genomically under fluctuation | **Published, different measures** | Lalejini, Ferguson, Grant & Ofria 2021 (*Front. Ecol. Evol.*, Avida): trait loss and deleterious accumulation in non-plastic populations; no network architecture |
@@ -468,7 +468,7 @@ regulatory strength and genome size contrasted across informative, yoked and
 absent cues.
 
 **Unread, and must be read before claiming (c):** Jorritsma & van den Berg 2026
-full text (paywalled). Their abstract says they "zoom in on network
+full text (paywalled; ResearchGate full text requested 2026-09-27, publication 396791722). Their abstract says they "zoom in on network
 architecture"; if they report connection strengths by cue reliability, (c) is
 theirs.
 
