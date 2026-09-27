@@ -572,5 +572,74 @@ count sits above the floor:
 
 ### 11.6 Deviations from the pre-registration
 
-None yet. Any change to design, measures, tests or decision rules after
-launch is logged here with its reason.
+None to design, measures, tests or decision rules. `analyse_v2.py` was run
+once, on complete data, with the committed version (SHA-256 prefix
+d0609140a970de48, verified on the Mac mini before running). No interim looks.
+
+Operational only: the Mac mini's idle-sleep setting (`sleep 1`) suspended the
+runs repeatedly overnight — wall time roughly doubled, results unaffected
+(processes pause; R-Aevol is deterministic given its seed). From 2026-09-27
+09:18 the sweep ran under `caffeinate`, with no further sleep events.
+
+### 11.7 Result of the pre-registered sweep (2026-09-27)
+
+All 216 runs completed (exit 0, generation 30,000). Output:
+`replication/raevol/results_v2_preregistered.txt`.
+
+**Manipulation check** (informative cue lowers metabolic error vs yoked):
+fails at p = 0.05 (0.038 vs 0.055, p = 0.088; right direction), holds at
+p = 0.10 and 0.20 (p = 1e-5). By the pre-registered rule P1 and P2 are
+therefore judged on the two faster rates only.
+
+| | r = 0.05 | r = 0.10 | r = 0.20 | verdict |
+|---|---|---|---|---|
+| **P1** S(fluc_info) > S(froz_info) | 11.03 vs 5.95 *(not evaluable)* | 13.39 vs 7.53, p_holm 0.005 | 13.18 vs 4.80, p_holm 1e-4 | **SUPPORTED** |
+| **P2** S(fluc_info) > S(fluc_yoked) | 11.03 vs 6.32 *(not evaluable)* | 13.39 vs 5.73, p_holm 1e-4 | 13.18 vs 4.56, p_holm 1e-4 | **SUPPORTED** |
+| **P3** S(fluc_none) < S(froz_none) | 1.11 vs 6.30, p_holm 1e-4 | 1.25 vs 6.30, p_holm 1e-4 | 1.14 vs 6.30, p_holm 1e-4 | **SUPPORTED** |
+| **P4** genes(froz_info) > genes(fluc_info) | 26.3 vs 16.3, p_holm 1e-4 | 28.3 vs 18.1, p_holm 1e-4 | 25.6 vs 18.0, p_holm 3e-4 | **SUPPORTED** |
+
+S = total regulatory strength. Rank-based p-values agree in every cell.
+The r = 0.05 cells of P1/P2 are also in the predicted direction and
+Holm-significant (0.009), but are excluded by the rule and do not count.
+
+**Caveats that travel with this result**
+- P3's three tests share one froz_none baseline, so they are not independent;
+  read P3 as "untrackable fluctuation gives the weakest regulation at every rate
+  against a common frozen baseline".
+- P1/P2 rest on two rates. At the slowest switching the cue is not clearly used,
+  and one fluc_info run at r = 0.05 lost all regulatory links for the whole
+  analysis window (8.3% of that cell's window generations have zero links).
+- All measures are for the best individual, as recorded by R-Aevol.
+- P4 confirms the direction of the genome-size effect, not its mechanism
+  (precision being gene-limited remains untested).
+- All fluctuation here is fine-grained (switching within a lifetime). The
+  conflict with Tsuda & Kawata 2010 (coarse, cue-free fluctuation promoting
+  complexity) is not addressed by this design.
+- One platform. EvoSim cannot host the trackable half: its organisms never read
+  the cue.
+
+**Secondary (exploratory, no verdicts)**
+- Count vs strength, informative cue, fluctuating vs frozen: raw link count is
+  *lower* under fluctuation at every rate (ratio 0.60, 0.78, 0.83; p = 0.02,
+  0.13, 0.52) while total strength is *higher* (1.85×, 1.78×, 2.75×) and
+  strength per link roughly doubles (2.1–2.3×). Counting links gives the wrong
+  sign at every rate.
+- Frozen informative vs frozen yoked: null, as expected (S 7.53 vs 5.39,
+  p = 0.18).
+- Population 512, r = 0.10: all four contrasts replicate (P1 p = 1e-5,
+  P2 p = 4e-5, P3 p = 1e-5, P4 p = 1e-5).
+- The r = 0.10 cells reproduce v1 with new seeds (v1 → v2: fluc_info 12.7 →
+  13.4, froz_info 4.7 → 7.5, fluc_yoked 5.7 → 5.7, fluc_none 1.4 → 1.2).
+- Bug in a secondary measure: per-link strength for fluc_info at r = 0.05
+  prints NaN, because one run has no links in the whole window and its NaN
+  enters the cell mean. Affects that one exploratory line only; S, which counts
+  zero links as zero strength, is unaffected.
+
+**What this establishes.** In R-Aevol, across a fourfold range of switch rates
+and two population sizes, fine-grained fluctuation *with a usable cue*
+strengthens regulatory wiring, fluctuation *without* one weakens it, the cue's
+information content (not its presence) is what matters, and fluctuation
+shrinks the genome. Still outstanding before a paper: read Jorritsma & van den
+Berg 2026 in full (§11.2); P5, the EvoSim confirmation of the count/strength
+divergence; and the grain question against Tsuda & Kawata.
+

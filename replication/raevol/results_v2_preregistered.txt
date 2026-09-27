@@ -1,0 +1,81 @@
+CELLS
+  fluc_info    r= 50 pop=1024  n=12
+  fluc_info    r=100 pop= 512  n=12
+  fluc_info    r=100 pop=1024  n=12
+  fluc_info    r=200 pop=1024  n=12
+  fluc_none    r= 50 pop=1024  n=12
+  fluc_none    r=100 pop= 512  n=12
+  fluc_none    r=100 pop=1024  n=12
+  fluc_none    r=200 pop=1024  n=12
+  fluc_yoked   r= 50 pop=1024  n=12
+  fluc_yoked   r=100 pop= 512  n=12
+  fluc_yoked   r=100 pop=1024  n=12
+  fluc_yoked   r=200 pop=1024  n=12
+  froz_info    r= 50 pop=1024  n=12
+  froz_info    r=100 pop= 512  n=12
+  froz_info    r=100 pop=1024  n=12
+  froz_info    r=200 pop=1024  n=12
+  froz_none    r=100 pop=1024  n=12
+  froz_yoked   r=100 pop=1024  n=12
+
+MANIPULATION CHECK  err(fluc_info) < err(fluc_yoked)
+  r= 50  0.0382 vs 0.0547   p=0.08817   -> FAILS
+  r=100  0.0293 vs 0.0583   p=0.00001   -> HOLDS
+  r=200  0.0303 vs 0.0626   p=0.00001   -> HOLDS
+
+PRIMARY TESTS (Holm across 12)
+  id     r  contrast                      mean A    mean B      diff         p    p_holm    p_rank
+  P1    50  fluc_info vs froz_info       11.0327    5.9479    5.0848   0.00458   0.00886   0.00469
+  P1   100  fluc_info vs froz_info       13.3919    7.5288    5.8631   0.00153   0.00459   0.00275
+  P1   200  fluc_info vs froz_info       13.1753    4.7959    8.3794   0.00001   0.00012   0.00001
+  P2    50  fluc_info vs fluc_yoked      11.0327    6.3206    4.7121   0.00443   0.00886   0.00203
+  P2   100  fluc_info vs fluc_yoked      13.3919    5.7340    7.6579   0.00002   0.00012   0.00001
+  P2   200  fluc_info vs fluc_yoked      13.1753    4.5611    8.6142   0.00002   0.00012   0.00001
+  P3    50  fluc_none vs froz_none        1.1056    6.3012   -5.1957   0.00001   0.00012   0.00001
+  P3   100  fluc_none vs froz_none        1.2453    6.3012   -5.0560   0.00001   0.00012   0.00001
+  P3   200  fluc_none vs froz_none        1.1396    6.3012   -5.1616   0.00001   0.00012   0.00002
+  P4    50  froz_info vs fluc_info       26.2785   16.3416    9.9369   0.00001   0.00012   0.00002
+  P4   100  froz_info vs fluc_info       28.2751   18.0687   10.2064   0.00001   0.00012   0.00001
+  P4   200  froz_info vs fluc_info       25.6020   18.0165    7.5855   0.00008   0.00032   0.00020
+
+VERDICTS
+  P1  SUPPORTED     evaluable rates [100, 200], predicted sign 2/2, Holm-significant 2
+  P2  SUPPORTED     evaluable rates [100, 200], predicted sign 2/2, Holm-significant 2
+  P3  SUPPORTED     evaluable rates [50, 100, 200], predicted sign 3/3, Holm-significant 3
+  P4  SUPPORTED     evaluable rates [50, 100, 200], predicted sign 3/3, Holm-significant 3
+
+SECONDARY (exploratory, no verdicts)
+  r= 50  links   fluc_info 56.3925  froz_info 94.0437  ratio 0.60  p=0.01981
+  r= 50  perlink fluc_info nan  froz_info 0.0738  ratio nan  p=0.00001
+  r= 50  S       fluc_info 11.0327  froz_info 5.9479  ratio 1.85  p=0.00453
+  r=100  links   fluc_info 71.2394  froz_info 90.9943  ratio 0.78  p=0.13432
+  r=100  perlink fluc_info 0.1949  froz_info 0.0923  ratio 2.11  p=0.00002
+  r=100  S       fluc_info 13.3919  froz_info 7.5288  ratio 1.78  p=0.00152
+  r=200  links   fluc_info 69.2808  froz_info 83.2496  ratio 0.83  p=0.52121
+  r=200  perlink fluc_info 0.1966  froz_info 0.0869  ratio 2.26  p=0.00001
+  r=200  S       fluc_info 13.1753  froz_info 4.7959  ratio 2.75  p=0.00001
+  frozen yoked control (expected null): S 7.5288 vs 5.3881  p=0.17789
+  pop512 P1  S fluc_info vs froz_info: 10.5526 vs 4.8065  p=0.00001
+  pop512 P2  S fluc_info vs fluc_yoked: 10.5526 vs 4.2891  p=0.00004
+  pop512 P3  S fluc_none vs froz_none: 1.6282 vs 6.3012  p=0.00001
+  pop512 P4  genes froz_info vs fluc_info: 25.2904 vs 17.4693  p=0.00001
+  fraction of window generations with zero links, by cell:
+    fluc_info    r= 50 pop=1024  0.083
+    fluc_info    r=100 pop= 512  0.000
+    fluc_info    r=100 pop=1024  0.000
+    fluc_info    r=200 pop=1024  0.000
+    fluc_none    r= 50 pop=1024  0.037
+    fluc_none    r=100 pop= 512  0.005
+    fluc_none    r=100 pop=1024  0.014
+    fluc_none    r=200 pop=1024  0.005
+    fluc_yoked   r= 50 pop=1024  0.000
+    fluc_yoked   r=100 pop= 512  0.002
+    fluc_yoked   r=100 pop=1024  0.000
+    fluc_yoked   r=200 pop=1024  0.003
+    froz_info    r= 50 pop=1024  0.000
+    froz_info    r=100 pop= 512  0.000
+    froz_info    r=100 pop=1024  0.000
+    froz_info    r=200 pop=1024  0.000
+    froz_none    r=100 pop=1024  0.000
+    froz_yoked   r=100 pop=1024  0.000
+EXIT=0

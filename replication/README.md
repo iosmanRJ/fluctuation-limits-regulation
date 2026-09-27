@@ -17,6 +17,7 @@ Build notes for Apple Silicon are in the project memory (`raevol-replication`).
 | `gen_params_v2.py` | **pre-registered** sweep: 3 switch rates, 2 population sizes, new seeds |
 | `analyse_v2.py` | **pre-registered** measures, tests and decision rules — do not edit after launch |
 | `launch_v2.sh` | launcher: primary cells first, seed-major, `DONE_<exit>` markers |
+| `results_v2_preregistered.txt` | output of the single pre-registered run of `analyse_v2.py`: P1–P4 all SUPPORTED (PAPER.md §11.7) |
 
 The yoked control uses four environments against the informative arm's two,
 at 1.5× the switch probability, so per-age target- and signal-change rates are
