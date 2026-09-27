@@ -436,9 +436,12 @@ connection: fluctuation adds edges without adding strength.
 
 **Information, EvoSim (C2, informative vs yoked, population matched):** strength
 density identical (p = 0.99), total strength n.s. (p = 0.78); count density
-slightly *lower* with the informative cue (−7.9%, p = 0.009). Consistent with
-organisms that never read the cue — EvoSim cannot host the trackable half of
-the revised claim.
+slightly *lower* with the informative cue (−7.9%, p = 0.009). In this regime —
+development once at birth — the cue goes unread. With reversible plasticity
+(`redevelop_every`) EvoSim organisms *do* read it (switchers 0.65 vs 0.23,
+n = 100/arm) but exploit only ~11% of its information (§1.2, §3), so EvoSim can
+host at most a weak version of the trackable case, and the strength measure has
+not been taken in that regime.
 
 **Population confound.** Population is 40% smaller under fluctuation and the
 ranges do not overlap between arms (8.5k–11.5k vs 12.9k–21.3k), so the two
@@ -615,8 +618,9 @@ Holm-significant (0.009), but are excluded by the rule and do not count.
 - All fluctuation here is fine-grained (switching within a lifetime). The
   conflict with Tsuda & Kawata 2010 (coarse, cue-free fluctuation promoting
   complexity) is not addressed by this design.
-- One platform. EvoSim cannot host the trackable half: its organisms never read
-  the cue.
+- One platform for the trackable half. EvoSim reads the cue only under
+  reversible plasticity and exploits ~11% of its information; the strength
+  measure has not been taken in that regime.
 
 **Secondary (exploratory, no verdicts)**
 - Count vs strength, informative cue, fluctuating vs frozen: raw link count is
