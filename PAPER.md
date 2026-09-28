@@ -742,3 +742,40 @@ Consequence for the claims: in EvoSim the count/strength divergence rests on the
 exploratory 180-run batch (§11.1); its confirmatory support is the R-Aevol
 sweep's secondary result (raw link count gives the wrong sign at every rate,
 §11.7), which carries no verdict.
+
+### 11.10 Result of the grain experiment (G1–G4) — 2026-09-28
+
+All 60 runs completed (exit 0, generation 30,000) at 00:38; `analyse_grain.py`
+ran once, automatically, with the committed code (SHA-256 prefix
+89a8613289731999, verified). Output: `replication/raevol/results_grain_preregistered.txt`.
+
+| cue-free fluctuation, mean dwell | genes | total strength S | links | metabolic error |
+|---|---|---|---|---|
+| 10 ages, q = 0.1 (fine) | 19.45 | 2.29 | 17.8 | 0.062 |
+| 100 ages, q = 0.01 | 16.25 | 1.06 | 9.5 | 0.059 |
+| 1,000 ages, q = 0.001 | 17.36 | 1.17 | 13.1 | 0.052 |
+| 5,000 ages, q = 0.0002 (coarse) | 19.24 | 2.04 | 22.9 | 0.038 |
+| frozen | 25.58 | 8.40 | 67.8 | 0.008 |
+
+| id | prediction | result | verdict |
+|---|---|---|---|
+| G1 | genes(coarse) > genes(fine) | 19.24 vs 19.45, p = 0.80 | INCONCLUSIVE |
+| G2 | genes(coarse) > genes(frozen) | 19.24 vs 25.58, p_holm = 4e-4, opposite sign | REFUTED |
+| G3 | S(coarse) > S(fine) | 2.04 vs 2.29, p = 0.60 | INCONCLUSIVE |
+| G4 | S(coarse) > S(frozen) | 2.04 vs 8.40, p_holm = 8e-5, opposite sign | REFUTED |
+
+Secondary: no dose-response across a 500-fold range of dwell times (Spearman
+with log dwell +0.06 for genes, p = 0.67; +0.01 for S, p = 0.97). Metabolic error
+falls with coarser grain (0.062 → 0.038) but stays far above frozen. The
+fine-grained cell reproduces P3/P4 with new seeds (genes 19.5 vs 25.6, p = 4e-4;
+S 2.3 vs 8.4, p = 1e-5), a third independent replication.
+
+**Pre-registered interpretation applies: "first not supported → grain is not
+the reconciler here; the conflict stays unresolved and is reported as a model
+difference."** In R-Aevol, cue-free fluctuation shrinks the genome and weakens
+regulation whether the environment changes within a lifetime or every ~250
+generations. This also removes the speculative account (Discussion draft) that
+EvoSim's coarser fluctuation explains its earlier genome enlargement: the
+EvoSim/R-Aevol difference in genome size is a model difference, not grain.
+The limit stated in advance still stands: two alternating targets are not
+Tsuda & Kawata's random walk to novel optima.

@@ -1,0 +1,18 @@
+CELLS  (dwell = 1/p ages; 20 ages per generation)
+  fluc_none  p=0.1     dwell     10 ages  n=12  genes  19.45  S   2.291  links   17.8  err 0.0624
+  fluc_none  p=0.01    dwell    100 ages  n=12  genes  16.25  S   1.057  links    9.5  err 0.0594
+  fluc_none  p=0.001   dwell   1000 ages  n=12  genes  17.36  S   1.169  links   13.1  err 0.0517
+  fluc_none  p=0.0002  dwell   5000 ages  n=12  genes  19.24  S   2.040  links   22.9  err 0.0376
+  froz_none  p=0.1     dwell     10 ages  n=12  genes  25.58  S   8.401  links   67.8  err 0.0081
+
+PRIMARY (Holm across 4)
+  G1  genes fluc_none p=0.0002 vs fluc_none p=0.1:  19.2397 vs 19.4509  diff -0.2112  p=0.80105  p_holm=1.00000  p_rank=0.88545  -> INCONCLUSIVE
+  G2  genes fluc_none p=0.0002 vs froz_none p=0.1:  19.2397 vs 25.5833  diff -6.3436  p=0.00013  p_holm=0.00039  p_rank=0.00031  -> REFUTED
+  G3  S     fluc_none p=0.0002 vs fluc_none p=0.1:  2.0404 vs 2.2906  diff -0.2502  p=0.59994  p_holm=1.00000  p_rank=0.75610  -> INCONCLUSIVE
+  G4  S     fluc_none p=0.0002 vs froz_none p=0.1:  2.0404 vs 8.4012  diff -6.3609  p=0.00002  p_holm=0.00008  p_rank=0.00002  -> REFUTED
+
+SECONDARY (exploratory, no verdicts)
+  dose-response  Spearman(genes, log10 dwell) = +0.064  perm p=0.67187  (n=48)
+  dose-response  Spearman(S, log10 dwell) = +0.007  perm p=0.96695  (n=48)
+  fine-grain sanity  genes fluc_none p=0.1 19.4509 vs froz_none 25.5833  p=0.00039
+  fine-grain sanity  S     fluc_none p=0.1 2.2906 vs froz_none 8.4012  p=0.00001
