@@ -584,6 +584,11 @@ runs repeatedly overnight — wall time roughly doubled, results unaffected
 (processes pause; R-Aevol is deterministic given its seed). From 2026-09-27
 09:18 the sweep ran under `caffeinate`, with no further sleep events.
 
+**Addendum 2026-09-28 (grain experiment).** No OSF registration was made before
+its results existed, so its pre-registration is the git commit `fa00777` alone,
+with local timestamps. Its analysis ran once, automatically, with the committed
+code (checksum verified). No deviations.
+
 ### 11.7 Result of the pre-registered sweep (2026-09-27)
 
 All 216 runs completed (exit 0, generation 30,000). Output:

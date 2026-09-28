@@ -18,6 +18,8 @@ Build notes for Apple Silicon are in the project memory (`raevol-replication`).
 | `analyse_v2.py` | **pre-registered** measures, tests and decision rules — do not edit after launch |
 | `launch_v2.sh` | launcher: primary cells first, seed-major, `DONE_<exit>` markers |
 | `results_v2_preregistered.txt` | output of the single pre-registered run of `analyse_v2.py`: P1–P4 all SUPPORTED (PAPER.md §11.7) |
+| `gen_params_grain.py`, `analyse_grain.py` | **pre-registered** grain experiment (G1–G4), committed as `fa00777` before any run |
+| `results_grain_preregistered.txt` | its single analysis run: G1, G3 inconclusive; G2, G4 refuted (PAPER.md §11.10) |
 
 The yoked control uses four environments against the informative arm's two,
 at 1.5× the switch probability, so per-age target- and signal-change rates are

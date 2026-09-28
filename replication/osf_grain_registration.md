@@ -1,5 +1,12 @@
 # OSF registration text — grain experiment (G1–G4)
 
+> **NOT SUBMITTED — and must not be submitted now.** The grain results were
+> produced on 2026-09-28 at 00:38, before any OSF registration was made. A
+> registration filed after that point would not be a pre-registration. The
+> grain experiment's pre-registration is git commit `fa00777` (local timestamps
+> only), and the manuscript says so. Kept for the record only.
+
+
 For pasting into an OSF registration ("OSF Preregistration" or the Simulation
 Studies template). The value of registering is an independent timestamp, so it
 should be submitted **before** `grain_results.txt` exists on the Mac mini

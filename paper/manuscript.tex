@@ -90,9 +90,11 @@ informative cue, fluctuation increased total regulatory strength 1.8- to
 2.7-fold relative to a frozen environment, and informative cues produced 2.3 to
 2.9 times the regulatory strength of yoked cues. Without a cue, fluctuating
 populations had the weakest regulation of any condition. Fluctuation also
-reduced the number of genes by 8 to 10. Connection counts moved in the opposite
+reduced the number of genes by 8 to 10. Cue-free fluctuation had these effects
+whether an environment lasted half a lifetime or about 250 generations. Connection
+counts moved in the opposite
 direction to regulatory strength in EvoSim and in R-Aevol populations with an
-informative cue. \pending{one sentence on grain}
+informative cue.
 Fluctuation therefore strengthened regulation only when the environment could be
 tracked, and counting edges can misjudge the direction of the effect.
 
@@ -107,7 +109,8 @@ state they were in. Others received the same signals arranged so that they told
 them nothing, and a third group received no signal. Switching on its own did not
 produce stronger regulation. With a meaningful signal, regulatory connections
 became much stronger than in a constant environment. Without one, they became
-weaker than in any other condition. The uninformative signal did not help,
+weaker than in any other condition, whether the environment switched within a
+lifetime or only every few hundred generations. The uninformative signal did not help,
 although it was physically identical to the meaningful one. We also found that
 counting regulatory connections, a common measure of network complexity, can
 point the opposite way to measuring how strong the connections are. Our main
@@ -188,8 +191,10 @@ varied environmental grain to examine the disagreement with Tsuda and Kawata.
 
 Fluctuation strengthened regulation when a cue made the environment trackable
 and weakened it when no cue was available. The difference was produced by the
-information the cue carried and not merely by its presence. Fine-grained
-fluctuation also reduced genome size. Connection counts and connection strength
+information the cue carried and not merely by its presence. Fluctuation also
+reduced genome size. Without a cue, these effects were the same whether the
+environment changed within a lifetime or every few hundred generations, so
+environmental grain does not explain the disagreement with Tsuda and Kawata. Connection counts and connection strength
 sometimes changed in opposite directions, so a count alone can misrepresent the
 effect of fluctuation on a network.
 
@@ -435,7 +440,7 @@ was used. In the EvoSim regime from which that conclusion came, organisms used
 only about a tenth of the available information (S4~Text), whereas in R-Aevol an
 informative cue halved metabolic error.
 
-\subsection*{Fine-grained fluctuation reduces genome size}
+\subsection*{Fluctuation reduces genome size}
 
 Fluctuation reduced the number of functional genes at every switching rate, by
 10, 10 and 8 genes (26.3, 28.3 and 25.6 in frozen populations compared with 16.3,
@@ -450,7 +455,9 @@ genes, while a target that changes within a lifetime cannot be matched precisely
 and leaves a coarser phenotype that needs fewer genes. Consistent with this,
 frozen populations reached a metabolic error of about 0.008 and fluctuating
 populations without a usable cue about 0.06. We have not tested this explanation
-directly.
+directly, and the grain experiment described below does not support it strongly.
+Coarse-grained populations matched their targets better than fine-grained ones
+(metabolic error 0.038 against 0.062) but did not carry more genes.
 
 \subsection*{Counting connections can give the wrong sign}
 
@@ -494,18 +501,35 @@ half a lifetime at $q=0.1$ to about 250 generations at $q=0.0002$
 produce larger genomes and stronger regulation than fine-grained fluctuation
 (G1, G3) and than a frozen environment (G2, G4), the direction reported by Tsuda
 and Kawata. How each possible outcome would be interpreted was fixed in advance
-(Materials and methods). \pending{results of the 60-run grain experiment,
-expected 2026-09-28}
+(Materials and methods).
+
+The results did not support this prediction (Table~\ref{table2}, Fig~\ref{fig6}).
+Under cue-free fluctuation, genome size and regulatory strength did not change
+with grain. At the coarsest grain, populations carried 19.2 genes and had a
+regulatory strength of 2.0, against 19.5 and 2.3 at the finest (G1 and G3,
+inconclusive; $p=0.80$ and $0.60$), and a secondary analysis found no trend across
+the four grains (Spearman correlation with log dwell time 0.06 for genes and
+0.01 for strength). Coarse-grained fluctuation reduced both quantities relative to
+the frozen environment as much as fine-grained fluctuation did (25.6 genes and a
+strength of 8.4 in frozen populations; G2 and G4 refuted, Holm-adjusted
+$p=4\times10^{-4}$ and $8\times10^{-5}$). Coarser grain did improve the match to
+the target, lowering metabolic error from 0.062 to 0.038, but genome size and
+regulation stayed where they were. The finest-grained cell reproduced P3 and P4
+once more, with new seeds. By the interpretation fixed in advance, grain does not
+reconcile our results with those of Tsuda and Kawata.
 
 \begin{figure}[!ht]
 \centering
 \ifshowfigs
-\fcolorbox{pend}{white}{\parbox[c][1.3in][c]{0.8\linewidth}{\centering\sffamily\color{pend}
-Fig 6 will show gene number and total regulatory strength against mean
-environmental dwell time\\ for cue-free fluctuating populations, with the frozen mean for reference.\\[4pt]
-\textbf{Results pending (grain experiment running).}}}
+\includegraphics[width=\linewidth]{figures/fig6_grain.pdf}
 \fi
-\caption{{\bf Environmental grain.} \pending{figure and legend}}
+\caption{{\bf Environmental grain.} Cue-free fluctuating populations at four
+switching probabilities, plotted against the mean time an environment persists
+($1/q$ ages; 20 ages make one generation), one point per population, with means
+and bootstrap 95\% confidence intervals. The dashed line and grey band show the
+mean and 95\% confidence interval of the frozen arm. (A) Functional genes.
+(B) Total regulatory strength. (C) Metabolic error, the distance between
+phenotype and target.}
 \label{fig6}
 \end{figure}
 
@@ -517,8 +541,9 @@ whether organisms could identify the current environment. Fluctuation with an
 informative cue produced the strongest regulation we observed and fluctuation
 without a cue the weakest. A yoked cue, which supplied the same molecules at the
 same rates, did not have the effect of an informative one. These results held
-across switching rates and at two population sizes, in a test whose predictions
-and analyses were fixed before the data were generated.
+across switching rates and at two population sizes, and the cost of cue-free
+fluctuation held across a 500-fold range of environmental grain, in tests whose
+predictions and analyses were fixed before the data were generated.
 
 The phenotypic side of this result is well known. Reliable cues favour plastic
 responses, and in their absence generalist phenotypes or bet-hedging are
@@ -530,12 +555,23 @@ its size. The yoked control also allowed us to separate the information carried
 by a cue from its physical presence, which cannot be done by varying cue
 reliability alone.
 
-\pending{paragraph on grain and Tsuda \& Kawata. EvoSim's fluctuation is coarse
-relative to a lifetime: development occurs once at birth and each environmental
-state lasts roughly twenty generations. Earlier EvoSim experiments found larger
-genomes under fluctuation, as did Tsuda and Kawata, whereas R-Aevol's
-fine-grained fluctuation reduced genome size. The grain experiment tests within
-a single model whether grain accounts for this difference.}
+We designed the grain experiment to reconcile these results with those of Tsuda
+and Kawata, who found that cue-free fluctuation of the optimum across generations
+promotes regulatory complexity~\cite{tsuda2010}. It did not. In R-Aevol, cue-free
+fluctuation reduced genome size and regulatory strength to the same extent
+whether an environment lasted half a lifetime or about 250 generations, and
+coarser grain improved how closely populations matched their targets without
+changing either quantity. Two differences between the studies remain as
+candidate explanations. Tsuda and Kawata's optimum moved to new positions in a
+random walk, whereas ours alternated between two fixed targets, and they found
+the random walk more favourable to complexity. A design with novel optima would
+test this directly. The other candidate is the way each model maps genotype to
+phenotype. The same applies to EvoSim, which produced larger genomes under
+fluctuation in earlier experiments. Its fluctuation is coarse relative to a
+lifetime, since development happens once at birth and each environmental state
+lasts roughly twenty generations, but the grain experiment makes coarse grain an
+unlikely explanation, and the difference in genome size between EvoSim and
+R-Aevol appears to be a difference between the models.
 
 The divergence between connection number and connection strength has different
 causes in the two models. In EvoSim, gene duplication and node addition copy the
@@ -574,15 +610,16 @@ We also pre-registered a confirmation of the EvoSim divergence between count and
 strength in a regime with more hidden nodes, on condition that fluctuating
 populations survived there. They did not (2 to 5 of 6 survived, compared with 6
 of 6 frozen populations), so the confirmation was not run and the EvoSim result
-remains exploratory. Finally, the pre-registrations were committed to a
-version-control repository before the corresponding runs, but for the first
-sweep these timestamps exist only locally and cannot be verified independently.
+remains exploratory. Finally, all pre-registrations were committed to a
+version-control repository before the corresponding runs, but these timestamps
+exist only locally and cannot be verified independently.
 
 \subsection*{Conclusion}
 
 Environmental fluctuation did not by itself strengthen gene regulation in these
 models. Regulation became stronger under fluctuation when a cue allowed organisms
-to track the environment, and weaker when no such cue existed. Because connection
+to track the environment, and weaker when no such cue existed, whatever the grain
+of the environment. Because connection
 counts and connection strength can change in opposite directions, conclusions
 about regulatory complexity may depend on which of the two is measured.
 
@@ -740,8 +777,10 @@ the runs overnight, which lengthened the wall time but cannot have affected the
 results, because runs are deterministic for a given seed. The EvoSim confirmation
 (commit \texttt{4bc16c3}) required fluctuating and frozen populations to survive
 a viability pilot. None of the three candidate regimes met this condition, so it
-was not run (commit \texttt{56fe3a0}). The grain experiment was committed as
-\texttt{fa00777} \pending{OSF registration, if made; outcome}.
+was not run (commit \texttt{56fe3a0}). The design, predictions and analysis code of the
+grain experiment were committed in the same way (commit \texttt{fa00777}) before
+its runs began, and its analysis was run once, automatically, when the last run
+finished.
 
 \begin{table}[!ht]
 \centering
@@ -756,7 +795,8 @@ P2 & An informative cue raises it over a yoked cue & supported ($q=0.10$, 0.20) 
 P3 & Fluctuation without a cue lowers it below frozen & supported (all rates) \\
 P4 & Fluctuation lowers the number of functional genes & supported (all rates) \\
 P5 & EvoSim: count density up and strength density down in a regime above the node floor & not run (no viable regime) \\
-G1--G4 & Coarse grain reverses the effect of cue-free fluctuation & \leavevmode\pending{running} \\
+G1, G3 & Coarse-grained cue-free fluctuation gives more genes (G1) and stronger regulation (G3) than fine-grained & inconclusive \\
+G2, G4 & Coarse-grained cue-free fluctuation gives more genes (G2) and stronger regulation (G4) than frozen & refuted \\
 \bottomrule
 \end{tabular}
 \begin{flushleft}\footnotesize
@@ -764,7 +804,9 @@ Supported: the predicted sign at every evaluable rate and Holm-adjusted $p<0.05$
 at two or more. Refuted: the opposite sign significant at any rate, or no rate
 Holm-significant. Otherwise inconclusive. P1 and P2 are evaluable only at rates
 where the informative cue measurably lowers metabolic error relative to the yoked
-cue.
+cue. G1--G4 are single tests: supported if the predicted sign holds with
+Holm-adjusted $p<0.05$, refuted if the opposite sign holds with $p<0.05$,
+otherwise inconclusive.
 \end{flushleft}
 \label{table2}
 \end{table}

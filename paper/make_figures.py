@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Figures 2-5 for the manuscript, from the per-run exports in paper/data/.
+Figures 2-6 for the manuscript, from the per-run exports in paper/data/.
 One point = one population (the unit of analysis). Intervals are bootstrap 95%
 CIs (10,000 resamples, fixed seed). Static print figures, PLOS sizing
 (max width 7.5 in), Arial, vector PDF.
@@ -252,9 +252,58 @@ def fig5():
     return pts, (ex, ey)
 
 
+# ----------------------------------------------------------------------------
+# Fig 6 -- grain: cue-free fluctuation against mean environmental dwell time
+# ----------------------------------------------------------------------------
+def fig6():
+    G = load("grain_runs.csv")
+    col = CUE["none"]
+    fl = [r for r in G if r["arm"] == "fluc_none"]
+    fz = [r for r in G if r["arm"] == "froz_none"]
+    dwells = sorted({float(r["dwell_ages"]) for r in fl})
+    fig, axes = plt.subplots(1, 3, figsize=(7.5, 2.45), gridspec_kw={"wspace": 0.42})
+    specs = [("genes", "Functional genes", "A"),
+             ("S", "Total regulatory strength", "B"),
+             ("err", "Metabolic error", "C")]
+    for ax, (k, lab, pl) in zip(axes, specs):
+        z = [float(r[k]) for r in fz]
+        m, lo, hi = boot_mean(z)
+        ax.axhspan(lo, hi, color=GRID, zorder=0, lw=0)
+        ax.axhline(m, color=MUTED, lw=0.9, ls=(0, (4, 2)), zorder=1)
+        ax.text(0.03, m, " frozen", transform=ax.get_yaxis_transform(), fontsize=6.5,
+                color=INK2, va="bottom", ha="left")
+        for dw in dwells:
+            v = [float(r[k]) for r in fl if abs(float(r["dwell_ages"]) - dw) < 1e-6]
+            jit = 10 ** ((rng.random(len(v)) - 0.5) * 0.12)
+            ax.scatter(np.array([dw] * len(v)) * jit / 1.25, v, s=14, facecolor=col,
+                       edgecolor="white", linewidth=0.5, zorder=3)
+            mm, l2, h2 = boot_mean(v)
+            ax.plot([dw * 1.25, dw * 1.25], [l2, h2], color=INK, lw=1.0, zorder=4)
+            ax.scatter([dw * 1.25], [mm], s=24, marker="D", facecolor=col, edgecolor=INK,
+                       linewidth=0.6, zorder=5)
+        ax.set_xscale("log")
+        ax.set_xticks([10, 100, 1000, 5000]); ax.set_xticklabels(["10", "100", "1,000", "5,000"])
+        ax.minorticks_off()
+        ax.set_xlim(5.5, 11000)
+        ax.set_xlabel("Mean dwell of an environment (ages)")
+        ax.set_ylabel(lab)
+        if k == "err":
+            ax.set_ylim(bottom=0)
+        else:
+            ax.set_ylim(bottom=0 if k == "S" else None)
+        panel_label(ax, pl)
+    from matplotlib.lines import Line2D
+    h = [Line2D([], [], ls="", marker="o", ms=5, mfc=col, mec="white", label="Fluctuating, no cue (one point per population)"),
+         Line2D([], [], ls="", marker="D", ms=4.5, mfc=col, mec=INK, label="Mean, 95% CI"),
+         Line2D([], [], color=MUTED, ls=(0, (4, 2)), lw=0.9, label="Frozen mean (band: 95% CI)")]
+    fig.legend(handles=h, loc="lower center", ncol=3, frameon=False, bbox_to_anchor=(0.5, -0.13))
+    fig.savefig(os.path.join(OUT, "fig6_grain.pdf"))
+    plt.close(fig)
+
+
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
-    fig2(); fig3(); fig4()
+    fig2(); fig3(); fig4(); fig6()
     pts, evo = fig5()
     print("fig5 points (cue, count ratio, strength ratio, rate):")
     for p in pts:
