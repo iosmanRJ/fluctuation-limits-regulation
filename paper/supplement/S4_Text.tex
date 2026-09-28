@@ -8,8 +8,7 @@ check that exposed each one. The complete record, including every retracted
 analysis, is in the project's \texttt{README.md} and \texttt{PAPER.md}.
 
 \section*{1. Earlier EvoSim results and their status}
-These results came from experiments with smaller populations (typically 2{,}000
-to 3{,}000 organisms) than the 180-run batch in the main text.
+These results came from experiments with smaller populations (mostly between 2{,}000 and 3{,}000 organisms) than the 180-run batch in the main text.
 
 \begin{longtable}{@{}p{0.27\linewidth}p{0.36\linewidth}p{0.3\linewidth}@{}}
 \toprule
@@ -29,7 +28,7 @@ The count effect replicates ($+0.12$ at grid 128), but strength density falls
 by 11\% and total strength does not change. The interpretation as denser wiring
 is withdrawn.\\
 The information content of the cue does not matter &
-15 informative--scrambled comparisons pooled: mean difference $-0.17$ nodes,
+Pooled over 15 informative--scrambled comparisons, mean difference $-0.17$ nodes,
 $t=-0.30$, sign test $p=0.61$ &
 Holds in EvoSim, where organisms exploit about 11\% of the cue's information.
 Contradicted in R-Aevol, where the cue is used (P2).\\
@@ -42,7 +41,7 @@ Task difficulty does not set genome size &
 Four manipulations of the task, all null (detection floors 2.2 to 4.2 nodes) &
 Stands.\\
 Organisms read the cue when development is reversible &
-Re-developing living organisms every few steps: switchers 0.65 against 0.23
+With living organisms re-developed every few steps, switchers 0.65 against 0.23
 (informative against scrambled, 100 populations per arm); genome size unchanged
 ($p=0.84$, 95\% CI $-2.1$ to $+2.6$ nodes) &
 Stands. The strength measure has not been taken in this regime.\\
@@ -65,25 +64,23 @@ runs that tested them.
 Prediction & Outcome\\
 \midrule
 \multicolumn{2}{@{}l}{\emph{Earlier EvoSim work}}\\
-Genome size rises with the complexity of the task & wrong: no change\\
-Rotating the yields alone makes the task conditional & wrong: inflow dominated\\
-An abiotic cue will be read because it cannot be depleted & wrong: legible but unread\\
-A conditional genome is adaptive but hard to reach by mutation & wrong: selected against\\
-Reversible development makes a fine-grained regime habitable & correct: 0 of 3 to 3 of 3 survived\\
-A conditional response, once evolved, raises genome size & wrong: response evolved, size unchanged\\
+Genome size rises with the complexity of the task & wrong (no change)\\
+Rotating the yields alone makes the task conditional & wrong (inflow dominated)\\
+An abiotic cue will be read because it cannot be depleted & wrong (legible but unread)\\
+A conditional genome is adaptive but hard to reach by mutation & wrong (selected against)\\
+Reversible development makes a fine-grained regime habitable & correct (survival rose from 0 of 3 to 3 of 3)\\
+A conditional response, once evolved, raises genome size & wrong (the response evolved, size did not change)\\
 \multicolumn{2}{@{}l}{\emph{This study}}\\
 P1--P4 (R-Aevol sweep) & all supported\\
-P5 (EvoSim confirmation) & not run: no viable regime\\
-G1, G3 (grain: coarse against fine) & inconclusive\\
-G2, G4 (grain: coarse against frozen) & refuted\\
+P5 (EvoSim confirmation) & not run (no viable regime)\\
+G1, G3 (grain, coarse against fine) & inconclusive\\
+G2, G4 (grain, coarse against frozen) & refuted\\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \section*{3. Measurement errors and the checks that found them}
-Almost every wrong conclusion in the project came from a measurement error rather
-than from the model itself, and each was found by a check whose correct answer was
-known in advance. They are listed because the same errors recur in simulation
+Almost every wrong conclusion in the project traced back to an error of measurement, and each was found by a check whose correct answer was known in advance. They are listed because the same errors recur in simulation
 studies.
 
 \begin{longtable}{@{}p{0.3\linewidth}p{0.34\linewidth}p{0.28\linewidth}@{}}
@@ -101,9 +98,7 @@ before deriving from it\\
 Parameters attributed to the wrong source & A tenfold error in the stated
 mutation rate of R-Aevol's configuration, in a draft of the Methods & Comparing
 against the platform's example files\\
-A control that was not a control & Turning off the yield rotation created a
-poorer world rather than a less conditional one; the arm with the least
-conditional task had the largest genomes & Measuring population size and energy
+A control that was not a control & Turning off the yield rotation also made the world poorer, and the arm with the least conditional task had the largest genomes & Measuring population size and energy
 in every arm\\
 A no-op manipulation that was not a no-op & Removing a node's inputs changed its
 output downstream and altered every trait (repair 0.995 to 0.127) & Requiring a
@@ -131,9 +126,7 @@ the three frozen arms were the same runs & Checking that arms differ\\
 A verification script that could not fail & A scoping error kept an accumulator
 at its initial value, so the script would have reported success whatever the
 data & A negative control with a known failure\\
-A significance test against the wrong spread & A difference compared with one
-arm's standard deviation rather than its standard error reported ``no effect''
-for $t=4.2$ & Recomputing with Welch and permutation tests\\
+A significance test against the wrong spread & Dividing a difference by one arm's standard deviation instead of the standard error of the difference reported ``no effect'' for $t=4.2$ & Recomputing with Welch and permutation tests\\
 \bottomrule
 \end{longtable}
 

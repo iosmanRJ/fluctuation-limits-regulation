@@ -12,17 +12,12 @@ is described briefly and marked as unused.
 EvoSim is an individual-based model of unicellular organisms whose genomes are
 gene regulatory networks of evolvable size and connectivity. In this study it is
 used to ask how environmental fluctuation, and the information available to track
-it, affect the number of regulatory connections and their strength. The model is
-meant to reproduce three general patterns: evolution of network size and
-connectivity under mutation, selection and drift; a trade-off between the cost
-and benefit of each phenotypic trait, so that traits settle at interior values;
-and a resource ecology built partly by the organisms themselves, through
-byproducts of consumption.
+it, affect the number of regulatory connections and their strength. The model is built so that network size and connectivity evolve under mutation, selection and drift. Each phenotypic trait has a cost as well as a benefit, so traits settle at interior values, and the resource ecology is built partly by the organisms themselves through the byproducts of consumption.
 
 \section*{2. Entities, state variables and scales}
 
 \paragraph*{Grid cells.} The environment is a square lattice of $G\times G$ cells
-($G=128$ here) with reflecting boundaries. Each cell holds the concentration of
+($G=128$ in this study) with reflecting boundaries. Each cell holds the concentration of
 six resource channels, $R_{r}(x,y)$ for $r=1,\dots,6$, capped at 6.0, and a count of
 the organisms occupying it (at most 8).
 
@@ -33,30 +28,27 @@ $n_g$ nodes, $13 \le n_g \le 32$, consisting of a weight matrix
 $W\in\mathbb{R}^{n_g\times n_g}$ and a bias vector $b\in\mathbb{R}^{n_g}$. Nodes
 1--12 are the phenotype outputs, node 13 is the sensor for the abiotic condition,
 and nodes $14,\dots,n_g$ are hidden nodes with no fixed meaning. Each organism
-also carries its phenotype, computed once at birth and fixed for life (unless
-reversible development is enabled, which it is not here): twelve traits in
-$[0,1]$, namely six resource-uptake shares (normalised to sum to one), body size,
+also carries its phenotype, computed once at birth and fixed for life in these experiments. It consists of twelve traits in $[0,1]$, namely six resource-uptake shares (normalised to sum to one), body size,
 motility, division threshold, DNA-repair fidelity, stress tolerance and leakage.
 
 \paragraph*{Global state.} The abiotic condition, which cycles through discrete
 states (Section 7.3); the seasonal phase; and a famine counter.
 
-\paragraph*{Scales.} Time advances in discrete steps. In the experiments reported
-here one generation took about 24 time steps in fluctuating and 31 in frozen
+\paragraph*{Scales.} Time advances in discrete steps. In the experiments of this study one generation took about 24 time steps in fluctuating and 31 in frozen
 populations (measured from the slope of mean lineage depth over the second half of
 each run), so a 150{,}000-step run covers roughly 5{,}000 to 6{,}000 generations.
 The maximum age is 60 steps.
 
 \section*{3. Process overview and scheduling}
-Each time step executes the following in order:
+Each time step executes the following steps in order.
 \begin{enumerate}
 \item \emph{Resource renewal.} Every channel in every cell decays, and external
   inflow is added (Section 7.1).
 \item \emph{Shock check.} With a small probability a mass-mortality or famine event
   occurs (Section 7.9).
-\item \emph{Reversible development} (unused here; Section 7.4).
+\item \emph{Reversible development} (Section 7.4), which was not used in this study.
 \item \emph{Organism update.} Organisms are visited once each, in storage order.
-  For each: uptake and conversion of resources, with byproduct release into the
+  For each organism the step comprises uptake and conversion of resources, with byproduct release into the
   cell (Section 7.5); maintenance cost (7.6); energy update; ageing unless
   dormant (7.7); movement (7.8); death if energy is exhausted or the maximum age is
   exceeded; otherwise, if the energy store exceeds the division threshold and the
@@ -69,13 +61,11 @@ Each time step executes the following in order:
 \end{enumerate}
 Because organisms are updated sequentially and draw on shared cell resources, an
 organism visited earlier in a step can deplete a cell before a later one reaches
-it. Storage order reflects slot reuse rather than any biological property.
+it. Storage order reflects the reuse of memory slots and has no biological meaning.
 
 \section*{4. Design concepts}
 \paragraph*{Basic principles.} Every trait that brings a benefit also carries a
-cost, so that selection does not simply push traits to a boundary. Uptake is an
-allocation of a fixed budget across channels rather than six independent
-affinities. Consumption of channel $r$ releases a byproduct into channel $r+1$,
+cost, so that selection does not drive traits to a boundary. Uptake is an allocation of a fixed budget across the six channels, so the affinities are not independent. Consumption of channel $r$ releases a byproduct into channel $r+1$,
 so all channels except the first exist only through the activity of the
 organisms.
 \paragraph*{Emergence.} Network size, connectivity and connection strength,
@@ -133,17 +123,15 @@ reflecting (no-flux) boundaries; concentrations are capped at 6.0.
 \subsection*{7.3 Abiotic condition, state and cue}
 The condition has $n_s$ states ($n_s=6$ in fluctuating arms, 1 in frozen arms) and
 a period of $P=2{,}000$ steps. With phase $\theta(t) = (t \bmod P)/P$, the current
-state is $s = 1 + \lfloor n_s\theta\rfloor$. The state rotates the yields: the
-yield of channel $r$ in state $s$ is $y_{1 + ((r-1+s-1) \bmod 6)}$, with
-$y = (1.00, 0.60, 0.45, 0.35, 0.28, 0.22)$, so a different channel pays best in each
-state. The cue delivered to node 13 is
+state is $s = 1 + \lfloor n_s\theta\rfloor$. The state rotates the yields, so that the yield of channel $r$ in state $s$ is $y_{1 + ((r-1+s-1) \bmod 6)}$, with
+$y = (1.00, 0.60, 0.45, 0.35, 0.28, 0.22)$, so a different channel pays best in each state. The cue delivered to node 13 is defined as follows.
 \begin{itemize}
-\item informative arm: $c = 2\theta - 1$, which determines the state exactly;
-\item yoked arm: $c = 2\phi - 1$ with $\phi$ the fractional part of
+\item In the informative arm $c = 2\theta - 1$, which determines the state exactly.
+\item In the yoked arm $c = 2\phi - 1$, with $\phi$ the fractional part of
   $(t \bmod P)\cdot 6.1803399/P$, an incommensurate period (the multiplier is
   $5+\varphi$, with $\varphi$ the golden ratio), which covers the same range but
-  carries 0.0004 bits of information about the state;
-\item no-cue arm: $c=0$.
+  carries 0.0004 bits of information about the state.
+\item In the no-cue arm $c=0$.
 \end{itemize}
 With $n_s = 1$ the state is always 1 and the cue is zero, so the three frozen arms
 are identical.
@@ -158,9 +146,7 @@ where $u_k = R_k$ at the organism's cell for $k\le 6$, $u_{13}=c$, and $u_k=0$
 otherwise. The phenotype is $\phi_k = (e_k+1)/2$ for $k=1,\dots,12$, and the
 uptake shares $\phi_1,\dots,\phi_6$ are rescaled to sum to one. Development does
 not reach a fixed point in general; the phenotype is the state after the eighth
-update, which is deterministic and heritable. (Reversible development, in which
-living organisms are re-developed every few steps, exists in the model but is not
-used here.)
+update, which is deterministic and heritable. Reversible development, in which living organisms are re-developed every few steps, exists in the model but was not used in this study.
 
 \subsection*{7.5 Uptake and conversion}
 Let $\ell = 0.45 + 0.55\,\phi_{12}$ be the effective leakage and
@@ -185,9 +171,7 @@ these experiments, and $L$ is the load counter. The cost is multiplied by 0.05
 when dormant. Energy is updated as gains minus cost, capped at 4.0.
 
 \subsection*{7.7 Dormancy and ageing}
-An organism whose energy at the start of the step is below 0.15 is dormant for
-that step: its uptake is reduced (Section 7.5), its maintenance cost is reduced
-(Section 7.6), it does not age and it cannot divide. Otherwise its age increases
+An organism whose energy at the start of the step is below 0.15 is dormant for that step. A dormant organism has reduced uptake (Section 7.5) and a reduced maintenance cost (Section 7.6), does not age and cannot divide. Otherwise its age increases
 by one.
 
 \subsection*{7.8 Movement}
@@ -213,27 +197,22 @@ developed in the conditions of its own cell.
 
 \subsection*{7.11 Mutation}
 The per-site rate is $\mu = \max\big(10^{-3}(1 - 0.85\,\phi_{10}^{\text{parent}}),\,10^{-6}\big)$,
-so DNA repair can reduce it by up to 85\%. At each birth:
-\begin{itemize}
-\item \emph{Point mutations}: a Poisson number with mean $\mu n_g^2$, each adding
-  $\mathcal{N}(0,0.25^2)$ to a randomly chosen weight.
-\item \emph{Bias mutation}: with probability $\mu n_g$, one randomly chosen bias
-  receives $\mathcal{N}(0,0.25^2)$.
-\item \emph{Connection silencing}: with probability 0.2 (in these experiments; 0 by
-  default), one randomly chosen weight is set to exactly zero. Without it,
-  additive mutation would drive every weight away from zero and density towards
-  one.
-\item \emph{Gene silencing}: with probability 0.002, all outgoing weights of a
-  random node are set to zero.
-\item \emph{Gene duplication}: with probability 0.002, the incoming and outgoing
-  weights and the bias of a random node are copied onto another random node, with
-  $\mathcal{N}(0,0.05^2)$ noise added to every copied weight, including weights
-  that were zero in the source.
-\item \emph{Node addition or deletion}: with probability 0.003 a hidden node is
-  added (if $n_g<32$) as a copy of a random existing node made in the same way as a
-  duplication; otherwise, with probability 0.003, a random hidden node is removed
-  (if $n_g>13$).
-\end{itemize}
+so DNA repair can reduce it by up to 85\%. At each birth the offspring genome
+receives a Poisson number of point mutations with mean $\mu n_g^2$, each adding
+$\mathcal{N}(0,0.25^2)$ to a randomly chosen weight, and with probability $\mu n_g$
+one randomly chosen bias receives $\mathcal{N}(0,0.25^2)$ as well. With
+probability 0.2 (in these experiments; 0 by default) one randomly chosen weight is
+set to exactly zero. We call this connection silencing. Without it, additive
+mutation would drive every weight away from zero and density towards one.
+
+Structural mutations act on whole nodes. With probability 0.002 all outgoing
+weights of a random node are set to zero (gene silencing). With probability 0.002
+the incoming and outgoing weights and the bias of a random node are copied onto
+another random node, and $\mathcal{N}(0,0.05^2)$ noise is added to every copied
+weight, including weights that were zero in the source (gene duplication). With
+probability 0.003 a hidden node is added, if $n_g<32$, as a copy of a random
+existing node made in the same way as a duplication. If no node is added, a random
+hidden node is removed with probability 0.003, provided $n_g>13$.
 In addition, each point mutation, bias mutation and connection silencing is
 classified for the load counter as deleterious (probability 0.70, load $+1$),
 beneficial (0.05, load $-1$) or neutral (otherwise), and each gene silencing adds
@@ -241,11 +220,7 @@ beneficial (0.05, load $-1$) or neutral (otherwise), and each gene silencing add
 as rise.
 
 \subsection*{7.12 Measures used in the main text}
-For each organism at birth: $n_{nz}$, the number of weights with $|w|>10^{-4}$;
-and the strength density $\sum|w|/n_g^2$ over all $n_g^2$ weights, zeros included.
-From these, per time step and averaged over the population: count density
-$n_{nz}/n_g^2$, strength density, and total strength $\sum|w|$ (strength density
-times $n_g^2$). Each run is summarised by the mean over its final 20\% of time
+Two quantities are computed for each organism at birth, the number $n_{nz}$ of weights with $|w|>10^{-4}$ and the strength density $\sum|w|/n_g^2$ over all $n_g^2$ weights, zeros included. At each time step the population averages of count density $n_{nz}/n_g^2$, strength density and total strength $\sum|w|$ (strength density times $n_g^2$) are recorded. Each run is summarised by the mean over its final 20\% of time
 steps, with ratios computed per step before averaging.
 
 \section*{Parameters}
@@ -276,10 +251,10 @@ Cue gain & 1 & 0 (no-cue arms)\\
 Yoked cue & off & on (yoked arms)\\
 Uptake rate & 0.60 & \\
 Leakage floor; rate bonus & 0.45; 1.2 & \\
-Maintenance: base, size$^2$, motility, stress$^2$, repair & 0.08, 0.22, 0.035, 0.04, 0.02 & \\
+Maintenance per step (base, size$^2$, motility, stress$^2$, repair) & 0.08, 0.22, 0.035, 0.04, 0.02 & \\
 Maintenance per hidden node & 0.0015 & \\
 Maintenance per non-zero weight $\kappa_e$ & 0 & $5\times10^{-5}$\\
-Maintenance: crowding, load, toxicity & 0.05, 0.015, 0.008 & \\
+Maintenance per step (crowding, load, toxicity) & 0.05, 0.015, 0.008 & \\
 Division energy & 2.0 & \\
 Initial energy; maximum energy & 0.8; 4.0 & \\
 Dormancy threshold; upkeep; uptake & 0.15; 0.05; 0.35 & \\

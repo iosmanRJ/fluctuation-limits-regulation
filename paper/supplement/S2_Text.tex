@@ -16,21 +16,13 @@ cmake .. -Dwith-raevol=ON -Dwithout-stats=OFF -Dwith-x=OFF \
 \end{lstlisting}
 \texttt{-Dwithout-stats=OFF} is required for the per-generation statistics file
 used in all analyses; the option is on by default and suppresses it. Building on
-Apple Silicon (macOS, Apple clang 21, Homebrew \texttt{cmake}, \texttt{libomp} and
-\texttt{boost}) required three changes that do not affect the model: the policy
-flag above, needed because the bundled GoogleTest declares a CMake minimum below
-3.5; passing the OpenMP include directory through \texttt{CMAKE\_CXX\_FLAGS}, since
-it did not reach every target otherwise; and correcting line 118 of
-\texttt{CMakeLists.txt}, which hard-codes the Intel Homebrew path
-\texttt{/usr/local/lib/libomp.dylib}, to \texttt{/opt/homebrew/opt/libomp/lib/libomp.dylib}.
+Apple Silicon (macOS, Apple clang 21, Homebrew \texttt{cmake}, \texttt{libomp} and \texttt{boost}) needed changes that do not affect the model. The policy flag above is required because the bundled GoogleTest declares a CMake minimum below 3.5. The OpenMP include directory had to be passed through \texttt{CMAKE\_CXX\_FLAGS}, since it did not reach every target otherwise. Line 118 of \texttt{CMakeLists.txt} hard-codes the Intel Homebrew path \texttt{/usr/local/lib/libomp.dylib}, which we changed to \texttt{/opt/homebrew/opt/libomp/lib/libomp.dylib}.
 All simulations ran single-threaded, ten or twelve at a time, on one 12-core
 machine.
 
 \section*{2. Parameter file}
 Each run was created with \texttt{aevol\_create} from a parameter file generated
-by \texttt{replication/raevol/gen\_params\_v2.py} (exploratory runs:
-\texttt{gen\_params\_v1.py}; grain experiment: \texttt{gen\_params\_grain.py}, which
-imports the same template). The template, with the fields that vary between runs
+by \texttt{replication/raevol/gen\_params\_v2.py}. The exploratory runs used \texttt{gen\_params\_v1.py} and the grain experiment \texttt{gen\_params\_grain.py}, which imports the same template. The template, with the fields that vary between runs
 shown in braces, is:
 \begin{lstlisting}
 STRAIN_NAME             {name}
@@ -89,8 +81,7 @@ Target B (height, mean, width) & 1.2, 0.48, 0.12 & $-1.4$, 0.50, 0.07 & 0.3, 0.2
 \bottomrule
 \end{tabular}
 \end{center}
-B is A reflected about 0.5. At creation the platform reports a geometric area of
-0.152468 for both. Frozen arms define two copies of A (odd seeds) or of B (even
+B is A reflected about 0.5. At creation the platform reports a geometric area of 0.152468 for each. Frozen arms define two copies of A (odd seeds) or of B (even
 seeds). The two signal proteins are taken from \texttt{examples/complex\_env}
 (its first two \texttt{CREATE\_SIGNAL} lines):
 \begin{lstlisting}
@@ -150,25 +141,21 @@ the code path used, as well as in the non-SIMD implementation
 
 \section*{5. Matching switching rates in the yoked arm}
 Let an environment be a pair (target, signal). In the informative arm the two
-environments are (A,~s1) and (B,~s2), so every switch changes both the target and
-the signal. With switching probability $q$ per age, the target changes at rate
+environments are (A,~s1) and (B,~s2), so every switch changes the target and the signal together. With switching probability $q$ per age, the target changes at rate
 $q$ per age and the signal at rate $q$ per age.
 
 In the yoked arm there are four environments, (A,~s1), (A,~s2), (B,~s1) and
 (B,~s2). From any of them, a switch moves to one of the three others with equal
 probability. Of the three, one keeps the target and changes the signal, one
-changes the target and keeps the signal, and one changes both. A switch therefore
-changes the target with probability 2/3 and the signal with probability 2/3. With
-switching probability $q'$, both change at rate $2q'/3$ per age, and setting
-$q' = 1.5q$ gives rate $q$ for both, as in the informative arm. Without this
+changes the target and keeps the signal, and one changes the two together. A switch therefore
+changes the target with probability 2/3 and the signal with probability 2/3. With switching probability $q'$, each changes at rate $2q'/3$ per age, and setting $q' = 1.5q$ gives each a rate of $q$, as in the informative arm. Without this
 correction the yoked arm would fluctuate a third less often than the informative
 arm, and any difference between the two would be confounded with the rate of
 fluctuation.
 
 The two arms also match in the marginal frequency of each signal (one half) and
 of each target (one half), and in the number of signal proteins present at any
-age (one). They differ in the association between signal and target: in the
-informative arm the signal determines the target, and in the yoked arm the two
+age (one). They differ in the association between signal and target. In the informative arm the signal determines the target, and in the yoked arm the two
 are independent. They also differ in the joint dynamics of a switch, since in the
 informative arm target and signal always change together and in the yoked arm
 they do so in one switch out of three. This is a direct consequence of removing
@@ -186,9 +173,7 @@ for (auto affinity: rna->affinity_list) {       // coding RNAs only
 nb_influences_       = nb_operating_influences_ + nb_enhancing_influences_;
 av_value_influences_ = (mean_activator_activity + mean_operator_activity) / (nb_activators + nb_operators);
 \end{lstlisting}
-The column \texttt{nb\_link} is the number of positive enhancing factors plus the
-number of positive operating factors over all protein--RNA affinities (an affinity
-with both counts twice), and \texttt{avg\_influence} is the mean of those factors,
+The column \texttt{nb\_link} is the number of positive enhancer factors plus the number of positive operator factors over all protein--RNA affinities (an affinity with a positive factor of each kind is counted twice), and \texttt{avg\_influence} is the mean of those factors,
 so the total regulatory strength is $S = \texttt{nb\_link}\times\texttt{avg\_influence}$. When
 there are no links, \texttt{avg\_influence} is undefined and we set $S=0$ (an
 earlier, exploratory script dropped such generations instead; the difference is
@@ -210,7 +195,7 @@ Grain (60) & fluctuating no-cue at $q=0.1, 0.01, 0.001, 0.0002$; frozen no-cue &
 \bottomrule
 \end{tabular}
 \end{center}
-Here $a$ and $c$ index the arm or cell in the order written by the generator
+The indices $a$ and $c$ number the arm or cell in the order written by the generator
 script and $s$ the replicate. Runs were launched seed-major, so that stopping a
 batch early would still leave a balanced design. Every run reached 30{,}000
 generations with exit status 0.
