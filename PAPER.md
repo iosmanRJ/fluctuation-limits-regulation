@@ -871,3 +871,17 @@ node and in the Discussion; Rago et al. 2019 (PLoS Comput Biol 15:e1006260) with
 Botero 2015 for adaptive tracking at coarse grain. Not cited: Scheiner, Barfield
 & Holt 2017 (quantitative-genetic rescue model, no GRN or cue information).
 S5 gained three rows (refs 19–21).
+
+### 11.15 Signal-protein links, and two more citations (2026-09-28)
+
+`nb_link` and S include influences of the SIGNAL PROTEINS: ExpManager_7.cpp adds
+each signal as a protein (`protein_add`) and computes affinities for
+`prot->is_init_ || prot->signal_`, and Stats_7 counts every affinity. P1–P4 are
+like-for-like (P1, P2 both with signals; P3 neither), so unaffected. Cross-cue
+comparisons (no-cue "weakest of any condition"; yoked 5.7 vs no-cue 1.25 at
+q = 0.10) include links the no-cue arms cannot have. Frozen no-cue reaches 6.3,
+within frozen-with-signals 4.8–7.5 (sweep), so that level needs no signals; how
+much of the fluctuating yoked/no-cue gap is signal links is unknown (not
+separable from the stats). Now stated in Methods, Limitations and S2 §6.
+Also cited: Ng & Kinjo 2023 (Sci Rep 13:19830) beside their 2024 paper;
+Ashander, Chevin & Baskett 2016 (Proc R Soc B 283:20161690) in the Introduction.

@@ -174,7 +174,13 @@ nb_influences_       = nb_operating_influences_ + nb_enhancing_influences_;
 av_value_influences_ = (mean_activator_activity + mean_operator_activity) / (nb_activators + nb_operators);
 \end{lstlisting}
 The column \texttt{nb\_link} is the number of positive enhancer factors plus the number of positive operator factors over all protein--RNA affinities (an affinity with a positive factor of each kind is counted twice), and \texttt{avg\_influence} is the mean of those factors,
-so the total regulatory strength is $S = \texttt{nb\_link}\times\texttt{avg\_influence}$. When
+so the total regulatory strength is $S = \texttt{nb\_link}\times\texttt{avg\_influence}$.
+The affinities include those of the signal proteins. \texttt{ExpManager\_7.cpp}
+adds each signal to the individual's protein list and computes its affinities
+like those of any other protein (the condition is
+\texttt{prot->is\_init\_ || prot->signal\_}), so in arms with a cue
+\texttt{nb\_link} and $S$ count signal-to-RNA influences, and the statistics do
+not separate them. When
 there are no links, \texttt{avg\_influence} is undefined and we set $S=0$ (an
 earlier, exploratory script dropped such generations instead; the difference is
 immaterial for the data reported, since they are rare). Genome size is

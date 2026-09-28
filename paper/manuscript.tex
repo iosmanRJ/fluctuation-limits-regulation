@@ -146,7 +146,9 @@ response. A plastic response within a lifetime pays when the environment changes
 on the timescale of an individual's life and a reliable cue indicates the coming
 state~\cite{levins1968,moran1992,kussell2005,botero2015}. Without such a cue,
 fluctuation favours a fixed generalist phenotype, bet-hedging or genetic
-tracking~\cite{kussell2005,botero2015}. A recent model of a gene regulatory
+tracking~\cite{kussell2005,botero2015}, and responding to a cue that predicts the
+environment poorly amplifies the mismatch between phenotype and
+environment~\cite{ashander2016}. A recent model of a gene regulatory
 network shows the same pattern for the evolution of plasticity. Plasticity
 evolved mainly under fast, erratic change, especially when cues were reliable,
 and evolvability under intermediate variability with less reliable
@@ -174,7 +176,7 @@ structured~\cite{espinosasoto2018,kashtan2005}.
 Differences of method make these results hard to compare. Fluctuation and information are usually confounded. An environment that changes
 more often also contains a different amount of predictable structure, and adding
 a cue changes what an organism experiences as well as what it can know. A
-comparison of networks with and without a cue input~\cite{ng2024} changes the
+comparison of networks with and without a cue input~\cite{ng2023,ng2024} changes the
 two together. Studies of
 animal learning handle this problem with a yoked control, in which a second
 subject receives the same stimuli as the first but without the contingency
@@ -641,7 +643,14 @@ measured regulatory strength in that regime. Each R-Aevol condition contained 12
 populations, fewer than the 60 to 100 used in comparable
 studies~\cite{tsuda2010,lalejini2021}. The effects were large ($|d|$ between 1.5
 and 3.9 in the evaluated cells) and remained significant after correction for
-multiple testing, but smaller effects could have been missed. The version of R-Aevol we used records per-generation statistics only for the
+multiple testing, but smaller effects could have been missed. Because the influences of signal proteins are counted, comparisons between arms
+with and without a cue include links that the no-cue arms cannot have. The
+pre-registered contrasts compare arms with the same signals and are not affected.
+Frozen populations without signals reached a regulatory strength of 6.3, within
+the range of frozen populations with signals (4.8 to 7.5), so regulation of that
+strength does not require signals. We cannot tell how much of the difference
+between fluctuating arms with and without a cue the signal links account for.
+The version of R-Aevol we used records per-generation statistics only for the
 best individual in each population. Its fluctuating environments alternate between two fixed targets and do
 not include the random walk towards new optima that Tsuda and Kawata found most
 favourable to complexity~\cite{tsuda2010}, and even at the coarsest grain a
@@ -774,7 +783,10 @@ switching probability of $1.5q$ each again changes at rate $q$ per age.
 generation. Genome size is the number of functional genes. Total regulatory
 strength is $S = n_\mathrm{link}\,\bar{a}$, where $n_\mathrm{link}$ is the number of
 activating and repressing protein--RNA influences (a protein that activates
-and also represses an RNA counts twice) and $\bar{a}$ is their mean strength (the sum of the activation and repression factors divided by their number). $S=0$ when there are no links.
+and also represses an RNA counts twice) and $\bar{a}$ is their mean strength (the sum of the activation and repression factors divided by their number). $S=0$ when there are no links. R-Aevol treats the signal proteins like other
+proteins when it computes binding, so in arms with a cue $n_\mathrm{link}$ and $S$
+include influences of the signal proteins, which the statistics do not
+separate.
 Each run is summarised by its mean over generations 25{,}001 to 30{,}000.
 
 \paragraph*{Runs.} The exploratory experiment had six arms with 12 seeds each at
