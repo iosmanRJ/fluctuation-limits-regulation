@@ -842,3 +842,20 @@ numbers held. Three interpretations did not, and the manuscript now says:
   "a switch still falls within ~0.4% of lifetimes at q = 0.0002" is now stated;
   the sleep deviation is harmless because a suspended process resumes unchanged,
   not because R-Aevol is deterministic (not verified); title "sensed" → "tracked".
+
+### 11.13 Third audit (2026-09-28)
+
+Checked this time: S1 parameter table against `params.jl` and the launch flags
+(all match, incl. founders max(200, 128²÷80) = 204); S2 switching code and
+targets/signals against the aevol source and `gen_params_v2.py`; S3 regenerated
+from `paper/data` (identical); S4 historical numbers against §1–§3 (all trace;
+"27 to 41 points" is the five non-saturated comparisons); rendered reference
+list. New check: frozen targets A (odd seeds) and B (even) are equally hard
+(error 0.0083 vs 0.0083, p = 0.89; genes p = 0.83), supporting "neither target is
+harder to match". Fixed: the abstract's "models disagree about the direction"
+had no negative-direction citation (added Malcom 2011, PLoS One 6:e14747:
+smaller fixed-size networks persist longer under fast change); per-age rate
+matching is R-Aevol-only; abstract cue-free sentence disambiguated; second
+result against the genes-for-precision idea added (informative cue: better
+match, fewer genes); Table 2 P4 says "with an informative cue"; q = 0.20 gene
+p marked uncorrected.
