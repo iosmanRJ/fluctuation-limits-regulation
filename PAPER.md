@@ -813,3 +813,32 @@ numbers held. Three interpretations did not, and the manuscript now says:
   citations; population size may contribute to the EvoSim count rise
   (r(pop, count density) −0.63 to −0.72 within fluctuating arms, +0.24 frozen);
   the yoked-cue multiplier is 10/φ = 6.1803399, not 5 + φ (code comment fixed).
+
+### 11.12 Second audit: information and genome size, and a post hoc reading labelled (2026-09-28)
+
+- **R-Aevol reproduces the EvoSim information null for genome size.**
+  Informative vs yoked functional genes: v1 19.0 vs 17.9 (p = 0.30); sweep
+  16.3/16.4, 18.1/19.9, 18.0/20.8 (q = 0.05/0.10/0.20; only q = 0.20 differs,
+  p = 0.01, in favour of the YOKED cue); population 512 17.5/17.9 (p = 0.69).
+  Information changes regulation instead: links ~1.7× (p ≤ 0.03 in all five
+  cells), TFs more at every rate, strength 2.3–2.9×. The manuscript had said
+  R-Aevol "reproduced neither" EvoSim conclusion and that P2 "contradicts" the
+  information null. Both corrected. §11.1's "Contradicts §1.2" is true for
+  regulation only.
+- The "~11% of the information" figure is (matched − 1)/(6 − 1) from Regime A
+  (matched 1.545 vs 0.976 scrambled), a matching score, not bits. The
+  manuscript now states the matching numbers.
+- The Discussion's reading of Tsuda & Kawata's cyclic regime goes beyond the
+  pre-registered interpretation (which, for G1/G3 not supported, was "report
+  as a model difference"); it is now labelled as such, and the interpretation
+  rules are in Methods. The cyclic-vs-random-walk limit WAS in the grain
+  pre-registration (§11.8), so it is not a post hoc discovery.
+- EvoSim, this batch: informative vs yoked populations equal in size
+  (p = 0.79) and strength density (p = 0.99) but count density lower with the
+  informative cue (0.55 vs 0.60, p = 0.009): now reported. The three frozen arms
+  are identical runs, so 180 runs hold 120 distinct populations.
+- Also: cue reliability at zero is a yoked cue, so the claim that reliability
+  cannot separate information from presence was withdrawn; the registered limit
+  "a switch still falls within ~0.4% of lifetimes at q = 0.0002" is now stated;
+  the sleep deviation is harmless because a suspended process resumes unchanged,
+  not because R-Aevol is deterministic (not verified); title "sensed" → "tracked".
