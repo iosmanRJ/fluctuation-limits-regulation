@@ -859,3 +859,15 @@ matching is R-Aevol-only; abstract cue-free sentence disambiguated; second
 result against the genes-for-precision idea added (informative cue: better
 match, fewer genes); Table 2 P4 says "with an informative cue"; q = 0.20 gene
 p marked uncorrected.
+
+### 11.14 Citations added from `relevant_papers/` (2026-09-28)
+
+Read in full; none overlaps the yoked-control or count-vs-strength claims.
+Cited: Ng & Kinjo 2024 (PeerJ 12:e17102; cue vs no-cue network models, fixed
+density) for the presence/information confound; Sakamoto & Innan 2024 (G3
+14:jkae144; sensor-gene network, sensor comes to activate some genes and repress
+others; always informative, gene number fixed) as precedent for EvoSim's sensor
+node and in the Discussion; Rago et al. 2019 (PLoS Comput Biol 15:e1006260) with
+Botero 2015 for adaptive tracking at coarse grain. Not cited: Scheiner, Barfield
+& Holt 2017 (quantitative-genetic rescue model, no GRN or cue information).
+S5 gained three rows (refs 19–21).

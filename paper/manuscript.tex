@@ -173,7 +173,9 @@ structured~\cite{espinosasoto2018,kashtan2005}.
 
 Differences of method make these results hard to compare. Fluctuation and information are usually confounded. An environment that changes
 more often also contains a different amount of predictable structure, and adding
-a cue changes what an organism experiences as well as what it can know. Studies of
+a cue changes what an organism experiences as well as what it can know. A
+comparison of networks with and without a cue input~\cite{ng2024} changes the
+two together. Studies of
 animal learning handle this problem with a yoked control, in which a second
 subject receives the same stimuli as the first but without the contingency
 between stimulus and outcome. Church showed that pairing individual subjects in
@@ -222,7 +224,8 @@ methods; ODD description in S1~Text). Each genome is a gene regulatory network,
 specified by a weight matrix and node biases, with 13 to 32 nodes. Thirteen
 nodes are fixed. Twelve are read out as phenotypic traits (resource-uptake
 allocation, body size, motility, division threshold, DNA repair, stress
-tolerance and leakage) and one receives an abiotic cue. The remaining hidden
+tolerance and leakage) and one receives an abiotic cue, much like the sensor gene
+of Sakamoto and Innan~\cite{sakamoto2024}. The remaining hidden
 nodes are added by duplication and removed by deletion, so genome size can
 evolve. The network is developed once at birth, and the phenotype does not
 change afterwards. Mutation can create and remove connections and each non-zero
@@ -545,7 +548,9 @@ did (25.6 genes and a
 strength of 8.4 in frozen populations; G2 and G4 refuted, Holm-adjusted
 $p=4\times10^{-4}$ and $8\times10^{-5}$). Coarser grain did improve the match to
 the target, lowering metabolic error from 0.062 to 0.038, but genome size and
-regulation stayed where they were. The finest-grained cell, with new seeds, reproduced
+regulation stayed where they were. This is the pattern expected of adaptive tracking, in
+which populations re-adapt genetically to each environment when it lasts many
+generations~\cite{botero2015,rago2019}. The finest-grained cell, with new seeds, reproduced
 P3 and the reduction in gene number without a cue. By the interpretation fixed in advance, grain does not
 reconcile our results with those of Tsuda and Kawata.
 
@@ -581,7 +586,9 @@ responses, and in their absence generalist phenotypes or bet-hedging are
 favoured~\cite{levins1968,moran1992,kussell2005,botero2015}. This has recently
 been shown for the evolution of plasticity in a gene regulatory network, in
 which the parts of the network that become sensitive to mutation also depend on
-the environmental regime~\cite{jorritsma2026}. Our results add the effect of a
+the environmental regime~\cite{jorritsma2026}, and in a network with a dedicated
+sensor gene, plasticity evolves as the sensor comes to activate some genes and
+repress others~\cite{sakamoto2024}. Our results add the effect of a
 cue's information on the regulatory strength and the size of the network that
 implements the response. The yoked control separated that information from the
 cue's physical presence, which a manipulation of cue reliability achieves only if

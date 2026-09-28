@@ -18,11 +18,20 @@ Reliable cues favour plastic responses; without them, fluctuation favours
 generalists, bet-hedging or genetic tracking & Established &
 Levins 1968 [1]; Moran 1992 [2]; Kussell and Leibler 2005 [3]; Botero et al.
 2015 [4]. Our results concern the corresponding effect on the regulatory network.\\
+In slowly changing environments populations track the environment genetically
+instead of evolving plasticity & Established & Botero et al. 2015 [4]; Rago et al.
+2019 [21]. Consistent with the better match to the target, without a change in
+regulation, at coarse grain in R-Aevol.\\
 In a gene regulatory network model, plasticity evolves mainly under fast, erratic
 change with reliable cues & Established & Jorritsma and van den Berg 2026 [5].
 Their abstract reports which parts of the network become sensitive to mutation.
 We have not been able to read the full text; if it reports connection strength
 by cue reliability, part of our architectural result would overlap with it.\\
+In a network with a dedicated sensor gene, discrete plasticity evolves as the
+sensor comes to activate some genes and repress others & Published & Sakamoto and
+Innan 2024 [19]. The sensor is always informative and gene number does not
+evolve, so neither an uninformative-cue control nor genome size is examined.
+EvoSim's sensor node follows the same design.\\
 Fluctuating environments can select for or against gene regulation &
 Established experimentally & Pollack, Nozoe and Kussell 2025 [6], who report that catabolite symport flux strongly affects selection for regulation and note that laboratory evolution under metabolic fluctuation often loses the regulation of metabolic genes.\\
 Fluctuation without information about the optimum promotes complex regulatory
@@ -42,6 +51,10 @@ populations.\\
 Sensing and non-sensing populations evolve differently in fluctuating
 environments & Published, different measures & Lalejini et al. 2021 [11]
 (Avida), measuring trait loss and the accumulation of deleterious mutations. Network architecture was not measured.\\
+Network models with and without a cue input compared & Published & Ng and Kinjo
+2024 [20]; plasticity-led evolution appears only with the cue input, and network
+density is fixed by the mutation operator. Removing the cue changes its presence
+and its information together, the confound the yoked control removes.\\
 Regulatory complexity is measured by counting genes or edges & Common practice &
 Tsuda and Kawata 2010 [7] (gene numbers, degree distributions); Espinosa-Soto
 2018 [12] (binary edges, weights not discussed).\\
@@ -96,6 +109,9 @@ caveat on [5] above.\\
 \item van Nimwegen E. Scaling laws in the functional content of genomes. Trends Genet. 2003;19(9):479--84.
 \item Cases I, de Lorenzo V, Ouzounis CA. Transcription regulation and environmental adaptation in bacteria. Trends Microbiol. 2003;11(6):248--53.
 \item Beslon G, Parsons DP, Sanchez-Dehesa Y, Pe\~na JM, Knibbe C. Scaling laws in bacterial genomes: a side-effect of selection of mutational robustness? BioSystems. 2010;102(1):32--40.
+\item Sakamoto T, Innan H. On the evolutionary origin of discrete phenotypic plasticity. G3 (Bethesda). 2024;14(9):jkae144.
+\item Ng ETH, Kinjo AR. Plasticity-led and mutation-led evolutions are different modes of the same developmental gene regulatory network. PeerJ. 2024;12:e17102.
+\item Rago A, Kouvaris K, Uller T, Watson R. How adaptive plasticity evolves when selected against. PLoS Comput Biol. 2019;15(3):e1006260.
 \end{enumerate}
 
 \end{document}
