@@ -24,11 +24,16 @@ Their abstract reports which parts of the network become sensitive to mutation.
 We have not been able to read the full text; if it reports connection strength
 by cue reliability, part of our architectural result would overlap with it.\\
 Fluctuating environments can select for or against gene regulation &
-Established experimentally & Pollack, Nozoe and Kussell 2025 [6]. There the deciding factor is metabolic flux.\\
-Cue-free fluctuation promotes complex regulatory networks & Published; conflicts
-with our R-Aevol results & Tsuda and Kawata 2010 [7] (optimum moving by a random
-walk across generations, constant uninformative input). Our grain experiment
-tested whether grain reconciles the two and found that it does not. The remaining candidate explanations are the novel optima of their design, against two alternating targets in ours, and differences in the genotype--phenotype map.\\
+Established experimentally & Pollack, Nozoe and Kussell 2025 [6], who report that catabolite symport flux strongly affects selection for regulation and note that laboratory evolution under metabolic fluctuation often loses the regulation of metabolic genes.\\
+Fluctuation without information about the optimum promotes complex regulatory
+networks & Published; conflicts with our R-Aevol results for a random-walk
+optimum & Tsuda and Kawata 2010 [7]. Their optimum moved across generations, and
+the networks received an on/off signal that carried no information about its
+position. The effect was strong for a random walk and slight, limited to large
+and infrequent shifts, for an optimum alternating between two positions, which
+is the pattern of our design. Our grain experiment found that grain does not
+reconcile the two results. The remaining candidate explanations are the novel
+optima of the random walk and differences in the genotype--phenotype map.\\
 Fluctuating environments favour larger genomes & Published; matches earlier EvoSim results & Bentkowski et al. 2015 [8]. R-Aevol shows the opposite.\\
 Genome size is limited by selection for mutational robustness and falls with
 population size and mutation rate & Established in Aevol & Knibbe et al. 2007 [9];
@@ -37,21 +42,28 @@ populations.\\
 Sensing and non-sensing populations evolve differently in fluctuating
 environments & Published, different measures & Lalejini et al. 2021 [11]
 (Avida), measuring trait loss and the accumulation of deleterious mutations. Network architecture was not measured.\\
-Connectivity is measured by counting edges & Common practice & Tsuda and Kawata
-2010 [7]; Kashtan and Alon 2005 [12]; Espinosa-Soto 2018 [13] (binary edges,
-weights not discussed).\\
-Edge counts can grow by near-neutral accumulation & Established & Soyer and
-Bonhoeffer 2006 [14].\\
+Regulatory complexity is measured by counting genes or edges & Common practice &
+Tsuda and Kawata 2010 [7] (gene numbers, degree distributions); Espinosa-Soto
+2018 [12] (binary edges, weights not discussed).\\
+Network size and connectivity can grow without selection for them & Established &
+Soyer and Bonhoeffer 2006 [13].\\
+The number of transcription factors scales faster than genome size and is
+higher in free-living bacteria & Established; two interpretations &
+Comparative genomics links it to lifestyle and environmental variety (van
+Nimwegen 2003 [16]; Cases, de Lorenzo and Ouzounis 2003 [17]). R-Aevol
+simulations reproduce the scaling and attribute it to mutation and
+rearrangement rates instead of lifestyle (Beslon et al. 2010 [18]).\\
 Summed edge strength as a network measure & Standard method & Iwasaki, Tsuda and
-Kawata 2013 [15].\\
-The yoked control & Established in the study of learning & Church 1964 [16]
+Kawata 2013 [14].\\
+The yoked control & Established in the study of learning & Church 1964 [15]
 describes a bias that arises when individual subjects are paired; our arms are
 not paired, so it does not apply.\\
 \midrule
 \multicolumn{3}{@{}l}{\emph{Not found in the literature}}\\
-Edge count and edge strength change in opposite directions under fluctuation &
-This study & EvoSim (exploratory), R-Aevol informative-cue populations
-(pre-registered secondary analysis).\\
+Edge count does not track edge strength under fluctuation & This study &
+EvoSim (exploratory; more edges with the same total strength), R-Aevol
+informative-cue populations (pre-registered secondary analysis; no more links
+but stronger regulation).\\
 A yoked control that separates a cue's information from its presence in the
 evolution of regulatory networks & This study & R-Aevol, with switching rates
 matched between arms (S2 Text).\\
@@ -75,11 +87,13 @@ caveat on [5] above.\\
 \item Knibbe C, Coulon A, Mazet O, Fayard JM, Beslon G. A long-term evolutionary pressure on the amount of noncoding DNA. Mol Biol Evol. 2007;24(10):2344--53.
 \item Luiselli J, Rouzaud-Cornabas J, Lartillot N, Beslon G. Genome streamlining: effect of mutation rate and population size on genome size reduction. Genome Biol Evol. 2024;16(12):evae250.
 \item Lalejini A, Ferguson AJ, Grant NA, Ofria C. Adaptive phenotypic plasticity stabilizes evolution in fluctuating environments. Front Ecol Evol. 2021;9:715381.
-\item Kashtan N, Alon U. Spontaneous evolution of modularity and network motifs. Proc Natl Acad Sci USA. 2005;102(39):13773--8.
 \item Espinosa-Soto C. On the role of sparseness in the evolution of modularity in gene regulatory networks. PLoS Comput Biol. 2018;14(5):e1006172.
 \item Soyer OS, Bonhoeffer S. Evolution of complexity in signaling pathways. Proc Natl Acad Sci USA. 2006;103(44):16337--42.
 \item Iwasaki WM, Tsuda ME, Kawata M. Genetic and environmental factors affecting cryptic variations in gene regulatory networks. BMC Evol Biol. 2013;13:91.
 \item Church RM. Systematic effect of random error in the yoked control design. Psychol Bull. 1964;62:122--31.
+\item van Nimwegen E. Scaling laws in the functional content of genomes. Trends Genet. 2003;19(9):479--84.
+\item Cases I, de Lorenzo V, Ouzounis CA. Transcription regulation and environmental adaptation in bacteria. Trends Microbiol. 2003;11(6):248--53.
+\item Beslon G, Parsons DP, Sanchez-Dehesa Y, Pe\~na JM, Knibbe C. Scaling laws in bacterial genomes: a side-effect of selection of mutational robustness? BioSystems. 2010;102(1):32--40.
 \end{enumerate}
 
 \end{document}

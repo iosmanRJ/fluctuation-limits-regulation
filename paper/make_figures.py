@@ -229,8 +229,10 @@ def fig5():
     ax.annotate("all three rates", (nx, ny), xytext=(6, 4), textcoords="offset points",
                 fontsize=6.5, color=INK2)
     fl = [r for r in E if r["arm"] == "fluc_none"]; fz = [r for r in E if r["arm"] == "froz_none"]
-    ex = np.mean([float(r["count_density"]) for r in fl]) / np.mean([float(r["count_density"]) for r in fz])
-    ey = np.mean([float(r["strength_density"]) for r in fl]) / np.mean([float(r["strength_density"]) for r in fz])
+        # raw counts and total strength, as for R-Aevol; the density measures share the
+    # n_g^2 denominator, which grows with the extra nodes of fluctuating networks
+    ex = np.mean([float(r["edges"]) for r in fl]) / np.mean([float(r["edges"]) for r in fz])
+    ey = np.mean([float(r["total_strength"]) for r in fl]) / np.mean([float(r["total_strength"]) for r in fz])
     ax.scatter([ex], [ey], s=40, marker="^", facecolor=CUE["none"], edgecolor=INK, linewidth=0.6, zorder=5)
     ax.annotate("EvoSim", (ex, ey), xytext=(5, -9), textcoords="offset points", fontsize=6.5, color=INK2)
     ax.text(0.14, 3.2, "count down,\nstrength up", fontsize=6.5, color=MUTED, va="top")

@@ -184,8 +184,8 @@ zoned task failed precisely because consumers flatten the field they must read.
         # The temporal multiplier must be IRRATIONAL. An integer one is
         # commensurate with the cycle: 7.0 measured 0.000 bits WITH a spatial
         # gradient but leaked 0.067 bits without one, because with `cond_gradient
-        # = false` the spatial term drops out and the two phases lock. 5 + phi
-        # never locks, and measures 0.0004 bits without a gradient and 0.0014
+        # = false` the spatial term drops out and the two phases lock. 10/phi
+        # (6.1803399 below) never locks, and measures 0.0004 bits without a gradient and 0.0014
         # with one. (A pure golden-ratio pair was tried earlier and leaked 0.72
         # bits, because cue and state then SHARE the spatial term.)
         q = Float32(mod(t, p.cond_period) * 6.1803399f0) / Float32(p.cond_period)

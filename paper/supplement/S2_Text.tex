@@ -223,4 +223,44 @@ the sweep; this lengthened wall time but cannot change results, which are
 determined by the seed. From that point runs were protected by
 \texttt{caffeinate}. No other deviation occurred.
 
+\section*{9. Results of every pre-registered test}
+Means of the two cells compared, two-sided permutation $p$ on the difference of
+means (100{,}000 permutations), the Holm-adjusted $p$ used for the verdicts
+(across the 12 tests of P1--P4, and across the four grain tests), and the $p$ of
+the rank-based permutation test computed alongside. The rank-based tests lead to
+the same verdicts. P1 and P2 at $q=0.05$ are listed but were not evaluable,
+because the manipulation check failed at that rate. Values are copied from
+\texttt{replication/raevol/results\_v2\_preregistered.txt} and
+\texttt{results\_grain\_preregistered.txt}.
+\begin{center}
+\small
+\begin{tabular}{@{}llrrlll@{}}
+\toprule
+Test & Cell & Mean A & Mean B & $p$ & Holm $p$ & Rank $p$\\
+\midrule
+P1 & $q=0.05$ & 11.03 & 5.95 & 0.0046 & 0.0089 & 0.0047\\
+P1 & $q=0.10$ & 13.39 & 7.53 & 0.0015 & 0.0046 & 0.0027\\
+P1 & $q=0.20$ & 13.18 & 4.80 & $<10^{-4}$ & 0.0001 & $<10^{-4}$\\
+P2 & $q=0.05$ & 11.03 & 6.32 & 0.0044 & 0.0089 & 0.0020\\
+P2 & $q=0.10$ & 13.39 & 5.73 & $<10^{-4}$ & 0.0001 & $<10^{-4}$\\
+P2 & $q=0.20$ & 13.18 & 4.56 & $<10^{-4}$ & 0.0001 & $<10^{-4}$\\
+P3 & $q=0.05$ & 1.11 & 6.30 & $<10^{-4}$ & 0.0001 & $<10^{-4}$\\
+P3 & $q=0.10$ & 1.25 & 6.30 & $<10^{-4}$ & 0.0001 & $<10^{-4}$\\
+P3 & $q=0.20$ & 1.14 & 6.30 & $<10^{-4}$ & 0.0001 & $<10^{-4}$\\
+P4 & $q=0.05$ & 26.28 & 16.34 & $<10^{-4}$ & 0.0001 & $<10^{-4}$\\
+P4 & $q=0.10$ & 28.28 & 18.07 & $<10^{-4}$ & 0.0001 & $<10^{-4}$\\
+P4 & $q=0.20$ & 25.60 & 18.02 & $<10^{-4}$ & 0.0003 & 0.0002\\
+G1 & coarse vs fine & 19.24 & 19.45 & 0.801 & 1.000 & 0.885\\
+G2 & coarse vs frozen & 19.24 & 25.58 & 0.0001 & 0.0004 & 0.0003\\
+G3 & coarse vs fine & 2.04 & 2.29 & 0.600 & 1.000 & 0.756\\
+G4 & coarse vs frozen & 2.04 & 8.40 & $<10^{-4}$ & $<10^{-4}$ & $<10^{-4}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+P1: $S$, fluctuating informative (A) against frozen informative (B). P2: $S$,
+fluctuating informative against fluctuating yoked. P3: $S$, fluctuating no-cue
+against frozen no-cue. P4: functional genes, frozen informative against
+fluctuating informative. G1 and G2: functional genes; G3 and G4: $S$; coarse
+grain ($q=0.0002$, A) against fine grain ($q=0.1$) or the frozen arm (B).
+
 \end{document}

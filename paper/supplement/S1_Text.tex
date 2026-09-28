@@ -128,9 +128,10 @@ $y = (1.00, 0.60, 0.45, 0.35, 0.28, 0.22)$, so a different channel pays best in 
 \begin{itemize}
 \item In the informative arm $c = 2\theta - 1$, which determines the state exactly.
 \item In the yoked arm $c = 2\phi - 1$, with $\phi$ the fractional part of
-  $(t \bmod P)\cdot 6.1803399/P$, an incommensurate period (the multiplier is
-  $5+\varphi$, with $\varphi$ the golden ratio), which covers the same range but
-  carries 0.0004 bits of information about the state.
+  $(t \bmod P)\cdot 6.1803399/P$. The multiplier $6.1803399 = 10/\varphi$, with
+  $\varphi$ the golden ratio, is irrational, so the cue covers the same range
+  without locking to the cycle and carries 0.0004 bits of information about the
+  state.
 \item In the no-cue arm $c=0$.
 \end{itemize}
 With $n_s = 1$ the state is always 1 and the cue is zero, so the three frozen arms
@@ -220,7 +221,7 @@ beneficial (0.05, load $-1$) or neutral (otherwise), and each gene silencing add
 as rise.
 
 \subsection*{7.12 Measures used in the main text}
-Two quantities are computed for each organism at birth, the number $n_{nz}$ of weights with $|w|>10^{-4}$ and the strength density $\sum|w|/n_g^2$ over all $n_g^2$ weights, zeros included. At each time step the population averages of count density $n_{nz}/n_g^2$, strength density and total strength $\sum|w|$ (strength density times $n_g^2$) are recorded. Each run is summarised by the mean over its final 20\% of time
+Two quantities are computed for each organism at birth, the number $n_{nz}$ of weights with $|w|>10^{-4}$ and the strength density $\sum|w|/n_g^2$ over all $n_g^2$ weights, zeros included. At each time step the population means of $n_{nz}$, of strength density and of $n_g$ are recorded. Count density is the mean $n_{nz}$ divided by the squared mean $n_g$, and total strength $\sum|w|$ is the mean strength density times the squared mean $n_g$. Each run is summarised by the mean over its final 20\% of time
 steps, with ratios computed per step before averaging.
 
 \section*{Parameters}

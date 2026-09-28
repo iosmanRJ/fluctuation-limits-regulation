@@ -20,6 +20,7 @@ Build notes for Apple Silicon are in the project memory (`raevol-replication`).
 | `results_v2_preregistered.txt` | output of the single pre-registered run of `analyse_v2.py`: P1–P4 all SUPPORTED (PAPER.md §11.7) |
 | `gen_params_grain.py`, `analyse_grain.py` | **pre-registered** grain experiment (G1–G4), committed as `fa00777` before any run |
 | `results_grain_preregistered.txt` | its single analysis run: G1, G3 inconclusive; G2, G4 refuted (PAPER.md §11.10) |
+| `export_raevol.py`, `export_grain.py` | write `paper/data/raevol_runs.csv` and `grain_runs.csv`, one row per run, with the pre-registered summary function (plus `tfs`, mean `nb_TF`, not pre-registered) |
 
 The yoked control uses four environments against the informative arm's two,
 at 1.5× the switch probability, so per-age target- and signal-change rates are
@@ -30,3 +31,5 @@ equal. See the docstring in `gen_params_v2.py`.
 Exploratory. `mean_abs_w` is Σ|w| / ng² (all slots, zeros included), i.e. a
 strength *density*; see the header of `analyse.jl` before deriving anything
 from it. The pre-registered confirmation is P5 in PAPER.md §11.5.
+`export_evosim.jl` writes `paper/data/evosim_runs.csv`; `gen_time.jl` gives
+steps per generation (fluctuating 23.6–24.3, frozen 30.7).

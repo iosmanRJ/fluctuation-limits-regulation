@@ -784,3 +784,32 @@ EvoSim's coarser fluctuation explains its earlier genome enlargement: the
 EvoSim/R-Aevol difference in genome size is a model difference, not grain.
 The limit stated in advance still stands: two alternating targets are not
 Tsuda & Kawata's random walk to novel optima.
+
+### 11.11 Manuscript audit: corrections of interpretation (2026-09-28)
+
+Every number in `paper/manuscript.tex` was re-derived from `paper/data/*.csv`
+and the pre-registered results files, every Methods statement was checked
+against the source, and every citation against its abstract or full text. The
+numbers held. Three interpretations did not, and the manuscript now says:
+
+- **EvoSim count vs strength.** Strength density fell 10.9%, but about 8.5
+  points of that is the n_g² denominator (+0.6 nodes, n_g² +9%). Total strength
+  is flat (−1.3%, p = 0.86) while the raw number of non-zero connections rose
+  86 → 120 (+39%, p < 1e-4). So: more connections, same wiring, not opposite
+  signs. Fig 5 now plots raw edges against total strength for EvoSim (1.39,
+  0.99), like R-Aevol. `evosim_runs.csv` gained an `edges` column.
+- **R-Aevol link counts.** Informative-cue fluctuating/frozen link ratios
+  0.60, 0.78, 0.83 have p = 0.02, 0.13, 0.52; the only significant one is at
+  q = 0.05, the rate excluded from P1/P2. A count-based study would have missed
+  the strengthening (strength 1.8–2.7×, per-link 2×), not reported the reverse.
+  §11.9's "raw link count gives the wrong sign at every rate" is true of point
+  estimates only.
+- **Tsuda & Kawata.** Their *cyclic* regime (two alternating optima, our
+  design) raised complexity only slightly, for large infrequent shifts; the
+  strong effect is their random walk. Their networks got an on/off signal (when
+  to express), not a constant input. The conflict is with the random walk.
+- Also: Beslon et al. 2010 (R-Aevol) attribute genomic scaling laws to mutation
+  rates, not lifestyle, now acknowledged next to the comparative-genomics
+  citations; population size may contribute to the EvoSim count rise
+  (r(pop, count density) −0.63 to −0.72 within fluctuating arms, +0.24 frozen);
+  the yoked-cue multiplier is 10/φ = 6.1803399, not 5 + φ (code comment fixed).
