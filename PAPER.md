@@ -885,3 +885,18 @@ much of the fluctuating yoked/no-cue gap is signal links is unknown (not
 separable from the stats). Now stated in Methods, Limitations and S2 §6.
 Also cited: Ng & Kinjo 2023 (Sci Rep 13:19830) beside their 2024 paper;
 Ashander, Chevin & Baskett 2016 (Proc R Soc B 283:20161690) in the Introduction.
+
+### 11.16 Fourth audit: complete number ledger (2026-09-28)
+
+All 320 numeric tokens in the manuscript (abstract to Table 2) were listed with
+context; every substantive value is verified against `paper/data`, the
+pre-registered results files, the EvoSim source, the aevol example configs or the
+record. Newly traced this pass: node-count p = 0.04722 (results_survivors.txt);
+complex_env rates 5e-5 = 10 × dynamic_env 5e-6, same selection 750, Hill,
+degradation and sampling as Table 1; the two signals are complex_env's first two
+CREATE_SIGNAL lines. `nb_TF` counts only `is_init_` (genome-encoded) proteins, so
+signal proteins are NOT in the TF counts; only nb_link and S include them.
+Edits: the signal-link caveat made self-contained; "best individual" limitation
+now states its consequence (every R-Aevol measure is the fittest individual per
+generation, not a population mean); Limitations split by model; Conclusion no
+longer lets "whatever the grain" read onto the informative-cue clause.

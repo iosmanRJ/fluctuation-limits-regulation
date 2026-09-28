@@ -643,23 +643,27 @@ measured regulatory strength in that regime. Each R-Aevol condition contained 12
 populations, fewer than the 60 to 100 used in comparable
 studies~\cite{tsuda2010,lalejini2021}. The effects were large ($|d|$ between 1.5
 and 3.9 in the evaluated cells) and remained significant after correction for
-multiple testing, but smaller effects could have been missed. Because the influences of signal proteins are counted, comparisons between arms
-with and without a cue include links that the no-cue arms cannot have. The
+multiple testing, but smaller effects could have been missed. Because R-Aevol counts the influences of signal proteins as regulatory links,
+comparisons between arms with and without a cue include links that the no-cue
+arms cannot have. The
 pre-registered contrasts compare arms with the same signals and are not affected.
 Frozen populations without signals reached a regulatory strength of 6.3, within
 the range of frozen populations with signals (4.8 to 7.5), so regulation of that
 strength does not require signals. We cannot tell how much of the difference
 between fluctuating arms with and without a cue the signal links account for.
 The version of R-Aevol we used records per-generation statistics only for the
-best individual in each population. Its fluctuating environments alternate between two fixed targets and do
+best individual in each population, so every R-Aevol measure describes the
+fittest individual of each generation, averaged over the analysis window, and
+not the population average. R-Aevol's fluctuating environments alternate between two fixed targets and do
 not include the random walk towards new optima that Tsuda and Kawata found most
 favourable to complexity~\cite{tsuda2010}, and even at the coarsest grain a
-switch falls within about 0.4\% of lifetimes. In EvoSim, fluctuation and population
+switch falls within about 0.4\% of lifetimes. Prediction P4 establishes the
+direction of the effect on genome size; its mechanism is untested.
+
+In EvoSim, fluctuation and population
 size are confounded between arms. The within-arm correlations argue against
 population size as the cause of the lower strength density but are consistent
-with a contribution to the higher connection count. Prediction P4 establishes the direction of the effect on genome size; its mechanism is untested.
-
-We also pre-registered a confirmation of the EvoSim divergence between count and
+with a contribution to the higher connection count. We also pre-registered a confirmation of the EvoSim divergence between count and
 strength in a regime with more hidden nodes, on condition that fluctuating
 populations survived there. They did not (2 to 5 of 6 survived, compared with 6
 of 6 frozen populations), so the confirmation was not run and the EvoSim result
@@ -671,8 +675,8 @@ exist only locally and cannot be verified independently.
 
 Environmental fluctuation did not by itself strengthen gene regulation in these
 models. Regulation became stronger under fluctuation when a cue allowed organisms
-to track the environment, and weaker when no such cue existed, whatever the grain
-of the environment. Because connection
+to track the environment. Without a cue it became weaker, whatever the grain of
+the environment. Because connection
 counts and connection strength can change independently, conclusions about
 regulatory complexity may depend on which of the two is measured.
 
