@@ -1,0 +1,241 @@
+\input{si_preamble}
+\begin{document}
+\sititle{S2 Text.}{R-Aevol build, configuration and the yoked-control derivation}
+
+\section*{1. Software and build}
+We used the regulation-enabled build of Aevol (R-Aevol) from the \texttt{aevol-7}
+branch of \url{https://gitlab.inria.fr/aevol/aevol.git}, commit \texttt{33277374}.
+The default branch (\texttt{aevol-9}) does not include regulation. Regulation is a
+compile-time option that defines \texttt{\_\_REGUL}; its sources are in
+\texttt{src/libaevol/raevol/}. The build used CMake with
+\begin{lstlisting}
+cmake .. -Dwith-raevol=ON -Dwithout-stats=OFF -Dwith-x=OFF \
+         -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+         -DCMAKE_CXX_FLAGS="-Xpreprocessor -fopenmp -I/opt/homebrew/opt/libomp/include" \
+         -DCMAKE_EXE_LINKER_FLAGS="-L/opt/homebrew/opt/libomp/lib -lomp"
+\end{lstlisting}
+\texttt{-Dwithout-stats=OFF} is required for the per-generation statistics file
+used in all analyses; the option is on by default and suppresses it. Building on
+Apple Silicon (macOS, Apple clang 21, Homebrew \texttt{cmake}, \texttt{libomp} and
+\texttt{boost}) required three changes that do not affect the model: the policy
+flag above, needed because the bundled GoogleTest declares a CMake minimum below
+3.5; passing the OpenMP include directory through \texttt{CMAKE\_CXX\_FLAGS}, since
+it did not reach every target otherwise; and correcting line 118 of
+\texttt{CMakeLists.txt}, which hard-codes the Intel Homebrew path
+\texttt{/usr/local/lib/libomp.dylib}, to \texttt{/opt/homebrew/opt/libomp/lib/libomp.dylib}.
+All simulations ran single-threaded, ten or twelve at a time, on one 12-core
+machine.
+
+\section*{2. Parameter file}
+Each run was created with \texttt{aevol\_create} from a parameter file generated
+by \texttt{replication/raevol/gen\_params\_v2.py} (exploratory runs:
+\texttt{gen\_params\_v1.py}; grain experiment: \texttt{gen\_params\_grain.py}, which
+imports the same template). The template, with the fields that vary between runs
+shown in braces, is:
+\begin{lstlisting}
+STRAIN_NAME             {name}
+SEED                    {seed}
+INIT_POP_SIZE           {1024 or 512}
+WORLD_SIZE              32 {32 or 16}
+INIT_METHOD             ONE_GOOD_GENE CLONE
+CHROMOSOME_INITIAL_LENGTH   5000
+FUZZY_FLAVOR            3
+SELECTION_SCHEME        fitness_proportionate   750
+POINT_MUTATION_RATE     5e-5
+SMALL_INSERTION_RATE    5e-5
+SMALL_DELETION_RATE     5e-5
+MAX_INDEL_SIZE          6
+WITH_ALIGNMENTS         false
+DUPLICATION_RATE        5e-5
+DELETION_RATE           5e-5
+TRANSLOCATION_RATE      5e-5
+INVERSION_RATE          5e-5
+BACKUP_STEP             10000
+RECORD_TREE             false
+HILL_SHAPE_N                   4
+HILL_SHAPE_THETA               0.5
+DEGRADATION_RATE               1
+NB_DEGRADATION_STEP            10
+NB_INDIV_AGE                   20
+INDIVIDUAL_EVALUATION_AGES     1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
+BINDING_ZEROS_PERCENTAGE       0.75
+RANDOM_BINDING_MATRIX          false
+WITH_HEREDITY                  false
+PROTEIN_PRESENCE_LIMIT         1e-2
+ENV_SAMPLING            300
+MAX_TRIANGLE_WIDTH      0.033333333
+ENV_AXIS_FEATURES       METABOLISM
+ENV_VARIATION           switch_in_a_list {q, or 1.5q for yoked arms}
+NB_ENVIRONMENTS {2 or 4}
+\end{lstlisting}
+followed by the target and signal definitions of Section 3. The exploratory runs
+used \texttt{BACKUP\_STEP} and \texttt{TREE\_STEP} 10{,}000 as well, and an identical
+template otherwise. With \texttt{RANDOM\_BINDING\_MATRIX false} the platform reads
+\texttt{binding\_matrix.rae} from the run directory; every run used the file
+distributed with \texttt{examples/dynamic\_env}, unchanged. The mutation and
+rearrangement rates are those of \texttt{examples/complex\_env}, ten times those of
+\texttt{examples/dynamic\_env}.
+
+\section*{3. Targets and signals}
+Each environment is a target function defined by three Gaussians
+(\texttt{ENV\_ADD\_GAUSSIAN} \emph{env height mean width}):
+\begin{center}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+& Gaussian 1 & Gaussian 2 & Gaussian 3\\
+\midrule
+Target A (height, mean, width) & 1.2, 0.52, 0.12 & $-1.4$, 0.50, 0.07 & 0.3, 0.80, 0.03\\
+Target B (height, mean, width) & 1.2, 0.48, 0.12 & $-1.4$, 0.50, 0.07 & 0.3, 0.20, 0.03\\
+\bottomrule
+\end{tabular}
+\end{center}
+B is A reflected about 0.5. At creation the platform reports a geometric area of
+0.152468 for both. Frozen arms define two copies of A (odd seeds) or of B (even
+seeds). The two signal proteins are taken from \texttt{examples/complex\_env}
+(its first two \texttt{CREATE\_SIGNAL} lines):
+\begin{lstlisting}
+CREATE_SIGNAL h0 w0 h1 m1 w0 h1 m0 h0 h1 w0 h0 m1 h1 h1 m1 m0 h0 w0 h1 m1 w0 h1 m0 h0 h1 w0 h0 m1 h1 h1 m1 m0 h1 m0 m1
+CREATE_SIGNAL m0 h0 m1 h1 m1 w0 m0 m1 m0 h0 m1 h1 w0 h0 h0 h1 m1 m0 h1 w0 h1 h0 m1 h1 m0 w0 w0 m0 m1 w0 w0 h1 h0 w0 h1 h0 h0 m0 h0 w0 h0 m1 m0 w0 h1 w0 w0 h1 m0
+\end{lstlisting}
+They are attached to environments with \texttt{ENV\_ADD\_SIGNAL} \emph{env signal}:
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Arm & Environments & \texttt{ENV\_ADD\_SIGNAL} lines\\
+\midrule
+Informative & (A), (B) & 1 1; 2 2\\
+Yoked & (A), (A), (B), (B) & 1 1; 2 2; 3 1; 4 2\\
+No cue & (A), (B) & none\\
+\bottomrule
+\end{tabular}
+\end{center}
+Before the first batch was launched, the platform's creation log was checked for
+each type of arm and reported the expected signal for each environment.
+
+\section*{4. How environments switch}
+The simulations run on the platform's SIMD engine. Its environment handler
+(\texttt{SIMD\_PhenotypicTargetHandler\_R::ApplyVariation}) builds, each
+generation, the sequence of environments for the 20 ages of a lifetime, starting
+from the environment of the last age of the previous generation:
+\begin{lstlisting}
+id_new_env = list_of_old_target_id[nb_indiv_age_ - 1];
+id_old_env = list_of_old_target_id[nb_indiv_age_ - 1];
+for (int16_t i = 0; i < nb_indiv_age_ ; i++) {
+  double env_chang = var_prng_->random();
+  if (env_chang < env_switch_probability_) {
+    while (id_new_env == id_old_env)
+      id_new_env = var_prng_->random(nb_env_);
+    id_old_env = id_new_env;
+  }
+  list_env_id_[i] = id_new_env;
+  ...
+}
+\end{lstlisting}
+The environment is therefore a single Markov chain over ages that continues
+across generations. At each age it switches with probability $q$, and a switch
+moves to one of the \emph{other} environments chosen uniformly by rejection
+sampling. The sequence is shared by the whole population. The non-SIMD handler
+contains a branch that, when a \texttt{deterministic} flag is set and there are
+two environments, gives each lifetime a fixed half-and-half split; the flag is
+initialised to \texttt{false} and never set, and \texttt{check\_simd}, which would
+make the SIMD engine copy the non-SIMD sequence, is never enabled by
+\texttt{aevol\_run}. The branch is therefore never executed.
+
+During development, at each age the concentrations of all signal proteins are set
+to zero and those attached to the environment active at that age are set to 0.9,
+before the regulatory dynamics for that age are integrated. We checked this in the
+SIMD engine's network solver (\texttt{src/libaevol/7/ExpManager\_7.cpp}), which is
+the code path used, as well as in the non-SIMD implementation
+(\texttt{Individual\_R::EvaluateInContext}).
+
+\section*{5. Matching switching rates in the yoked arm}
+Let an environment be a pair (target, signal). In the informative arm the two
+environments are (A,~s1) and (B,~s2), so every switch changes both the target and
+the signal. With switching probability $q$ per age, the target changes at rate
+$q$ per age and the signal at rate $q$ per age.
+
+In the yoked arm there are four environments, (A,~s1), (A,~s2), (B,~s1) and
+(B,~s2). From any of them, a switch moves to one of the three others with equal
+probability. Of the three, one keeps the target and changes the signal, one
+changes the target and keeps the signal, and one changes both. A switch therefore
+changes the target with probability 2/3 and the signal with probability 2/3. With
+switching probability $q'$, both change at rate $2q'/3$ per age, and setting
+$q' = 1.5q$ gives rate $q$ for both, as in the informative arm. Without this
+correction the yoked arm would fluctuate a third less often than the informative
+arm, and any difference between the two would be confounded with the rate of
+fluctuation.
+
+The two arms also match in the marginal frequency of each signal (one half) and
+of each target (one half), and in the number of signal proteins present at any
+age (one). They differ in the association between signal and target: in the
+informative arm the signal determines the target, and in the yoked arm the two
+are independent. They also differ in the joint dynamics of a switch, since in the
+informative arm target and signal always change together and in the yoked arm
+they do so in one switch out of three. This is a direct consequence of removing
+the association and cannot be matched as well.
+
+\section*{6. Measures}
+R-Aevol writes \texttt{stats/stats\_simd\_best.csv}, one row per generation, for
+the individual with the highest fitness. The regulatory statistics are computed in
+\texttt{src/libaevol/7/Stats\_7.cpp}:
+\begin{lstlisting}
+for (auto affinity: rna->affinity_list) {       // coding RNAs only
+  if (affinity.enhancer_factor > 0.0) { nb_activators++; mean_activator_activity += affinity.enhancer_factor; }
+  if (affinity.operator_factor > 0.0) { nb_operators++;  mean_operator_activity  += affinity.operator_factor; }
+}
+nb_influences_       = nb_operating_influences_ + nb_enhancing_influences_;
+av_value_influences_ = (mean_activator_activity + mean_operator_activity) / (nb_activators + nb_operators);
+\end{lstlisting}
+The column \texttt{nb\_link} is the number of positive enhancing factors plus the
+number of positive operating factors over all protein--RNA affinities (an affinity
+with both counts twice), and \texttt{avg\_influence} is the mean of those factors,
+so the total regulatory strength is $S = \texttt{nb\_link}\times\texttt{avg\_influence}$. When
+there are no links, \texttt{avg\_influence} is undefined and we set $S=0$ (an
+earlier, exploratory script dropped such generations instead; the difference is
+immaterial for the data reported, since they are rare). Genome size is
+\texttt{nb\_functional\_genes}. Each run is summarised by the mean of each measure
+over generations 25{,}001--30{,}000, and the run is the unit of analysis.
+
+\section*{7. Runs and seeds}
+\begin{center}
+\small
+\begin{tabular}{@{}p{0.2\linewidth}p{0.42\linewidth}p{0.3\linewidth}@{}}
+\toprule
+Experiment & Cells & Seeds\\
+\midrule
+Exploratory (72 runs) & 6 arms at $q=0.10$, population 1024 & $100000 + 1000\,a + s$, $a=0..5$, $s=1..12$\\
+Pre-registered sweep, primary (168) & 4 arms at $q=0.05, 0.10, 0.20$; frozen no-cue and frozen yoked at $q=0.10$; population 1024 & $200000 + 1000\,c + s$\\
+Pre-registered sweep, secondary (48) & fluctuating informative, yoked and no-cue, frozen informative; $q=0.10$; population 512 & $200000 + 1000\,c + s$\\
+Grain (60) & fluctuating no-cue at $q=0.1, 0.01, 0.001, 0.0002$; frozen no-cue & $300000 + 1000\,c + s$\\
+\bottomrule
+\end{tabular}
+\end{center}
+Here $a$ and $c$ index the arm or cell in the order written by the generator
+script and $s$ the replicate. Runs were launched seed-major, so that stopping a
+batch early would still leave a balanced design. Every run reached 30{,}000
+generations with exit status 0.
+
+\section*{8. Pre-registration record}
+\begin{center}
+\small
+\begin{tabular}{@{}p{0.23\linewidth}p{0.14\linewidth}p{0.55\linewidth}@{}}
+\toprule
+Item & Commit & Content\\
+\midrule
+Sweep P1--P4 & \texttt{f985ccd} & design, predictions, decision rules; \texttt{gen\_params\_v2.py}, \texttt{analyse\_v2.py}\\
+EvoSim confirmation P5 & \texttt{4bc16c3} & viability-pilot rule, analysis script\\
+P5 outcome & \texttt{56fe3a0} & no grid met the rule; not run\\
+Grain G1--G4 & \texttt{fa00777} & \texttt{gen\_params\_grain.py}, \texttt{analyse\_grain.py}\\
+\bottomrule
+\end{tabular}
+\end{center}
+Before each analysis ran, the SHA-256 checksum of the analysis script on the
+simulation machine was compared with the committed version (\texttt{analyse\_v2.py}
+prefix \texttt{d0609140a970de48}; \texttt{analyse\_grain.py} prefix
+\texttt{89a8613289731999}). Each analysis was run once, on complete data. The
+simulation machine's idle-sleep setting suspended runs during the first night of
+the sweep; this lengthened wall time but cannot change results, which are
+determined by the seed. From that point runs were protected by
+\texttt{caffeinate}. No other deviation occurred.
+
+\end{document}

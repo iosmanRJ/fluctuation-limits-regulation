@@ -1,0 +1,22 @@
+% Shared preamble for the supporting-information documents (S1-S5).
+\documentclass[10pt,letterpaper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,array,longtable}
+\usepackage[table]{xcolor}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage{listings}
+\usepackage[labelfont=bf,labelsep=period,justification=raggedright,singlelinecheck=off]{caption}
+\definecolor{linkblue}{HTML}{1C5CAB}
+\definecolor{codebg}{HTML}{F4F4F1}
+\hypersetup{colorlinks=true, linkcolor=linkblue, citecolor=linkblue, urlcolor=linkblue}
+\lstset{basicstyle=\ttfamily\footnotesize, backgroundcolor=\color{codebg},
+  frame=none, breaklines=true, columns=fullflexible, keepspaces=true,
+  xleftmargin=4pt, xrightmargin=4pt, aboveskip=6pt, belowskip=6pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\raggedright
+\renewcommand{\tablename}{Table}
+\newcommand{\sititle}[2]{{\Large\bfseries #1}\par\vspace{3pt}{\large #2}\par\vspace{2pt}
+  {\small\color{black!60}Supporting information for ``Environmental fluctuation strengthens gene regulation only when it can be sensed''}\par\vspace{10pt}}

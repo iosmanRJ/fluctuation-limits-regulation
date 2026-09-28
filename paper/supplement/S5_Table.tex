@@ -1,0 +1,91 @@
+\input{si_preamble}
+\begin{document}
+\sititle{S5 Table.}{Prior work and how this study relates to it}
+
+The table sets out which parts of the argument are established in the
+literature, which conflict with our results, and which we did not find
+precedent for. Literature searches covered theory of plasticity and cue
+reliability, gene-regulatory-network evolution under fluctuating selection,
+digital evolution (Avida, Aevol), network sparseness and modularity, and weighted
+network measures.
+
+\begin{longtable}{@{}p{0.3\linewidth}p{0.18\linewidth}p{0.46\linewidth}@{}}
+\toprule
+Claim & Status & Sources and relation to this study\\
+\midrule
+\endhead
+Reliable cues favour plastic responses; without them, fluctuation favours
+generalists, bet-hedging or genetic tracking & Established &
+Levins 1968 [1]; Moran 1992 [2]; Kussell and Leibler 2005 [3]; Botero et al.
+2015 [4]. Our results concern the corresponding effect on the regulatory
+network, not the phenotype.\\
+In a gene regulatory network model, plasticity evolves mainly under fast, erratic
+change with reliable cues & Established & Jorritsma and van den Berg 2026 [5].
+Their abstract reports which parts of the network become sensitive to mutation.
+We have not been able to read the full text; if it reports connection strength
+by cue reliability, part of our architectural result would overlap with it.\\
+Fluctuating environments can select for or against gene regulation &
+Established experimentally & Pollack, Nozoe and Kussell 2025 [6]. There the
+deciding factor is metabolic flux, not cue information.\\
+Cue-free fluctuation promotes complex regulatory networks & Published; conflicts
+with our R-Aevol results & Tsuda and Kawata 2010 [7] (optimum moving by a random
+walk across generations, constant uninformative input). Our grain experiment
+tested whether grain reconciles the two and found that it does not. Remaining
+candidates: novel optima versus two alternating targets, and differences in the
+genotype--phenotype map.\\
+Fluctuating environments favour larger genomes & Published; matches earlier
+EvoSim results, not R-Aevol & Bentkowski et al. 2015 [8].\\
+Genome size is limited by selection for mutational robustness and falls with
+population size and mutation rate & Established in Aevol & Knibbe et al. 2007 [9];
+Luiselli et al. 2024 [10]. Consistent with the small genomes in large EvoSim
+populations.\\
+Sensing and non-sensing populations evolve differently in fluctuating
+environments & Published, different measures & Lalejini et al. 2021 [11]
+(Avida): trait loss and accumulation of deleterious mutations, not network
+architecture.\\
+Connectivity is measured by counting edges & Common practice & Tsuda and Kawata
+2010 [7]; Kashtan and Alon 2005 [12]; Espinosa-Soto 2018 [13] (binary edges,
+weights not discussed).\\
+Edge counts can grow by near-neutral accumulation & Established & Soyer and
+Bonhoeffer 2006 [14].\\
+Summed edge strength as a network measure & Standard method & Iwasaki, Tsuda and
+Kawata 2013 [15].\\
+The yoked control & Established in the study of learning & Church 1964 [16]
+describes a bias that arises when individual subjects are paired; our arms are
+not paired, so it does not apply.\\
+\midrule
+\multicolumn{3}{@{}l}{\emph{Not found in the literature}}\\
+Edge count and edge strength change in opposite directions under fluctuation &
+This study & EvoSim (exploratory), R-Aevol informative-cue populations
+(pre-registered secondary analysis).\\
+A yoked control that separates a cue's information from its presence in the
+evolution of regulatory networks & This study & R-Aevol, with switching rates
+matched between arms (S2 Text).\\
+Regulatory strength and genome size compared across informative, yoked and
+absent cues & This study & Pre-registered predictions P1--P4; subject to the
+caveat on [5] above.\\
+\bottomrule
+\end{longtable}
+
+\section*{References}
+\small
+\begin{enumerate}\setlength{\itemsep}{1pt}
+\item Levins R. Evolution in Changing Environments. Princeton: Princeton University Press; 1968.
+\item Moran NA. The evolutionary maintenance of alternative phenotypes. Am Nat. 1992;139(5):971--89.
+\item Kussell E, Leibler S. Phenotypic diversity, population growth, and information in fluctuating environments. Science. 2005;309(5743):2075--8.
+\item Botero CA, Weissing FJ, Wright J, Rubenstein DR. Evolutionary tipping points in the capacity to adapt to environmental change. Proc Natl Acad Sci USA. 2015;112(1):184--9.
+\item Jorritsma A, van den Berg P. The evolution of plasticity and evolvability in a simple gene regulatory network. Evolution. 2026;80(1):230--9.
+\item Pollack D, Nozoe T, Kussell E. Gene regulation, phenotypic memory, and selection in fluctuating environments. bioRxiv [Preprint]. 2025. doi:10.1101/2025.06.23.661119.
+\item Tsuda ME, Kawata M. Evolution of gene regulatory networks by fluctuating selection and intrinsic constraints. PLoS Comput Biol. 2010;6(8):e1000873.
+\item Bentkowski P, van Oosterhout C, Mock T. A model of genome size evolution for prokaryotes in stable and fluctuating environments. Genome Biol Evol. 2015;7(8):2344--51.
+\item Knibbe C, Coulon A, Mazet O, Fayard JM, Beslon G. A long-term evolutionary pressure on the amount of noncoding DNA. Mol Biol Evol. 2007;24(10):2344--53.
+\item Luiselli J, Rouzaud-Cornabas J, Lartillot N, Beslon G. Genome streamlining: effect of mutation rate and population size on genome size reduction. Genome Biol Evol. 2024;16(12):evae250.
+\item Lalejini A, Ferguson AJ, Grant NA, Ofria C. Adaptive phenotypic plasticity stabilizes evolution in fluctuating environments. Front Ecol Evol. 2021;9:715381.
+\item Kashtan N, Alon U. Spontaneous evolution of modularity and network motifs. Proc Natl Acad Sci USA. 2005;102(39):13773--8.
+\item Espinosa-Soto C. On the role of sparseness in the evolution of modularity in gene regulatory networks. PLoS Comput Biol. 2018;14(5):e1006172.
+\item Soyer OS, Bonhoeffer S. Evolution of complexity in signaling pathways. Proc Natl Acad Sci USA. 2006;103(44):16337--42.
+\item Iwasaki WM, Tsuda ME, Kawata M. Genetic and environmental factors affecting cryptic variations in gene regulatory networks. BMC Evol Biol. 2013;13:91.
+\item Church RM. Systematic effect of random error in the yoked control design. Psychol Bull. 1964;62:122--31.
+\end{enumerate}
+
+\end{document}

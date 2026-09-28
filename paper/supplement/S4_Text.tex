@@ -1,0 +1,148 @@
+\input{si_preamble}
+\begin{document}
+\sititle{S4 Text.}{Earlier EvoSim results and the audit trail}
+
+This supplement records the EvoSim results that preceded the present study, what
+became of each, and the measurement errors found along the way together with the
+check that exposed each one. The complete record, including every retracted
+analysis, is in the project's \texttt{README.md} and \texttt{PAPER.md}.
+
+\section*{1. Earlier EvoSim results and their status}
+These results came from experiments with smaller populations (typically 2{,}000
+to 3{,}000 organisms) than the 180-run batch in the main text.
+
+\begin{longtable}{@{}p{0.27\linewidth}p{0.36\linewidth}p{0.3\linewidth}@{}}
+\toprule
+Earlier result & Evidence & Status after this study\\
+\midrule
+\endhead
+Fluctuation increases the number of network nodes &
+7 of 7 frozen--fluctuating comparisons positive and significant; mean $+6.3$
+nodes (range $+2.6$ to $+10.2$) &
+Reproduces published results~[1,2]. R-Aevol shows the opposite (P4), at every
+grain tested (G1--G4), so this is a difference between the models.\\
+Fluctuation increases connection density &
+Count density $+0.09$ to $+0.14$, significant in 5 of 6 comparisons; the edge
+increase exceeded that expected from node number alone by 27 to 41 percentage
+points; stable across development iterations 4 to 20 &
+The count effect replicates ($+0.12$ at grid 128), but strength density falls
+by 11\% and total strength does not change. The interpretation as denser wiring
+is withdrawn.\\
+The information content of the cue does not matter &
+15 informative--scrambled comparisons pooled: mean difference $-0.17$ nodes,
+$t=-0.30$, sign test $p=0.61$ &
+Holds in EvoSim, where organisms exploit about 11\% of the cue's information.
+Contradicted in R-Aevol, where the cue is used (P2).\\
+Wiring cost makes fluctuation lethal &
+In the sparsest regime tested, 0 of 60 frozen and 37 and 33 of 60 fluctuating
+populations went extinct (Fisher $p=3.6\times10^{-13}$) &
+Consistent with the viability pilot for P5: fluctuating populations survived 2,
+2 and 5 of 6 times at grids 80, 96 and 112, against 6 of 6 frozen.\\
+Task difficulty does not set genome size &
+Four manipulations of the task, all null (detection floors 2.2 to 4.2 nodes) &
+Stands.\\
+Organisms read the cue when development is reversible &
+Re-developing living organisms every few steps: switchers 0.65 against 0.23
+(informative against scrambled, 100 populations per arm); genome size unchanged
+($p=0.84$, 95\% CI $-2.1$ to $+2.6$ nodes) &
+Stands. The strength measure has not been taken in this regime.\\
+Long-run outcome &
+8 runs of 25 million steps (about 630{,}000 generations): node number reached the
+minimum (12 at the time) by generation 14{,}000 and stayed there &
+Stands; the present version has a minimum of 13 because a sensor node was
+added.\\
+\bottomrule
+\end{longtable}
+
+\section*{2. Record of pre-registered predictions}
+Throughout the project, predictions were committed to version control before the
+runs that tested them.
+
+\begin{center}
+\small
+\begin{tabular}{@{}p{0.62\linewidth}p{0.3\linewidth}@{}}
+\toprule
+Prediction & Outcome\\
+\midrule
+\multicolumn{2}{@{}l}{\emph{Earlier EvoSim work}}\\
+Genome size rises with the complexity of the task & wrong: no change\\
+Rotating the yields alone makes the task conditional & wrong: inflow dominated\\
+An abiotic cue will be read because it cannot be depleted & wrong: legible but unread\\
+A conditional genome is adaptive but hard to reach by mutation & wrong: selected against\\
+Reversible development makes a fine-grained regime habitable & correct: 0 of 3 to 3 of 3 survived\\
+A conditional response, once evolved, raises genome size & wrong: response evolved, size unchanged\\
+\multicolumn{2}{@{}l}{\emph{This study}}\\
+P1--P4 (R-Aevol sweep) & all supported\\
+P5 (EvoSim confirmation) & not run: no viable regime\\
+G1, G3 (grain: coarse against fine) & inconclusive\\
+G2, G4 (grain: coarse against frozen) & refuted\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{3. Measurement errors and the checks that found them}
+Almost every wrong conclusion in the project came from a measurement error rather
+than from the model itself, and each was found by a check whose correct answer was
+known in advance. They are listed because the same errors recur in simulation
+studies.
+
+\begin{longtable}{@{}p{0.3\linewidth}p{0.34\linewidth}p{0.28\linewidth}@{}}
+\toprule
+Error & What it produced & How it was found\\
+\midrule
+\endhead
+Edge counts used as a measure of wiring & A density increase that is not an
+increase in wiring strength (this study) & Measuring summed absolute weight,
+prompted by the R-Aevol replication\\
+A statistic read without checking its definition & \texttt{mean\_abs\_w} is summed
+weight divided by all $n_g^2$ slots, so multiplying it by the edge count gave
+meaningless ``total strength'' columns & Reading the source of the statistic
+before deriving from it\\
+Parameters attributed to the wrong source & A tenfold error in the stated
+mutation rate of R-Aevol's configuration, in a draft of the Methods & Comparing
+against the platform's example files\\
+A control that was not a control & Turning off the yield rotation created a
+poorer world rather than a less conditional one; the arm with the least
+conditional task had the largest genomes & Measuring population size and energy
+in every arm\\
+A no-op manipulation that was not a no-op & Removing a node's inputs changed its
+output downstream and altered every trait (repair 0.995 to 0.127) & Requiring a
+zero-effect arm whose result is known\\
+Tags that leaked & Tagging organisms by storage slot, which is reused after
+death, spread the tag to unrelated organisms & A control arm that reached
+fixation when it should not\\
+Wrong unit of analysis & Pooling repeated measurements of the same node inflated
+a correlation & Reducing each node to one value\\
+Survivorship in the sampling frame & Sampling only at the end of runs, when almost
+all nodes were old & Sampling during runs\\
+A derived timescale from the wrong statistic & Generations per environmental
+state computed from a survivor-biased lifespan, a threefold error & Using the
+slope of lineage depth\\
+Small samples & Three promising signals from 3 or 4 seeds, all gone at 12 seeds &
+Replication at larger $n$\\
+A control checked in one mode only & The scrambled cue leaked 0.067 bits of
+information without a spatial gradient, the mode mostly used & Measuring its
+information content in every mode; fixed to 0.0004 bits\\
+A regime that kills one arm & At grid 48, 6 of 6 fluctuating and 0 of 6 frozen
+populations died, which would have made the comparison one of survivors & A
+viability check at full run length before any batch\\
+Identical arms counted as replicates & With a single state the cue is zero, so
+the three frozen arms were the same runs & Checking that arms differ\\
+A verification script that could not fail & A scoping error kept an accumulator
+at its initial value, so the script would have reported success whatever the
+data & A negative control with a known failure\\
+A significance test against the wrong spread & A difference compared with one
+arm's standard deviation rather than its standard error reported ``no effect''
+for $t=4.2$ & Recomputing with Welch and permutation tests\\
+\bottomrule
+\end{longtable}
+
+\section*{References}
+\small
+1. Tsuda ME, Kawata M. Evolution of gene regulatory networks by fluctuating
+selection and intrinsic constraints. PLoS Comput Biol. 2010;6(8):e1000873.\\
+2. Bentkowski P, van Oosterhout C, Mock T. A model of genome size evolution for
+prokaryotes in stable and fluctuating environments. Genome Biol Evol.
+2015;7(8):2344--51.
+
+\end{document}

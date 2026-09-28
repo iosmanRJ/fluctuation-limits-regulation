@@ -327,8 +327,9 @@ close to its minimum of 13 in this regime and increased only slightly ($+0.6$
 nodes, $p=0.047$).
 
 Two aspects of this regime affect the interpretation. First, fluctuating
-populations were 40\% smaller than frozen ones, and population size can change genome
-architecture by itself. Because the population sizes of the two arms did not
+populations were 40\% smaller than frozen ones, as expected since in frozen dishes
+all inflow feeds the best-paying channel (S1~Text), and population size can change
+genome architecture by itself. Because the population sizes of the two arms did not
 overlap, the two effects cannot be separated statistically. Within each arm,
 however, larger populations had lower strength density ($r$ between $-0.31$ and
 $-0.47$; Fig~\ref{fig2}D). If population size were the cause, the smaller
@@ -569,7 +570,7 @@ test this directly. The other candidate is the way each model maps genotype to
 phenotype. The same applies to EvoSim, which produced larger genomes under
 fluctuation in earlier experiments. Its fluctuation is coarse relative to a
 lifetime, since development happens once at birth and each environmental state
-lasts roughly twenty generations, but the grain experiment makes coarse grain an
+lasts about 14 generations, but the grain experiment makes coarse grain an
 unlikely explanation, and the difference in genome size between EvoSim and
 R-Aevol appears to be a difference between the models.
 
@@ -629,9 +630,12 @@ about regulatory complexity may depend on which of the two is measured.
 \subsection*{EvoSim}
 EvoSim is described in full, following the ODD protocol~\cite{grimm2020}, in
 S1~Text. We summarise here the parts relevant to this study. Organisms live on a
-$G\times G$ lattice ($G=128$) with six diffusing resource channels. Only the
-first channel receives external inflow. Consuming channel $r$ releases a
-byproduct into channel $r+1$, and yields decline along this chain. Each organism
+$G\times G$ lattice ($G=128$) with six diffusing resource channels. External
+inflow, which varies seasonally, enters the first channel (with the exception
+described under Environment and cue), and consuming channel $r$ releases a
+byproduct into channel $r+1$, with yields declining along this chain. All arms
+also experience rare random mass-mortality and famine events, on average one
+every 25{,}000 time steps. Each organism
 has an energy store and divides when the store exceeds a heritable threshold.
 Starvation and the other causes of death are described in S1~Text.
 
@@ -647,9 +651,10 @@ where $u_k$ is the local concentration of resource $k$ for $k\le 6$, the cue for
 $k=13$, and zero otherwise. The final expression values are mapped to the twelve
 traits.
 
-\paragraph*{Mutation.} At each birth, each weight receives an additive Gaussian
-perturbation ($\sigma=0.25$) with probability $10^{-3}$. This rate is reduced by
-up to 85\% by the organism's heritable repair trait. The structural mutations are
+\paragraph*{Mutation.} At each birth, a Poisson number of point mutations with
+mean $10^{-3} n_g^2$ is applied, each adding $\mathcal{N}(0,0.25^2)$ to a randomly
+chosen weight. This rate is reduced by up to 85\% by the organism's heritable
+repair trait. The structural mutations are
 gene silencing (probability 0.002), which sets a node's outgoing weights to zero;
 gene duplication (0.002), which copies the regulatory role of one node onto
 another and adds $\mathcal{N}(0,0.05^2)$ noise to every copied weight; and the
@@ -662,8 +667,9 @@ step.
 
 \paragraph*{Environment and cue.} An abiotic condition cycles through discrete
 states with a period of 2{,}000 time steps. Each state changes which resource
-channel gives the highest yield, and 40\% of the external inflow goes to the
-favoured channel. The condition, scaled to $[-1,1]$, is the input to node 13.
+channel gives the highest yield, and in fluctuating arms 40\% of the external
+inflow goes to the favoured channel. In frozen arms all inflow enters channel 1,
+which then also gives the highest yield. The condition, scaled to $[-1,1]$, is the input to node 13.
 Fluctuating arms have six states and frozen arms one. In the yoked arm the cue is
 generated on a period incommensurate with the cycle (a multiplier of
 $5+\varphi$), so that it covers the same range of values but carries only 0.0004
@@ -679,7 +685,9 @@ logged time step, and then averaged over the last 20\% of the run. Populations
 that went extinct were excluded and their number is reported.
 
 \paragraph*{Runs.} We ran six arms with 30 seeds each for 150{,}000 time steps
-(180 runs). Runs are deterministic for a given seed and bit-identical across
+(180 runs), about 6{,}200 generations in fluctuating and 4{,}900 in frozen
+populations (24 and 31 time steps per generation, from the slope of mean lineage
+depth). Runs are deterministic for a given seed and bit-identical across
 thread counts.
 
 \subsection*{R-Aevol}
@@ -823,26 +831,31 @@ the history of all analyses and the per-run statistics are available at
 
 \paragraph*{S1 Text.}
 \label{S1_Text}
-{\bf ODD description of EvoSim.} \pending{to be written}
+{\bf ODD description of EvoSim.} Complete model description following the ODD
+protocol, with every parameter value.
 
 \paragraph*{S2 Text.}
 \label{S2_Text}
-{\bf R-Aevol build, configuration files and the yoked-control derivation.}
-\pending{to be written}
+{\bf R-Aevol build, configuration and the yoked-control derivation.} Build
+options and the changes needed on Apple Silicon, the parameter-file template,
+targets and signals, the environment-switching code, the derivation of matched
+switching rates, the definition of the measures, seeds, and the pre-registration
+record.
 
 \paragraph*{S3 Table.}
 \label{S3_Table}
-{\bf Per-arm and per-run results for every experiment.} \pending{to be assembled}
+{\bf Results for every arm of every experiment.} Means and standard deviations for
+all 528 runs. Per-run values are in the repository.
 
 \paragraph*{S4 Text.}
 \label{S4_Text}
-{\bf Earlier EvoSim results and the audit trail.} Claims that were superseded,
-the measurement traps that produced them, and the control that caught each.
-\pending{to be written}
+{\bf Earlier EvoSim results and the audit trail.} Status of earlier claims after
+this study, the record of pre-registered predictions, and the measurement errors
+found during the project with the checks that exposed them.
 
 \paragraph*{S5 Table.}
 \label{S5_Table}
-{\bf Prior-art comparison.} \pending{to be assembled}
+{\bf Prior work and how this study relates to it.}
 
 \section*{Acknowledgments}
 \pending{acknowledgements; disclosure of AI-assisted analysis and writing, as
