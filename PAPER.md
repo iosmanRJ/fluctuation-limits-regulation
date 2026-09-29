@@ -943,3 +943,31 @@ author summary, Introduction, Discussion, Limitations and Conclusion rewritten;
 the pre-registered verdicts are unchanged (they concern total S). The supplement
 preamble still carried the round-2 title ("...sensed"): fixed. S2 gained §10 on
 the instrumentation.
+
+### 11.19 Pre-registration: confirmation of the signal-link decomposition (2026-09-29)
+
+Written and committed BEFORE any confirmation run. The decomposition of §11.17
+was exploratory; this experiment tests its central pattern with new seeds and the
+instrumented binary from generation 0 (no continuations).
+
+Design (`replication/raevol/gen_params_confirm.py`, SHA-256 prefix 9dc50e0885a39e6c): every
+setting identical to the v2 sweep (built by gen_params_v2.make_param) except cells
+and seeds. Population 1024, 12 new seeds per cell (SEED_BASE 400000). Cells:
+q = 0.10 and 0.20 × {fluc_info, fluc_yoked, fluc_none, froz_info, froz_yoked},
+plus froz_none at q = 0.10 (rate-independent): 132 runs, 30,000 generations.
+
+Measures, tests, decision rules and the interpretation of each outcome are fixed
+in `replication/raevol/analyse_confirm.py` (SHA-256 prefix 92c07d172bf66f6d), which will be
+run once, automatically, after the last run, only if its checksum matches. In
+brief, on the genome-encoded strength S_int over generations 25,001–30,000:
+- C1 no cue: S_int(fluc_none, q) < S_int(froz_none)
+- C2 yoked cue: S_int(fluc_yoked, q) < S_int(froz_yoked, q)
+- C3 information: S_int(fluc_info, q) > S_int(fluc_yoked, q)
+- C4 maintenance: lower 95% bootstrap bound of S_int(fluc_info)/S_int(froz_info)
+  > 0.75 (non-inferiority)
+C1–C3: two-sided permutation, Holm across 6 tests; C3/C4 evaluable only where the
+manipulation check (informative cue lowers metabolic error vs yoked) holds.
+Verdict rules and outcome interpretations as in the script's docstring. The
+analysis script was tested on synthetic positive and negative cases before this
+commit. No OSF registration (as for §11.4 and §11.8, the timestamp is the git
+commit).
