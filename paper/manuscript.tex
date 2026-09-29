@@ -57,7 +57,7 @@
 
 \begin{flushleft}
 {\Large
-\textbf{Environmental fluctuation strengthens gene regulation only when it can be tracked}
+\textbf{Environmental fluctuation erodes gene regulation unless it can be tracked}
 }
 \newline
 \\
@@ -74,49 +74,43 @@
 Environmental variability is widely expected to favour more elaborate gene
 regulation, but models disagree even about the direction of the effect, and
 many of them measure regulatory complexity by counting network connections. We
-separated fluctuation from the information available for tracking it and asked
-how each affects regulatory architecture, using two independent
-individual-based models of genome evolution. In EvoSim the genome is
-a regulatory network of evolvable size, and in R-Aevol regulation arises from
-transcription factors encoded in a DNA-like sequence. In each model we compared frozen
-and fluctuating environments and, under fluctuation, an informative cue, no cue,
-and a yoked cue that supplies the same signals at the same frequencies but
-independently of the environment. In EvoSim, fluctuation increased the density
-of regulatory connections by 26\% but did not change total wiring strength, so
-the average connection became weaker. In R-Aevol we tested four predictions,
-committed to version control before the simulations were run, at three
-switching rates, and all four were supported. With an
-informative cue, fluctuation increased total regulatory strength 1.8- to
+separated fluctuation from the information available for tracking it in
+R-Aevol, an individual-based model in which regulation arises from transcription
+factors encoded in a DNA-like sequence. We compared frozen and fluctuating
+environments and, under fluctuation, an informative cue, no cue, and a yoked cue
+that supplies the same signal proteins at the same frequencies but independently
+of the environment. Four predictions, committed to version control before the
+simulations were run and tested at three switching rates, were all supported.
+With an informative cue, fluctuation increased total regulatory strength 1.8- to
 2.7-fold relative to a frozen environment, and informative cues produced 2.3 to
-2.9 times the regulatory strength of yoked cues but no more genes. With an informative cue,
-fluctuation also reduced the number of genes by 8 to 10. Without a cue,
-fluctuating populations had fewer genes and the weakest regulation of any
-condition, whether an environment lasted half a lifetime or about 250
-generations. In neither model
-did connection counts track regulatory strength. With an informative cue,
-R-Aevol populations had no more regulatory links than frozen populations,
-although their regulation was stronger. Fluctuation therefore strengthened
-regulation only when the environment could be tracked, and counting edges can
-miss the effect.
+2.9 times the regulatory strength of yoked cues but no more genes. Without a cue,
+fluctuating populations had about a fifth of the frozen regulatory strength and
+fewer genes, whether an environment lasted half a lifetime or about 250
+generations. An exploratory decomposition showed that links from the signal
+proteins themselves made up about half of the regulatory strength of fluctuating
+informative-cue populations. Their genome-encoded network was as strong as in a
+frozen environment, and stronger only at the fastest switching rate, whereas
+with a yoked cue it was as weak as without any cue. Fluctuation therefore erodes
+gene regulation unless the environment can be tracked, and a usable cue is
+mainly wired into the network. Link counts did not show this, because frozen
+populations carried many weak links from the signal proteins.
 
 \section*{Author summary}
 Organisms in changing environments often have complex gene regulation, and it
 is easy to assume that environmental change is what builds it. We checked this
-assumption in two computer models of evolving genomes that work in very
-different ways. Populations evolved in environments that were either constant or
-switching between states, and we controlled what the organisms could know
-about the switching. Some populations received a signal that told them which
-state they were in. Others received the same signals arranged so that they told
-them nothing, and a third group received no signal. Switching on its own did not
-produce stronger regulation. In the model in which organisms used the
-signal, a meaningful signal made regulatory connections much stronger than in a
-constant environment. Without a signal, they became weaker than in any other
-condition, whether the environment switched within a
-lifetime or only about every 250 generations. The uninformative signal did not help,
-although it was physically identical to the meaningful one. We also found that
-counting regulatory connections, a common measure of network complexity, can
-miss changes in how strong the connections are. Our main
-predictions were written down and committed before the simulations were run.
+assumption in a computer model of evolving genomes. Populations evolved in
+environments that were either constant or switching between two states, and we
+controlled what the organisms could know about the switching. Some populations
+received a signal that told them which state they were in. Others received the
+same signals arranged so that they told them nothing, and a third group received
+no signal. Switching without a meaningful signal eroded the regulatory network,
+whether the environment switched within a lifetime or only about every 250
+generations. The uninformative signal did not prevent this, although it was
+physically identical to the meaningful one. With a meaningful signal, the network
+kept the strength it had in a constant environment, and the signal itself was
+wired into it. Counting regulatory connections, a common measure of network
+complexity, missed much of this. Our main predictions were written down and
+committed before the simulations were run.
 
 \clearpage
 \newgeometry{top=0.85in,left=1in,right=1in,footskip=0.75in}
@@ -190,48 +184,40 @@ can grow without selection for them~\cite{soyer2006}, and a count does not
 reflect how strongly a connection acts. Weighted measures have been used~\cite{iwasaki2013}, though seldom as the
 main outcome.
 
-We addressed these issues with two independent models of genome evolution that
-represent genomes and regulation in different ways. In EvoSim the genome is a
-regulatory network whose size and connectivity evolve. In R-Aevol, regulation
-arises from transcription factors encoded in a DNA-like sequence that bind
-upstream of genes~\cite{sanchezdehesa2008,beslon2010}. In each model we compared
-frozen and fluctuating environments, and under fluctuation we compared an
-informative cue, no cue, and a yoked cue that presents the same signals at the
-same frequencies as the informative one but independently of the environment (in
-R-Aevol also with the same per-age rates of target and signal change). Connectivity was measured as a count and as a strength. An exploratory replication in R-Aevol contradicted one
-conclusion we had drawn earlier from EvoSim, that fluctuation enlarges genomes.
-It reproduced another, that a cue's information does not change genome size,
-and showed in addition that information changes regulation. We then stated four predictions,
-committed them before running new simulations, and tested them at three
-switching rates and two population sizes. A further pre-registered experiment
-varied environmental grain, one of the differences between our design and that
-of Tsuda and Kawata.
+We addressed these issues in R-Aevol, a model of genome evolution in which
+regulation arises from transcription factors encoded in a DNA-like sequence that
+bind upstream of genes~\cite{sanchezdehesa2008,beslon2010}. We compared frozen
+and fluctuating environments, and under fluctuation an informative cue, no cue,
+and a yoked cue that presents the same signals at the same frequencies and with
+the same per-age rates of target and signal change as the informative one, but
+independently of the environment. Connectivity was measured as a count and as a
+strength. The study began with a different model, EvoSim, in which the genome is
+a regulatory network of evolvable size (S1, S4 and S6 Text). An exploratory
+experiment in R-Aevol contradicted one conclusion we had drawn from EvoSim, that
+fluctuation enlarges genomes. It reproduced another, that a cue's information
+does not change genome size, and showed in addition that information changes
+regulation. We then stated four predictions, committed them before running new
+simulations, and tested them at three switching rates and two population sizes.
+A further pre-registered experiment varied environmental grain, one of the
+differences between our design and that of Tsuda and Kawata. Finally, an
+exploratory analysis separated the links of the signal proteins from those of the
+genome-encoded network.
 
-Fluctuation strengthened regulation when a cue made the environment trackable
-and weakened it when no cue was available. The difference came from the information the cue carried, since a cue that carried none had no such effect. Information did not increase genome size, and
-fluctuation reduced it. Without a cue, these effects did not detectably depend on
-whether the environment changed within a lifetime or about every 250
-generations, so environmental grain does not explain the difference from Tsuda
-and Kawata's results. Connection counts did not track connection strength, so a
+Without information about the environment, fluctuation eroded the regulatory
+network, and without a cue this did not detectably depend on whether the
+environment changed within a lifetime or about every 250 generations, so
+environmental grain does not explain the difference from Tsuda and Kawata's
+results. A cue that carried no information did not prevent the erosion. With an
+informative cue, total regulatory strength rose, but about half of it came from
+the signal proteins' own links, and the genome-encoded network kept the strength
+it has in a frozen environment. Information did not increase genome size, and
+fluctuation reduced it. Connection counts did not track connection strength, so a
 count alone can misrepresent the effect of fluctuation on a network.
 
 % =============================================================================
 \section*{Results}
 
-\subsection*{Models and experimental design}
-
-\textbf{EvoSim} is an individual-based model of unicellular organisms on a
-two-dimensional lattice with diffusing, cross-fed resources (Materials and
-methods; ODD description in S1~Text). Each genome is a gene regulatory network,
-specified by a weight matrix and node biases, with 13 to 32 nodes. Thirteen
-nodes are fixed. Twelve are read out as phenotypic traits (resource-uptake
-allocation, body size, motility, division threshold, DNA repair, stress
-tolerance and leakage) and one receives an abiotic cue, much like the sensor gene
-of Sakamoto and Innan~\cite{sakamoto2024}. The remaining hidden
-nodes are added by duplication and removed by deletion, so genome size can
-evolve. The network is developed once at birth, and the phenotype does not
-change afterwards. Mutation can create and remove connections and each non-zero
-connection has a small maintenance cost, so connectivity is also free to evolve.
+\subsection*{Model and experimental design}
 
 \textbf{R-Aevol} is the version of the Aevol platform that includes gene
 regulation~\cite{sanchezdehesa2008,beslon2010,aevol9}. Genomes are circular
@@ -255,9 +241,7 @@ switch R-Aevol moves to one of the other environments at random. At a given
 switching probability the four-environment arm thus changes its target less
 often than the two-environment arm, and we multiplied the yoked arm's switching
 probability by 1.5 so that the two arms have the same per-age rates of target change and of signal change (Materials and methods). We write $q$ for the switching
-probability per age. EvoSim follows the same logic with an abiotic cue, whose
-yoked version is decoupled from the environmental state by running on an
-incommensurate period.
+probability per age.
 
 \begin{figure}[!ht]
 \centering
@@ -322,69 +306,12 @@ range of the pre-registered sweep (P1--P4).}
 \label{fig1}
 \end{figure}
 
-\subsection*{In EvoSim, fluctuation increases connection number but not wiring strength}
+\subsection*{The effect of fluctuation on regulation depends on the cue}
 
-Earlier EvoSim experiments had found that fluctuation increases connection
-density (S4~Text). We repeated the comparison in 180 runs (six arms of 30 seeds,
-150{,}000 time steps each) and measured the strength of connections as
-well as their number. The cue is zero in a frozen environment, so the three frozen arms are
-identical and the runs contain 120 distinct populations. Without a cue,
-fluctuation raised count density, the
-proportion of possible connections that are non-zero, from 0.467 to 0.587
-($+25.5\%$, $p<10^{-4}$, $d=2.2$; 28 surviving fluctuating and 30 frozen
-populations; Fig~\ref{fig2}A), and the number of non-zero connections from 86
-to 120 ($+39\%$, $p<10^{-4}$). Total wiring strength did not change (38.0 in
-frozen and 37.5 in fluctuating populations, $p=0.86$; Fig~\ref{fig2}C).
-Fluctuating networks thus had more connections but not more wiring, and the
-average non-zero connection was about 30\% weaker. Strength density, the summed
-absolute weight divided by the number of possible connections, fell from 0.207
-to 0.184 ($-10.9\%$, $p<10^{-4}$, $d=-1.4$; Fig~\ref{fig2}B), mostly because
-there were more possible connections. Node count stayed close to its minimum of
-13 in this regime and increased only slightly ($+0.6$ nodes, $p=0.047$), which
-raises $n_g^2$ by about 9\%. With the informative and the yoked cue, fluctuation
-had effects in the same directions (count density $+18\%$ and $+28\%$, total
-strength unchanged, $p=0.40$ and $0.59$).
-
-Population size is a possible confound. Fluctuating populations were 40\% smaller than frozen ones, as expected since in frozen dishes
-all inflow feeds the best-paying channel (S1~Text), and population size can change
-genome architecture by itself. Because the population sizes of the two arms did not
-overlap, the two effects cannot be separated statistically, and the
-correlations within arms point in different directions for the two measures.
-Larger populations had lower strength density in every arm ($r$ between $-0.31$
-and $-0.47$; Fig~\ref{fig2}D), so population size would predict higher strength
-density in the smaller fluctuating populations, the reverse of what we found.
-Count density, in contrast, was higher in smaller populations within each
-fluctuating arm ($r$ between $-0.63$ and $-0.72$), though not in the frozen arm
-($r=0.24$), so population size may contribute to the increase in connection
-number. The cue was also not used in this regime. Populations with the informative and
-the yoked cue were the same size ($p=0.79$) and had the same strength density
-($p=0.99$), although count density was lower with the informative cue (0.55
-against 0.60, $p=0.009$). EvoSim organisms respond to the cue only when
-development is reversible, and even then they match their phenotype to the
-current state only in part (S4~Text). The EvoSim results
-concern fluctuation that the organisms cannot track.
-
-\begin{figure}[!ht]
-\centering
-\ifshowfigs\includegraphics[width=\linewidth]{figures/fig2_evosim.pdf}\fi
-\caption{{\bf EvoSim: more connections, no more wiring.}
-Fluctuating (no cue; filled) versus frozen (hollow) populations, one point per
-population; diamonds are means with bootstrap 95\% confidence intervals. Numbers
-above panels are the change in the mean.
-(A) Count density, the number of non-zero connections divided by the number of possible connections.
-(B) Strength density, the summed absolute weight divided by the number of possible connections.
-(C) Total wiring strength.
-(D) Strength density against population size within each arm. Extinct
-populations (2 of 30 fluctuating, 0 of 30 frozen) are excluded.}
-\label{fig2}
-\end{figure}
-
-\subsection*{In R-Aevol, the effect of fluctuation on regulation depends on the cue}
-
-We then asked whether an independent model would reproduce two earlier EvoSim
-conclusions, namely that fluctuation increases genome size and connectivity and
-that the information content of a cue makes no difference to genome size. It
-reproduced the second but not the first. In an exploratory experiment (six arms,
+Earlier exploratory work with EvoSim had suggested that fluctuation increases
+genome size and connectivity and that the information content of a cue makes no
+difference to genome size (S4~Text). R-Aevol reproduced the second conclusion but
+not the first. In an exploratory experiment (six arms,
 12 seeds each, 30{,}000 generations), fluctuation reduced genome size under every
 cue condition, and its effect on regulation depended on the cue
 (Fig~\ref{fig3}). With an informative
@@ -470,6 +397,48 @@ best-paying resource channel in 1.5 of 6 states, against 1.0 with a scrambled
 cue, yet had the same number of nodes (S4~Text). What information changed in
 R-Aevol was regulation, which has not been measured in that EvoSim regime.
 
+\subsection*{Much of the gain is the cue's own wiring}
+
+R-Aevol treats the signal proteins like other proteins when it computes binding,
+so the regulatory strength and link counts above include the influences of the
+signal proteins. To separate them from the genome-encoded network, we continued
+every run from its saved population at generation 30{,}000 for 2{,}000
+generations, with statistics that record the signal proteins' influences
+separately (Materials and methods). This analysis was not pre-registered. The
+continuations reproduced the regulatory strength of the analysis window (the
+correlation of cell means was 0.995 across 21 cells).
+
+About half of the regulatory strength of fluctuating informative-cue populations
+came from the signal proteins (50 to 55\%; Fig~\ref{fig_decomp}A). Their
+genome-encoded network was no stronger than in the frozen environment at
+$q=0.05$ and $0.10$ (5.4 against 4.8 and 5.9 against 5.4; $p=0.61$ and $0.62$) and
+1.5 times stronger at $q=0.20$ (6.8 against 4.4, $p=0.007$). The gain in total
+strength tested by P1 is therefore mainly the cue being wired into the network.
+The yoked cue differed. Its signal proteins also carried strong links, which made
+up 68 to 80\% of the total, but the genome-encoded network was as weak as in
+populations without a cue (0.9 to 2.1 against 1.1 to 1.3; $p=0.11$, $0.06$ and
+$0.67$), less than half its strength in any frozen arm (4.4 to 6.4). On the
+genome-encoded network alone, the informative cue produced 2.5, 3.7 and 7.2 times
+the strength of the yoked cue ($p\le 0.007$), larger ratios than for total
+strength, and the difference held at a population size of 512 and in the
+exploratory experiment. Without information, then, fluctuation erodes the
+genome-encoded network whether or not a signal is present, and with information
+the network keeps the strength it has in a frozen environment.
+
+\begin{figure}[!ht]
+\centering
+\ifshowfigs\includegraphics[width=\linewidth]{figures/fig4_decomposition.pdf}\fi
+\caption{{\bf Signal-protein links and the genome-encoded network (exploratory).}
+Continuations of every run from its saved population at generation 30{,}000 to
+32{,}000, population 1024. (A) Total regulatory strength divided into the part
+exerted by the signal proteins (hatched) and by genome-encoded proteins (solid).
+(B) The same for the number of regulatory links. Colour gives the cue; frozen
+arms are hollow. Whiskers are bootstrap 95\% confidence intervals of the
+genome-encoded part (black) and of the total (grey). The frozen yoked and frozen
+no-cue arms were run at $q=0.10$; the frozen no-cue arm does not depend on $q$.}
+\label{fig_decomp}
+\end{figure}
+
 \subsection*{Fluctuation reduces genome size}
 
 With an informative cue, fluctuation reduced the number of functional genes at
@@ -492,33 +461,23 @@ genes (18.1 against 20.0).
 
 \subsection*{Connection counts do not track connection strength}
 
-Connection number and connection strength did not always change together
-(Fig~\ref{fig5}). In EvoSim, fluctuation increased the number of connections by
-39\% and left total wiring strength unchanged. In R-Aevol, fluctuating
-populations with an informative cue had no more regulatory links than the
-corresponding frozen populations (0.60, 0.78 and 0.83 times as many at the three
-rates; $p=0.02$, 0.13 and 0.52), although their total regulatory strength was
-1.8 to 2.7 times higher and their strength per link about twice as high. A study
-measuring connectivity as link number would have missed the strengthening of
-regulation, and its point estimates would have suggested the opposite. Without a
-cue, number and strength fell together to about a fifth of the frozen values, so
-the two measures do not always disagree. These comparisons were pre-specified as
-secondary analyses without a formal verdict.
-
-\begin{figure}[!ht]
-\centering
-\ifshowfigs\includegraphics[width=0.62\linewidth]{figures/fig5_count_vs_strength.pdf}\fi
-\caption{{\bf Counting versus weighing.}
-Ratio of fluctuating to frozen connection count against the corresponding ratio
-of connection strength, on logarithmic axes. R-Aevol (circles): raw number of
-regulatory links and total regulatory strength, per switching probability,
-population 1024. EvoSim (triangle): number of non-zero connections and total
-wiring strength, no cue. Points are ratios of means. Points on the dashed
-diagonal are cases in which the two measures agree, and points off it are cases
-in which counting misreports strength. For R-Aevol with an informative cue, the
-difference in link number is significant only at $q=0.05$.}
-\label{fig5}
-\end{figure}
+Link counts and regulatory strength did not change together
+(Fig~\ref{fig_decomp}B). In the analysis window, fluctuating populations with an
+informative cue had no more regulatory links than the corresponding frozen
+populations (0.60, 0.78 and 0.83 times as many at the three rates; $p=0.02$,
+0.13 and 0.52), although their total regulatory strength was 1.8 to 2.7 times
+higher. The decomposition shows why. Frozen populations carried many weak links
+from the signal proteins (47 to 52 links with a combined strength of 0.7 to 1.8),
+whereas fluctuating informative-cue populations carried fewer and much stronger
+ones (18 to 22 links with a combined strength of 5.8 to 7.2). In the
+genome-encoded network, link number followed strength. The two rose together at
+$q=0.20$ (51 against 34 links, $p=0.008$), and neither differed significantly at
+the slower rates. A study measuring connectivity as link number would have missed the wiring
+of the cue into the network, and its point estimates would have suggested the
+opposite. Without a cue, number and strength fell together to about a fifth of
+the frozen values. The comparisons of link number in the analysis window were
+pre-specified as secondary analyses without a formal verdict, and the
+decomposition is exploratory.
 
 \subsection*{Environmental grain}
 
@@ -574,14 +533,19 @@ phenotype and target.}
 % =============================================================================
 \section*{Discussion}
 
-In R-Aevol, the effect of environmental fluctuation on regulation depended on
-whether organisms could identify the current environment. Fluctuation with an
-informative cue produced the strongest regulation we observed and fluctuation
-without a cue the weakest. A yoked cue, which supplied the same molecules at the
-same rates, did not have the effect of an informative one. These results held
-across switching rates and at two population sizes, and the cost of cue-free
-fluctuation held across a 500-fold range of environmental grain, in tests whose
-predictions and analyses were fixed before the data were generated.
+In R-Aevol, environmental fluctuation eroded the genome-encoded regulatory
+network unless organisms could identify the current environment. Without a cue,
+or with a yoked cue that supplied the same signal proteins at the same rates, the
+network fell to a fraction of its strength in a frozen environment. With an
+informative cue it kept that strength, and the cue itself was wired into it, so
+that total regulatory strength rose. The pre-registered tests concerned total
+strength. They were supported across switching rates and at two population
+sizes, and the erosion without a cue held across a 500-fold range of
+environmental grain, in tests whose predictions and analyses were fixed before
+the data were generated. The separation of signal-protein links from the
+genome-encoded network was exploratory, and it changes the interpretation of the
+first prediction. Fluctuation with a usable cue raised total regulatory strength
+mainly by adding the cue's own links.
 
 The phenotypic side of this result is well known. Reliable cues favour plastic
 responses, and in their absence generalist phenotypes or bet-hedging are
@@ -590,11 +554,13 @@ been shown for the evolution of plasticity in a gene regulatory network, in
 which the parts of the network that become sensitive to mutation also depend on
 the environmental regime~\cite{jorritsma2026}, and in a network with a dedicated
 sensor gene, plasticity evolves as the sensor comes to activate some genes and
-repress others~\cite{sakamoto2024}. Our results add the effect of a
-cue's information on the regulatory strength and the size of the network that
-implements the response. The yoked control separated that information from the
-cue's physical presence, which a manipulation of cue reliability achieves only if
-it includes a cue that is present at the usual frequencies but uninformative.
+repress others~\cite{sakamoto2024}. Our results add the effect of a cue's
+information on the network that implements the response. Information did not
+make the network larger, or stronger except at the fastest switching rate. It
+prevented fluctuation from eroding the network and was itself wired into it. The
+yoked control separated that information from the cue's physical presence, which
+a manipulation of cue reliability achieves only if it includes a cue that is
+present at the usual frequencies but uninformative.
 
 We designed the grain experiment to test whether grain accounts for the
 difference from Tsuda and Kawata, who found that fluctuation of the optimum
@@ -607,149 +573,65 @@ we fixed in advance, the remaining difference between the two studies is
 therefore one between the models. Going beyond that interpretation, Tsuda and
 Kawata's own results point to the pattern of fluctuation, which we had listed as
 a limitation of the design when registering it. Their strong effect came from an
-optimum that moved to new positions in a random walk. In their cyclic regime, which alternated between
-two optima as ours does, complexity rose only slightly and only for large,
-infrequent shifts~\cite{tsuda2010}, so for this kind of fluctuation the two
-studies differ less than their headline results suggest. A design with novel
-optima would test this directly. The way each model maps genotype to phenotype
-is a further candidate. The same applies to EvoSim, which produced larger genomes under
-fluctuation in earlier experiments. Its fluctuation is coarse relative to a
-lifetime, since development happens once at birth and each environmental state
-lasts about 14 generations, but coarse grain did not enlarge genomes in
-R-Aevol, so grain is an unlikely explanation, and the difference in genome size between EvoSim and
-R-Aevol is most likely a difference between the models.
+optimum that moved to new positions in a random walk. In their cyclic regime,
+which alternated between two optima as ours does, complexity rose only slightly
+and only for large, infrequent shifts~\cite{tsuda2010}, so for this kind of
+fluctuation the two studies differ less than their headline results suggest. A
+design with novel optima would test this directly. The way each model maps
+genotype to phenotype is a further candidate. Earlier experiments in EvoSim also
+produced larger genomes under fluctuation (S4~Text); coarse grain did not enlarge
+genomes in R-Aevol, so that difference too is most likely one between the models.
 
-The divergence between connection number and connection strength probably has
-different causes in the two models, and we have tested neither. In EvoSim, gene
-duplication and node addition copy the connections of an existing node and add
-small random values to every copied weight, including weights that were zero,
-so each duplication can create many weak connections. Point mutations that hit a
-zero weight also create connections. If purifying selection is weaker in the
-smaller populations of fluctuating environments, such connections would persist
-and connection number would rise without an increase in total strength, which
-fits the correlations with population size within the fluctuating arms. In
-R-Aevol, frozen populations had at least as many regulatory links as
-informative-cue populations, but weaker ones, and we did not determine why.
-Many evolutionary models of regulation measure complexity by counting genes or
-connections~\cite{tsuda2010,espinosasoto2018}, and we recommend that weighted
-measures be reported as well.
+The divergence between link number and link strength in R-Aevol comes largely
+from the signal proteins. In frozen environments, where the signals predict
+nothing, they carried many weak links, and under fluctuation with an informative
+cue, fewer and stronger ones. We did not determine why the uninformative signals
+of frozen populations accumulate weak links, or why the uninformative signals of
+yoked populations carried stronger ones. A similar divergence appeared in EvoSim,
+where fluctuation raised the number of connections without raising total wiring
+strength (S6~Text). Many evolutionary models of regulation measure complexity by
+counting genes or connections~\cite{tsuda2010,espinosasoto2018}, and we recommend
+that weighted measures be reported as well, separately for the inputs of a
+network and for the network itself.
 
 \subsection*{Limitations}
 
-The positive result, that a usable cue allows fluctuation to strengthen
-regulation, rests on R-Aevol alone. EvoSim organisms respond to a cue only when
-development is reversible and even then only in part, and we have not
-measured regulatory strength in that regime. Each R-Aevol condition contained 12
-populations, fewer than the 60 to 100 used in comparable
-studies~\cite{tsuda2010,lalejini2021}. The effects were large ($|d|$ between 1.5
-and 3.9 in the evaluated cells) and remained significant after correction for
-multiple testing, but smaller effects could have been missed. Because R-Aevol counts the influences of signal proteins as regulatory links,
-comparisons between arms with and without a cue include links that the no-cue
-arms cannot have. The
-pre-registered contrasts compare arms with the same signals and are not affected.
-Frozen populations without signals reached a regulatory strength of 6.3, within
-the range of frozen populations with signals (4.8 to 7.5), so regulation of that
-strength does not require signals. We cannot tell how much of the difference
-between fluctuating arms with and without a cue the signal links account for.
-The version of R-Aevol we used records per-generation statistics only for the
-best individual in each population, so every R-Aevol measure describes the
-fittest individual of each generation, averaged over the analysis window, and
-not the population average. R-Aevol's fluctuating environments alternate between two fixed targets and do
-not include the random walk towards new optima that Tsuda and Kawata found most
-favourable to complexity~\cite{tsuda2010}, and even at the coarsest grain a
-switch falls within about 0.4\% of lifetimes. Prediction P4 establishes the
-direction of the effect on genome size; its mechanism is untested.
-
-In EvoSim, fluctuation and population
-size are confounded between arms. The within-arm correlations argue against
-population size as the cause of the lower strength density but are consistent
-with a contribution to the higher connection count. We also pre-registered a confirmation of the EvoSim divergence between count and
-strength in a regime with more hidden nodes, on condition that fluctuating
-populations survived there. They did not (2 to 5 of 6 survived, compared with 6
-of 6 frozen populations), so the confirmation was not run and the EvoSim result
-remains exploratory. Finally, all pre-registrations were committed to a
-version-control repository before the corresponding runs, but these timestamps
-exist only locally and cannot be verified independently.
+Our results come from a single model. In EvoSim, the model in which this study
+began, organisms did not use the cue in the regime we studied, and we have not
+measured regulatory strength in the regime in which they do (S4 and S6 Text).
+Each R-Aevol condition contained 12 populations, fewer than the 60 to 100 used in
+comparable studies~\cite{tsuda2010,lalejini2021}. The effects were large ($|d|$
+between 1.5 and 3.9 in the evaluated cells) and remained significant after
+correction for multiple testing, but smaller effects could have been missed. The
+pre-registered measure of regulatory strength includes the influences of the
+signal proteins. The decomposition that separates them was not pre-registered,
+and it rests on continuations of each run for 2{,}000 generations beyond the
+analysis window, because resuming a run in this version of R-Aevol does not
+reproduce it exactly; the continuations matched the original cell means closely.
+This version of R-Aevol records per-generation statistics only for the best
+individual in each population, so every R-Aevol measure describes the fittest
+individual of each generation, averaged over the analysis window, and not the
+population average. R-Aevol's fluctuating environments alternate between two
+fixed targets and do not include the random walk towards new optima that Tsuda
+and Kawata found most favourable to complexity~\cite{tsuda2010}, and even at the
+coarsest grain a switch falls within about 0.4\% of lifetimes. Prediction P4
+establishes the direction of the effect on genome size; its mechanism is
+untested. Finally, all pre-registrations were committed to a version-control
+repository before the corresponding runs, but these timestamps exist only
+locally and cannot be verified independently.
 
 \subsection*{Conclusion}
 
-Environmental fluctuation did not by itself strengthen gene regulation in these
-models. Regulation became stronger under fluctuation when a cue allowed organisms
-to track the environment. Without a cue it became weaker, whatever the grain of
-the environment. Because connection
-counts and connection strength can change independently, conclusions about
-regulatory complexity may depend on which of the two is measured.
+Environmental fluctuation did not by itself strengthen gene regulation in
+R-Aevol. Without information about the environment it eroded the regulatory
+network, whatever the grain of the environment. With an informative cue the
+network kept its strength and the cue was wired into it, so that total regulatory
+strength rose. Because link counts and link strength, and the links of a
+network's inputs and of the network itself, can change independently,
+conclusions about regulatory complexity may depend on which is measured.
 
 % =============================================================================
 \section*{Materials and methods}
-
-\subsection*{EvoSim}
-EvoSim is described in full, following the ODD protocol~\cite{grimm2020}, in
-S1~Text, and the parts relevant to this study are summarised below. Organisms live on a
-$G\times G$ lattice ($G=128$) with six diffusing resource channels. External
-inflow, which varies seasonally, enters the first channel (with the exception
-described under Environment and cue), and consuming channel $r$ releases a
-byproduct into channel $r+1$, with yields declining along this chain. All arms
-also experience rare random mass-mortality and famine events, on average one
-every 25{,}000 time steps. Each organism
-has an energy store and divides when the store exceeds a heritable threshold.
-Starvation and the other causes of death are described in S1~Text.
-
-\paragraph*{Genome and development.} A genome is a weight matrix $W$ and a bias
-vector $b$ over $n_g$ nodes, with $13 \le n_g \le 32$. Nodes 1 to 12 are read out
-as the phenotype, node 13 receives the abiotic cue, and hidden nodes
-$14,\dots,n_g$ have no fixed meaning. Development takes place once, at birth.
-Expression is initialised at 0.1 and updated eight times as
-\begin{equation}
-e_k \leftarrow \tanh\Big(b_k + \sum_m W_{mk}\, e_m + u_k\Big),
-\end{equation}
-where $u_k$ is the local concentration of resource $k$ for $k\le 6$, the cue for
-$k=13$, and zero otherwise. The final expression values are mapped to the twelve
-traits.
-
-\paragraph*{Mutation.} At each birth, a Poisson number of point mutations with
-mean $10^{-3} n_g^2$ is applied, each adding $\mathcal{N}(0,0.25^2)$ to a randomly
-chosen weight. This rate is reduced by up to 85\% by the organism's heritable
-repair trait. With probability equal to the reduced per-weight rate times $n_g$,
-one node bias receives a mutation of the same size. The structural mutations are
-gene silencing (probability 0.002), which sets a node's outgoing weights to zero;
-gene duplication (0.002), which copies the regulatory role of one node onto
-another and adds $\mathcal{N}(0,0.05^2)$ noise to every copied weight; and the
-addition or deletion of a hidden node (0.003 each), where an added node is a
-duplicate of an existing one made in the same way. Connection silencing
-(probability 0.2 per birth) sets one randomly chosen weight to exactly zero.
-Without it, additive mutation would drive density towards one. Each hidden node
-costs 0.0015 and each non-zero weight $5\times10^{-5}$ energy units per time
-step.
-
-\paragraph*{Environment and cue.} An abiotic condition cycles through discrete
-states with a period of 2{,}000 time steps. Each state changes which resource
-channel gives the highest yield, and in fluctuating arms 40\% of the external
-inflow goes to the favoured channel. In frozen arms all inflow enters channel 1,
-which then also gives the highest yield. The phase of the cycle, scaled to $[-1,1]$, is the input to node 13 and
-identifies the current state. Fluctuating arms have six states and frozen arms
-one. In the yoked arm the cue is instead the phase multiplied by
-$10/\varphi\approx6.18$, with $\varphi$ the golden ratio, and wrapped back into
-the same range, so that it takes the same values but carries only 0.0004 bits of
-information about the state. In the no-cue arm the gain of the cue is
-zero. With a single state the cue is identically zero, so the three frozen arms
-produce identical runs and were analysed as one arm.
-
-\paragraph*{Measures.} For every organism at birth we record the number of
-weights with $|w|>10^{-4}$, the strength density $\sum|w|/n_g^2$ over all $n_g^2$
-weights, including zeros, and $n_g$. The log holds their population means at
-each time step. Count density is the mean number of non-zero weights divided by
-the squared mean $n_g$, and total strength is the mean strength density
-multiplied by the squared mean $n_g$. Each measure is then averaged over the
-last 20\% of the run. Populations
-that went extinct were excluded and their number is reported.
-
-\paragraph*{Runs.} We ran six arms with 30 seeds each for 150{,}000 time steps
-(180 runs), about 6{,}200 generations in fluctuating and 4{,}900 in frozen
-populations (24 and 31 time steps per generation, from the slope of mean lineage
-depth). Runs are deterministic for a given seed and, on the same machine
-and Julia version, bit-identical across thread counts (checked at 1, 4 and 8
-threads).
 
 \subsection*{R-Aevol}
 We used the \texttt{aevol-7} branch of Aevol (commit \texttt{33277374},
@@ -803,6 +685,21 @@ no-cue arms and the frozen informative arm were repeated at a population of 512
 (48 runs). The grain experiment has cue-free fluctuating arms at $q=0.1$, 0.01,
 0.001 and 0.0002 and a frozen arm, with 12 new seeds each (60 runs). All runs reached 30{,}000 generations.
 
+\paragraph*{Signal-protein links (exploratory).} To separate the influences of the
+signal proteins from those of genome-encoded proteins, we compiled a copy of the
+platform whose statistics also report the number of positive activation and
+repression factors exerted by signal proteins and their sum (S2~Text). Resuming a
+run from a saved population with this version did not reproduce the original run
+exactly. A run resumed at generation 20{,}000 differed from the original from the
+first resumed generation on. We therefore continued each run from its saved
+population at generation 30{,}000 to generation 32{,}000 in the same environment
+and summarised it over those 2{,}000 generations. We did this for all 168 primary
+runs of the pre-registered sweep, the 36 runs with signals at a population of 512
+and the 48 exploratory runs with signals (252 runs). The genome-encoded part of
+the regulatory strength is $S$ minus the sum of the signal proteins' factors, and
+likewise for link counts. Contrasts were tested with the same permutation test,
+without correction and without verdicts.
+
 \begin{table}[!ht]
 \centering
 \caption{{\bf R-Aevol parameters.}}
@@ -845,10 +742,8 @@ data, with the committed code, whose checksum was verified beforehand. The only
 deviation was operational. The idle-sleep setting of the host machine suspended
 the runs overnight, which lengthened the wall time but cannot have affected the
 results, because a suspended process resumes from the state in which it
-stopped. The EvoSim confirmation
-(commit \texttt{4bc16c3}) required fluctuating and frozen populations to survive
-a viability pilot. None of the three candidate regimes met this condition, so it
-was not run (commit \texttt{56fe3a0}). The design, predictions and analysis code of the
+stopped. A pre-registered confirmation in EvoSim could not be run, because
+no candidate regime met its viability condition (S6~Text). The design, predictions and analysis code of the
 grain experiment were committed in the same way (commit \texttt{fa00777}) before
 its runs began, and its analysis was run once, automatically, when the last run
 finished. Its interpretation was fixed at the same time. If coarse grain gave
@@ -871,7 +766,7 @@ P1 & Fluctuation with an informative cue raises total regulatory strength over f
 P2 & An informative cue raises it over a yoked cue & supported ($q=0.10$, 0.20) \\
 P3 & Fluctuation without a cue lowers it below frozen & supported (all rates) \\
 P4 & Fluctuation with an informative cue lowers the number of functional genes & supported (all rates) \\
-P5 & In EvoSim, count density rises and strength density falls in a regime above the node floor & not run (no viable regime) \\
+
 G1, G3 & Coarse-grained cue-free fluctuation gives more genes (G1) and stronger regulation (G3) than fine-grained & inconclusive \\
 G2, G4 & Coarse-grained cue-free fluctuation gives more genes (G2) and stronger regulation (G4) than frozen & refuted \\
 \bottomrule
@@ -885,9 +780,10 @@ cue. G1--G4 are single tests, supported if the predicted sign holds with Holm-ad
 \end{table}
 
 \subsection*{Software and availability}
-EvoSim is written in Julia and uses only the standard library for simulation.
-The R-Aevol runs were made on a single 12-core machine. The configurations of the two models, the launch scripts, the pre-registered analysis scripts,
-the history of all analyses and the per-run statistics are available at
+The R-Aevol runs were made on a single 12-core machine. EvoSim (S1 and S6 Text)
+is written in Julia and uses only the standard library for simulation. The configurations of the two models, the launch scripts, the pre-registered analysis
+scripts, the instrumented statistics and continuation scripts, the history of
+all analyses and the per-run statistics are available at
 \pending{repository URL and Zenodo DOI}.
 
 % =============================================================================
@@ -920,6 +816,12 @@ found during the project with the checks that exposed them.
 \paragraph*{S5 Table.}
 \label{S5_Table}
 {\bf Prior work and how this study relates to it.}
+
+\paragraph*{S6 Text.}
+\label{S6_Text}
+{\bf EvoSim: connection count and wiring strength under fluctuation
+(exploratory).} The EvoSim experiment, its methods, the population-size
+confound and the pre-registered confirmation that could not be run.
 
 \section*{Acknowledgments}
 \pending{acknowledgements; disclosure of AI-assisted analysis and writing, as

@@ -20,6 +20,8 @@ Build notes for Apple Silicon are in the project memory (`raevol-replication`).
 | `results_v2_preregistered.txt` | output of the single pre-registered run of `analyse_v2.py`: P1–P4 all SUPPORTED (PAPER.md §11.7) |
 | `gen_params_grain.py`, `analyse_grain.py` | **pre-registered** grain experiment (G1–G4), committed as `fa00777` before any run |
 | `results_grain_preregistered.txt` | its single analysis run: G1, G3 inconclusive; G2, G4 refuted (PAPER.md §11.10) |
+| `instrument_signal_links.py` | patches a COPY of the aevol-7 source so the best-individual stats also report links and summed influence of SIGNAL proteins (two columns appended at the end of each row) |
+| `decomp_launch.sh`, `decomp_extract.py`, `decomp_analyse.py` | EXPLORATORY decomposition: continue every run from its generation-30,000 population to 32,000 with the instrumented binary, summarise per run (`paper/data/decomp_runs.csv`), and test contrasts on the genome-encoded part → `results_decomp_exploratory.txt`. Resuming is not bit-reproducible, hence continuation rather than re-run; validated against the original window (r = 0.995) |
 | `export_raevol.py`, `export_grain.py` | write `paper/data/raevol_runs.csv` and `grain_runs.csv`, one row per run, with the pre-registered summary function (plus `tfs`, mean `nb_TF`, not pre-registered) |
 
 The yoked control uses four environments against the informative arm's two,

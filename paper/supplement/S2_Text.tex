@@ -269,4 +269,25 @@ against frozen no-cue. P4: functional genes, frozen informative against
 fluctuating informative. G1 and G2: functional genes; G3 and G4: $S$; coarse
 grain ($q=0.0002$, A) against fine grain ($q=0.1$) or the frozen arm (B).
 
+\section*{10. Signal-protein links (exploratory)}
+To separate the influences of the signal proteins from those of genome-encoded
+proteins, a copy of the platform was compiled with the same options after a patch
+to \texttt{Stats\_7.cpp}
+(\texttt{replication/raevol/instrument\_signal\_links.py}). Inside the loop that
+counts positive enhancer and operator factors, each factor whose protein has
+\texttt{signal\_} set is also counted and summed separately, and the two values
+are appended at the end of every row of \texttt{stats\_simd\_best.csv}. All
+existing columns are computed and written as before.
+
+Resuming a run from a saved population did not reproduce the original run. A run
+resumed at generation 20{,}000 differed from the original in fitness, genome
+length and links from the first resumed generation on. Every run was therefore
+continued from its saved population at generation 30{,}000 to 32{,}000
+(\texttt{decomp\_launch.sh}), each in a copy of its directory, and summarised over
+generations 30{,}001--32{,}000 (\texttt{decomp\_extract.py}). The continuations
+reproduced the original cell means of $S$ (correlation 0.995 across 21 cells;
+ratios 0.79 to 1.16). Results are in
+\texttt{replication/raevol/results\_decomp\_exploratory.txt} and per run in
+\texttt{paper/data/decomp\_runs.csv}.
+
 \end{document}

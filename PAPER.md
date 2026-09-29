@@ -900,3 +900,46 @@ Edits: the signal-link caveat made self-contained; "best individual" limitation
 now states its consequence (every R-Aevol measure is the fittest individual per
 generation, not a population mean); Limitations split by model; Conclusion no
 longer lets "whatever the grain" read onto the informative-cue clause.
+
+### 11.17 Signal-link decomposition (EXPLORATORY, 2026-09-29) — changes the headline
+
+Method: aevol-7 copy with instrumented Stats_7 (replication/raevol/
+instrument_signal_links.py) appends nb_signal_link and sum_signal_influence.
+Resume from a backup is NOT bit-reproducible (resumed at 20,000: rows differed from
+20,001 on), so every run with and without signals (252 runs: v2 1024 all 14 cells,
+v2 512 three signal cells, v1 four signal cells) was CONTINUED from its saved
+generation-30,000 population to 32,000 (decomp_launch.sh), summarised by
+decomp_extract.py, analysed by decomp_analyse.py → results_decomp_exploratory.txt.
+Validation: continuation reproduces original cell means of S (r = 0.995, 21 cells;
+ratios 0.79–1.16).
+
+Result (internal = genome-encoded = S − signal part):
+- frozen, any cue: internal 4.4–6.4; signal share 0–24%.
+- fluctuating, no cue: internal 1.0–1.3 (≈ total).
+- fluctuating, YOKED: internal 1.0–2.2 (68–80% of S is signal links) — as eroded as
+  no cue (p = 0.11, 0.06, 0.67). The 5× yoked/no-cue gap in S was ALL signal links.
+- fluctuating, INFORMATIVE: internal 5.5–6.8 (50–55% of S is signal links).
+- P1 on internal S: n.s. at q = 0.05, 0.10 (p ≈ 0.61, 0.62), 1.53× at q = 0.20
+  (p = 0.007). So the pre-registered P1 gain is mostly the cue's own wiring.
+- P2 on internal S: 2.5×, 3.7×, 7.2× (p ≤ 0.007), holds at pop 512 and v1.
+- Signal links: frozen informative have MORE (46–52) but far WEAKER (S_sig 0.7–1.8)
+  signal links than fluctuating informative (18–22 links, S_sig 5.8–7.2).
+Reframing: fluctuation ERODES the regulatory network unless the environment can be
+tracked; a usable cue is wired in and the internal network keeps its frozen-level
+strength (stronger only at the fastest rate). The pre-registered verdicts stand as
+registered (they are about total S); the interpretation changes.
+
+### 11.18 Restructure: R-Aevol paper, EvoSim to S6 Text (2026-09-29)
+
+Following §11.17, the manuscript is now an R-Aevol paper titled "Environmental
+fluctuation erodes gene regulation unless it can be tracked". EvoSim's model
+paragraph, results section and figure, methods and the P5 record moved to the new
+S6 Text (EvoSim remains the study's origin, cited via S1, S4, S6). New Results
+section "Much of the gain is the cue's own wiring" with Fig 4 (decomposition,
+`paper/figures/fig4_decomposition.pdf`) replaces the old counts-vs-strength
+Fig 5; the counts section now explains the divergence by signal links (frozen:
+47–52 weak signal links, fluctuating informative: 18–22 strong ones). Abstract,
+author summary, Introduction, Discussion, Limitations and Conclusion rewritten;
+the pre-registered verdicts are unchanged (they concern total S). The supplement
+preamble still carried the round-2 title ("...sensed"): fixed. S2 gained §10 on
+the instrumentation.

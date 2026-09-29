@@ -255,6 +255,64 @@ def fig5():
 
 
 # ----------------------------------------------------------------------------
+# Fig 4 -- signal-protein links versus the genome-encoded network (EXPLORATORY)
+# Continuations of every run from its saved generation-30,000 population to
+# 32,000 with instrumented statistics (replication/raevol/decomp_*.py).
+# ----------------------------------------------------------------------------
+def fig_decomp():
+    C = load("decomp_runs.csv")
+
+    def vals(arm, rate, k, pop=1024):
+        return [float(r[k]) for r in C if r["experiment"] == "v2" and r["arm"] == arm
+                and abs(float(r["rate"]) - rate) < 1e-9 and int(r["pop"]) == pop]
+
+    groups = [("q = 0.05", [("froz_info", 0.05), ("fluc_info", 0.05), ("fluc_yoked", 0.05), ("fluc_none", 0.05)]),
+              ("q = 0.10", [("froz_info", 0.10), ("fluc_info", 0.10), ("fluc_yoked", 0.10), ("fluc_none", 0.10)]),
+              ("q = 0.20", [("froz_info", 0.20), ("fluc_info", 0.20), ("fluc_yoked", 0.20), ("fluc_none", 0.20)]),
+              ("frozen,\nother cues", [("froz_yoked", 0.10), ("froz_none", 0.10)])]
+    fig, axes = plt.subplots(1, 2, figsize=(7.3, 2.9))
+    for ax, (ktot, ksig, kint, ylab, lab) in zip(axes, [
+            ("S", "S_sig", "S_int", "Total regulatory strength", "A"),
+            ("links", "links_sig", "links_int", "Regulatory links (count)", "B")]):
+        x, ticks, tlabels = 0.0, [], []
+        for gname, cells in groups:
+            start = x
+            for arm, rate in cells:
+                cue = arm.split("_")[1]; fluc = arm.startswith("fluc")
+                col = CUE[cue]
+                ti, si = np.mean(vals(arm, rate, kint)), np.mean(vals(arm, rate, ksig))
+                face = col if fluc else "white"
+                ax.bar(x, ti, width=0.72, color=face, edgecolor=col, linewidth=0.9, zorder=3)
+                ax.bar(x, si, width=0.72, bottom=ti, color="white" if not fluc else col, alpha=1.0 if not fluc else 0.35,
+                       edgecolor=col, linewidth=0.9, hatch="////", zorder=3)
+                m, lo, hi = boot_mean(vals(arm, rate, kint))
+                ax.plot([x - 0.12, x - 0.12], [lo, hi], color=INK, lw=0.9, zorder=5)
+                m, lo, hi = boot_mean(vals(arm, rate, ktot))
+                ax.plot([x + 0.12, x + 0.12], [lo, hi], color=MUTED, lw=0.9, zorder=5)
+                x += 0.85
+            ticks.append((start + x - 0.85) / 2); tlabels.append(gname)
+            x += 0.9
+        ax.set_xticks(ticks); ax.set_xticklabels(tlabels)
+        ax.tick_params(axis="x", length=0)
+        ax.set_ylabel(ylab)
+        panel_label(ax, lab)
+    from matplotlib.patches import Patch
+    from matplotlib.lines import Line2D
+    h = [Patch(facecolor=CUE["info"], edgecolor=CUE["info"], label="Informative cue"),
+         Patch(facecolor=CUE["yoked"], edgecolor=CUE["yoked"], label="Yoked cue"),
+         Patch(facecolor=CUE["none"], edgecolor=CUE["none"], label="No cue"),
+         Patch(facecolor="white", edgecolor=MUTED, label="Frozen (hollow)"),
+         Patch(facecolor=MUTED, edgecolor=MUTED, label="Genome-encoded"),
+         Patch(facecolor="white", edgecolor=MUTED, hatch="////", label="Signal proteins"),
+         Line2D([], [], color=INK, lw=0.9, label="95% CI, genome-encoded"),
+         Line2D([], [], color=MUTED, lw=0.9, label="95% CI, total")]
+    fig.legend(handles=h, loc="lower center", ncol=4, frameon=False, bbox_to_anchor=(0.5, -0.2),
+               handletextpad=0.4, columnspacing=1.2)
+    fig.savefig(os.path.join(OUT, "fig4_decomposition.pdf"))
+    plt.close(fig)
+
+
+# ----------------------------------------------------------------------------
 # Fig 6 -- grain: cue-free fluctuation against mean environmental dwell time
 # ----------------------------------------------------------------------------
 def fig6():
@@ -305,10 +363,6 @@ def fig6():
 
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
-    fig2(); fig3(); fig4(); fig6()
-    pts, evo = fig5()
-    print("fig5 points (cue, count ratio, strength ratio, rate):")
-    for p in pts:
-        print("  %-5s %.3f %.3f %s" % p)
-    print("  EvoSim %.3f %.3f" % evo)
+    fig2()        # EvoSim; now shown in S6 Text
+    fig3(); fig4(); fig_decomp(); fig6()
     print("figures written to", OUT)
