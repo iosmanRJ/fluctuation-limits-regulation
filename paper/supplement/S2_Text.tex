@@ -198,6 +198,7 @@ Exploratory (72 runs) & 6 arms at $q=0.10$, population 1024 & $100000 + 1000\,a 
 Pre-registered sweep, primary (168) & 4 arms at $q=0.05, 0.10, 0.20$; frozen no-cue and frozen yoked at $q=0.10$; population 1024 & $200000 + 1000\,c + s$\\
 Pre-registered sweep, secondary (48) & fluctuating informative, yoked and no-cue, frozen informative; $q=0.10$; population 512 & $200000 + 1000\,c + s$\\
 Grain (60) & fluctuating no-cue at $q=0.1, 0.01, 0.001, 0.0002$; frozen no-cue & $300000 + 1000\,c + s$\\
+Confirmation (132) & fluctuating informative, yoked and no-cue, frozen informative and yoked at $q=0.10, 0.20$; frozen no-cue; population 1024; instrumented platform & $400000 + 1000\,c + s$\\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -217,13 +218,15 @@ Sweep P1--P4 & \texttt{f985ccd} & design, predictions, decision rules; \texttt{g
 EvoSim confirmation P5 & \texttt{4bc16c3} & viability-pilot rule, analysis script\\
 P5 outcome & \texttt{56fe3a0} & no grid met the rule; not run\\
 Grain G1--G4 & \texttt{fa00777} & \texttt{gen\_params\_grain.py}, \texttt{analyse\_grain.py}\\
+Confirmation C1--C4 & \texttt{59ff365} & \texttt{gen\_params\_confirm.py}, \texttt{analyse\_confirm.py} (SHA-256 prefix \texttt{92c07d172bf66f6d}), tested on synthetic data before the commit\\
 \bottomrule
 \end{tabular}
 \end{center}
 Before each analysis ran, the SHA-256 checksum of the analysis script on the
 simulation machine was compared with the committed version (\texttt{analyse\_v2.py}
 prefix \texttt{d0609140a970de48}; \texttt{analyse\_grain.py} prefix
-\texttt{89a8613289731999}). Each analysis was run once, on complete data. The
+\texttt{89a8613289731999}; \texttt{analyse\_confirm.py} prefix
+\texttt{92c07d172bf66f6d}). Each analysis was run once, on complete data. The
 simulation machine's idle-sleep setting suspended runs during the first night of
 the sweep; this lengthened wall time but cannot change results, which are
 determined by the seed. From that point runs were protected by
@@ -268,6 +271,30 @@ fluctuating informative against fluctuating yoked. P3: $S$, fluctuating no-cue
 against frozen no-cue. P4: functional genes, frozen informative against
 fluctuating informative. G1 and G2: functional genes; G3 and G4: $S$; coarse
 grain ($q=0.0002$, A) against fine grain ($q=0.1$) or the frozen arm (B).
+
+The confirmation (C1--C3, genome-encoded strength $S_\mathrm{int}$; Holm across
+these six tests) gave the following, copied from
+\texttt{replication/raevol/results\_confirm\_preregistered.txt}. C4 is a
+non-inferiority test (ratio 1.60, 95\% CI 1.13--2.28 at $q=0.10$; 1.53, 1.11--2.14
+at $q=0.20$; margin 0.75). All four were supported.
+\begin{center}
+\small
+\begin{tabular}{@{}llrrlll@{}}
+\toprule
+Test & Cell & Mean A & Mean B & $p$ & Holm $p$ & Rank $p$\\
+\midrule
+C1 & $q=0.10$ & 1.34 & 7.88 & $<10^{-4}$ & $<10^{-4}$ & $<10^{-4}$\\
+C1 & $q=0.20$ & 1.31 & 7.88 & $<10^{-4}$ & $<10^{-4}$ & $<10^{-4}$\\
+C2 & $q=0.10$ & 1.84 & 4.03 & 0.011 & 0.011 & 0.0053\\
+C2 & $q=0.20$ & 1.20 & 5.64 & $<10^{-4}$ & $<10^{-4}$ & $<10^{-4}$\\
+C3 & $q=0.10$ & 6.53 & 1.84 & 0.0001 & 0.0002 & 0.0003\\
+C3 & $q=0.20$ & 5.96 & 1.20 & $<10^{-4}$ & $<10^{-4}$ & $<10^{-4}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+C1: fluctuating no-cue (A) against frozen no-cue (B). C2: fluctuating yoked
+against frozen yoked at the same rate. C3: fluctuating informative against
+fluctuating yoked.
 
 \section*{10. Signal-protein links (exploratory)}
 To separate the influences of the signal proteins from those of genome-encoded

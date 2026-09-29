@@ -25,10 +25,14 @@ instead of evolving plasticity & Established & Botero et al. 2015 [4]; Rago et a
 2019 [21]. Consistent with the better match to the target, without a change in
 regulation, at coarse grain in R-Aevol.\\
 In a gene regulatory network model, plasticity evolves mainly under fast, erratic
-change with reliable cues & Established & Jorritsma and van den Berg 2026 [5].
-Their abstract reports which parts of the network become sensitive to mutation.
-We have not been able to read the full text; if it reports connection strength
-by cue reliability, part of our architectural result would overlap with it.\\
+change with reliable cues & Established & Jorritsma and van den Berg 2026 [5]
+(read in the authors' manuscript): a fixed four-gene network, change between
+generations only, 1,000 replicates. They show link strengths schematically by cue
+reliability. Reliable cues give strong links from the regulatory genes to the
+output; uninformative cues (reliability 0, drawn uniformly) give networks that
+ignore the cue and have strong links within the regulatory layer. They do not
+compare with a constant environment, separate the cue's own links from the
+network, or let genome size evolve.\\
 In a network with a dedicated sensor gene, discrete plasticity evolves as the
 sensor comes to activate some genes and repress others & Published & Sakamoto and
 Innan 2024 [19]. The sensor is always informative and gene number does not
@@ -81,12 +85,13 @@ informative-cue populations (pre-registered secondary analysis; no more links
 but stronger regulation).\\
 A yoked control that separates a cue's information from its presence in the
 evolution of regulatory networks & This study & R-Aevol, with the rates of target
-and signal change matched between arms (S2 Text). Varying cue reliability achieves the same
-separation if it includes a cue that is present but uninformative; the abstract
-of [5] does not say whether it does.\\
+and signal change matched between arms (S2 Text). The zero-reliability cue of [5] is present
+but uninformative; it is drawn uniformly, so its statistics are not matched to
+those of the informative cue.\\
 Regulatory strength and genome size compared across informative, yoked and
-absent cues & This study & Pre-registered predictions P1--P4; subject to the
-caveat on [5] above.\\
+absent cues & This study & Pre-registered predictions P1--P4 and the
+confirmation C1--C4; [5] reports link strengths schematically across cue
+reliabilities under fluctuation only.\\
 \bottomrule
 \end{longtable}
 

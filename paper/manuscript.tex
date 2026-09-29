@@ -86,13 +86,15 @@ With an informative cue, fluctuation increased total regulatory strength 1.8- to
 2.9 times the regulatory strength of yoked cues but no more genes. Without a cue,
 fluctuating populations had about a fifth of the frozen regulatory strength and
 fewer genes, whether an environment lasted half a lifetime or about 250
-generations. An exploratory decomposition showed that links from the signal
-proteins themselves made up about half of the regulatory strength of fluctuating
-informative-cue populations. Their genome-encoded network was as strong as in a
-frozen environment, and stronger only at the fastest switching rate, whereas
-with a yoked cue it was as weak as without any cue. Fluctuation therefore erodes
-gene regulation unless the environment can be tracked, and a usable cue is
-mainly wired into the network. Link counts did not show this, because frozen
+generations. Separating the links of the signal proteins from the genome-encoded network
+showed that the signals' own links made up about half of the regulatory strength
+of fluctuating informative-cue populations. A second pre-registered experiment
+with new seeds confirmed the pattern found in this exploratory analysis.
+Fluctuation eroded the genome-encoded network without a cue and with a yoked cue,
+and with an informative cue the network was at least as strong as in a frozen
+environment with the same signals. Fluctuation therefore erodes gene regulation
+unless the environment can be tracked, and a usable cue is wired into the
+network. Link counts did not show this, because frozen
 populations carried many weak links from the signal proteins.
 
 \section*{Author summary}
@@ -107,10 +109,11 @@ no signal. Switching without a meaningful signal eroded the regulatory network,
 whether the environment switched within a lifetime or only about every 250
 generations. The uninformative signal did not prevent this, although it was
 physically identical to the meaningful one. With a meaningful signal, the network
-kept the strength it had in a constant environment, and the signal itself was
-wired into it. Counting regulatory connections, a common measure of network
-complexity, missed much of this. Our main predictions were written down and
-committed before the simulations were run.
+kept at least the strength it had in a constant environment, and the signal
+itself was wired into it. Counting regulatory connections, a common measure of network
+complexity, missed much of this. Our main predictions, including those of a second
+experiment that confirmed this pattern, were written down and committed before
+the simulations were run.
 
 \clearpage
 \newgeometry{top=0.85in,left=1in,right=1in,footskip=0.75in}
@@ -177,8 +180,11 @@ subject receives the same stimuli as the first but without the contingency
 between stimulus and outcome. Church showed that pairing individual subjects in
 this way can bias the comparison~\cite{church1964}. In our design each yoked arm receives the same stimulus statistics as the informative arm without being matched to particular informative-arm populations, so this bias does not arise. Varying the reliability of a cue achieves the same separation only if it
 includes a cue that is present at the usual frequencies but carries no
-information, and we know of no explicit use of a yoked control in studies of
-regulatory network evolution. Measurement is a further problem. Regulatory complexity is often quantified by counting genes or
+information. Jorritsma and van den Berg included a cue of zero reliability,
+drawn uniformly and independently of the environment~\cite{jorritsma2026}, but
+its values were not matched to those of their informative cues, and we know of
+no yoked control matched in stimulus statistics in studies of regulatory network
+evolution. Measurement is a further problem. Regulatory complexity is often quantified by counting genes or
 connections~\cite{tsuda2010,espinosasoto2018}, but network size and connectivity
 can grow without selection for them~\cite{soyer2006}, and a count does not
 reflect how strongly a connection acts. Weighted measures have been used~\cite{iwasaki2013}, though seldom as the
@@ -201,7 +207,8 @@ simulations, and tested them at three switching rates and two population sizes.
 A further pre-registered experiment varied environmental grain, one of the
 differences between our design and that of Tsuda and Kawata. Finally, an
 exploratory analysis separated the links of the signal proteins from those of the
-genome-encoded network.
+genome-encoded network, and a second pre-registered experiment tested the
+resulting pattern with new seeds.
 
 Without information about the environment, fluctuation eroded the regulatory
 network, and without a cue this did not detectably depend on whether the
@@ -209,8 +216,10 @@ environment changed within a lifetime or about every 250 generations, so
 environmental grain does not explain the difference from Tsuda and Kawata's
 results. A cue that carried no information did not prevent the erosion. With an
 informative cue, total regulatory strength rose, but about half of it came from
-the signal proteins' own links, and the genome-encoded network kept the strength
-it has in a frozen environment. Information did not increase genome size, and
+the signal proteins' own links, and the genome-encoded network was at least as
+strong as in a frozen environment with the same signals. The confirmation
+experiment supported all four of its predictions about the genome-encoded
+network. Information did not increase genome size, and
 fluctuation reduced it. Connection counts did not track connection strength, so a
 count alone can misrepresent the effect of fluctuation on a network.
 
@@ -439,6 +448,63 @@ no-cue arms were run at $q=0.10$; the frozen no-cue arm does not depend on $q$.}
 \label{fig_decomp}
 \end{figure}
 
+\subsection*{A pre-registered confirmation}
+
+Because the decomposition was exploratory, we tested its pattern in a second
+pre-registered experiment (Table~\ref{table2}; Materials and methods). The
+instrumented version of the platform recorded the signal proteins' influences
+from the first generation, with 12 new seeds in each of 11 cells at $q=0.10$ and
+$0.20$. The manipulation check held at each rate ($p<10^{-4}$), and all four
+predictions about the genome-encoded network were supported
+(Table~\ref{table3}). Without a cue, fluctuation reduced the network to about a
+sixth of its frozen strength (1.3 against 7.9 at each rate; C1). With a yoked cue
+it fell to 1.8 and 1.2, against 4.0 and 5.6 in frozen populations with the same
+signals (C2). The informative cue kept it 3.5 and 5.0 times as strong as the
+yoked cue (C3) and at least as strong as in frozen populations with the same
+signals (C4). In fact it was 1.60 and 1.53 times as strong there (95\%
+confidence intervals 1.13 to 2.28 and 1.11 to 2.14). This increase over the
+frozen environment, significant at each rate as a secondary comparison
+($p=0.016$ and $0.029$, uncorrected), had appeared only at $q=0.20$ in the
+exploratory continuations. The signal proteins again contributed about half of
+the regulatory strength of fluctuating informative-cue populations (53\%).
+
+One observation qualifies the frozen reference. Frozen populations without
+signals had a stronger genome-encoded network (7.9) than frozen populations with
+signals (3.9 to 5.6), as in the exploratory analysis. How informative-cue
+populations compare with a frozen environment therefore depends on whether that
+environment has signals, and the pre-registered comparison used the one that
+does.
+
+\begin{table}[!ht]
+\centering
+\caption{{\bf Pre-registered confirmation: genome-encoded regulatory strength.}}
+\small
+\begin{tabular}{@{}llrrll@{}}
+\toprule
+Prediction & $q$ & A & B & Test & Verdict\\
+\midrule
+C1 & 0.10 & 1.34 & 7.88 & Holm $p=6\times10^{-5}$ & supported\\
+   & 0.20 & 1.31 & 7.88 & Holm $p=6\times10^{-5}$ & \\
+C2 & 0.10 & 1.84 & 4.03 & Holm $p=0.011$ & supported\\
+   & 0.20 & 1.20 & 5.64 & Holm $p=6\times10^{-5}$ & \\
+C3 & 0.10 & 6.53 & 1.84 & Holm $p=2\times10^{-4}$ & supported\\
+   & 0.20 & 5.96 & 1.20 & Holm $p=9\times10^{-5}$ & \\
+C4 & 0.10 & 6.53 & 4.09 & ratio 1.60, 95\% CI 1.13--2.28 & supported\\
+   & 0.20 & 5.96 & 3.88 & ratio 1.53, 95\% CI 1.11--2.14 & \\
+\bottomrule
+\end{tabular}
+\begin{flushleft}\footnotesize
+Mean genome-encoded regulatory strength over generations 25{,}001--30{,}000, 12
+populations per cell. In C1, A is fluctuating and B frozen, without a cue; in C2, fluctuating and
+frozen with a yoked cue; in C3, informative and yoked cue under fluctuation; in
+C4, fluctuating and frozen with an informative cue. C1 to
+C3 are two-sided permutation tests with Holm correction across their six tests;
+C4 is a non-inferiority test on the ratio of means with a margin of 0.75 and a
+bootstrap confidence interval.
+\end{flushleft}
+\label{table3}
+\end{table}
+
 \subsection*{Fluctuation reduces genome size}
 
 With an informative cue, fluctuation reduced the number of functional genes at
@@ -543,24 +609,39 @@ strength. They were supported across switching rates and at two population
 sizes, and the erosion without a cue held across a 500-fold range of
 environmental grain, in tests whose predictions and analyses were fixed before
 the data were generated. The separation of signal-protein links from the
-genome-encoded network was exploratory, and it changes the interpretation of the
-first prediction. Fluctuation with a usable cue raised total regulatory strength
-mainly by adding the cue's own links.
+genome-encoded network, found in an exploratory analysis and confirmed in a
+second pre-registered experiment, changes the interpretation of the first
+prediction. Most of the rise in total regulatory strength under fluctuation with
+a usable cue was the cue's own links, although the genome-encoded network also
+became somewhat stronger.
 
 The phenotypic side of this result is well known. Reliable cues favour plastic
 responses, and in their absence generalist phenotypes or bet-hedging are
 favoured~\cite{levins1968,moran1992,kussell2005,botero2015}. This has recently
-been shown for the evolution of plasticity in a gene regulatory network, in
-which the parts of the network that become sensitive to mutation also depend on
-the environmental regime~\cite{jorritsma2026}, and in a network with a dedicated
-sensor gene, plasticity evolves as the sensor comes to activate some genes and
-repress others~\cite{sakamoto2024}. Our results add the effect of a cue's
-information on the network that implements the response. Information did not
-make the network larger, or stronger except at the fastest switching rate. It
-prevented fluctuation from eroding the network and was itself wired into it. The
-yoked control separated that information from the cue's physical presence, which
-a manipulation of cue reliability achieves only if it includes a cue that is
-present at the usual frequencies but uninformative.
+been shown for the evolution of plasticity in a small gene regulatory network
+whose link strengths also depended on cue reliability. With reliable cues the
+links from the regulatory genes to the output became strong, and with
+uninformative cues the networks ignored the cue and evolved strong links within
+the regulatory layer, which made them evolvable~\cite{jorritsma2026}. In a
+network with a dedicated sensor gene, plasticity evolves as the sensor comes to
+activate some genes and repress others~\cite{sakamoto2024}. Our results add a
+comparison with a constant environment, a measure of how much of the regulation
+is the cue's own wiring, and genome size. Information did not make the network
+larger. It prevented fluctuation from eroding the network, made it somewhat
+stronger than in a frozen environment with the same signals (1.5 to 1.6 times in
+the confirmation), and was itself wired into it. Our yoked
+control separated the information from the cue's physical presence with the
+stimulus statistics held fixed.
+
+Two differences from Jorritsma and van den Berg stand out. Their networks became
+unresponsive to uninformative cues, whereas our yoked-cue populations kept strong
+links from the uninformative signals, which made up most of their regulatory
+strength. And their networks evolved strong internal links when cues carried no
+information, whereas ours lost them. Their environment changed only between
+generations, their network had four genes and a fixed topology, and they
+compared cue reliabilities under fluctuation, without a constant environment as
+reference, so the two results need not conflict. The difference nevertheless
+deserves a direct test.
 
 We designed the grain experiment to test whether grain accounts for the
 difference from Tsuda and Kawata, who found that fluctuation of the optimum
@@ -599,15 +680,19 @@ network and for the network itself.
 Our results come from a single model. In EvoSim, the model in which this study
 began, organisms did not use the cue in the regime we studied, and we have not
 measured regulatory strength in the regime in which they do (S4 and S6 Text).
-Each R-Aevol condition contained 12 populations, fewer than the 60 to 100 used in
-comparable studies~\cite{tsuda2010,lalejini2021}. The effects were large ($|d|$
-between 1.5 and 3.9 in the evaluated cells) and remained significant after
+Each R-Aevol condition contained 12 populations, fewer than the 60 to 1{,}000 used in
+comparable studies~\cite{tsuda2010,lalejini2021,jorritsma2026}. The effects were large ($|d|$
+between 1.5 and 3.9 in the evaluated cells of the sweep and between 1.2 and 3.6
+in the confirmation) and remained significant after
 correction for multiple testing, but smaller effects could have been missed. The
 pre-registered measure of regulatory strength includes the influences of the
-signal proteins. The decomposition that separates them was not pre-registered,
-and it rests on continuations of each run for 2{,}000 generations beyond the
-analysis window, because resuming a run in this version of R-Aevol does not
-reproduce it exactly; the continuations matched the original cell means closely.
+signal proteins. The first decomposition that separates them was not
+pre-registered and rested on continuations of each run for 2{,}000 generations
+beyond the analysis window, because resuming a run in this version of R-Aevol
+does not reproduce it exactly. The confirmation measured the genome-encoded
+network directly, with new seeds and pre-registered predictions, and supported
+the pattern. It tested whether the network is maintained under an informative
+cue, and its strengthening is a secondary result.
 This version of R-Aevol records per-generation statistics only for the best
 individual in each population, so every R-Aevol measure describes the fittest
 individual of each generation, averaged over the analysis window, and not the
@@ -625,8 +710,8 @@ locally and cannot be verified independently.
 Environmental fluctuation did not by itself strengthen gene regulation in
 R-Aevol. Without information about the environment it eroded the regulatory
 network, whatever the grain of the environment. With an informative cue the
-network kept its strength and the cue was wired into it, so that total regulatory
-strength rose. Because link counts and link strength, and the links of a
+network kept at least its strength and the cue was wired into it, so that total
+regulatory strength rose. A pre-registered confirmation supported this pattern. Because link counts and link strength, and the links of a
 network's inputs and of the network itself, can change independently,
 conclusions about regulatory complexity may depend on which is measured.
 
@@ -700,6 +785,16 @@ the regulatory strength is $S$ minus the sum of the signal proteins' factors, an
 likewise for link counts. Contrasts were tested with the same permutation test,
 without correction and without verdicts.
 
+\paragraph*{Confirmation.} The second pre-registered experiment used the
+instrumented version to create and run populations, so the signal proteins'
+influences were recorded from generation 0. It had fluctuating informative,
+yoked and no-cue arms and frozen informative and yoked arms at $q=0.10$ and
+$0.20$, and a frozen no-cue arm, each with 12 new seeds and a population of 1024
+(132 runs). Every other setting was that of the pre-registered sweep. All runs
+reached 30{,}000 generations and were summarised over generations 25{,}001 to
+30{,}000. The genome-encoded strength of the no-cue arms is their total strength,
+since they have no signals.
+
 \begin{table}[!ht]
 \centering
 \caption{{\bf R-Aevol parameters.}}
@@ -752,7 +847,12 @@ environment, grain would reconcile the two studies. If it did so only relative t
 fine grain, Tsuda and Kawata's gain would probably need novel optima, which our
 design cannot produce. If it did not do so relative to fine grain, grain would
 not be the explanation and the difference would be reported as one between the
-models.
+models. The confirmation (C1 to C4) was pre-registered in the same way (commit
+\texttt{59ff365}), after the exploratory decomposition and before any of its
+runs. Its analysis script, tested beforehand on synthetic data, fixed the tests,
+the decision rules and what each outcome would mean for the paper, including a
+change of title if the informative cue did not maintain the network. The script
+was run once, after its checksum was verified, when the last run finished.
 
 \begin{table}[!ht]
 \centering
@@ -769,12 +869,21 @@ P4 & Fluctuation with an informative cue lowers the number of functional genes &
 
 G1, G3 & Coarse-grained cue-free fluctuation gives more genes (G1) and stronger regulation (G3) than fine-grained & inconclusive \\
 G2, G4 & Coarse-grained cue-free fluctuation gives more genes (G2) and stronger regulation (G4) than frozen & refuted \\
+C1 & Without a cue, fluctuation weakens the genome-encoded network below frozen & supported ($q=0.10$, 0.20) \\
+C2 & With a yoked cue, fluctuation weakens it below frozen with the same signals & supported ($q=0.10$, 0.20) \\
+C3 & An informative cue keeps it stronger than a yoked cue & supported ($q=0.10$, 0.20) \\
+C4 & With an informative cue it is not more than 25\% weaker than frozen & supported ($q=0.10$, 0.20) \\
 \bottomrule
 \end{tabular}
 \begin{flushleft}\footnotesize
 A prediction was supported if the predicted sign held at every evaluable rate and the Holm-adjusted $p<0.05$ at two or more, refuted if the opposite sign was significant at any rate or no rate was Holm-significant, and inconclusive otherwise. P1 and P2 are evaluable only at rates
 where the informative cue measurably lowers metabolic error relative to the yoked
 cue. G1--G4 are single tests, supported if the predicted sign holds with Holm-adjusted $p<0.05$, refuted if the opposite sign holds with $p<0.05$, and inconclusive otherwise.
+C1--C3 were to be supported if the predicted sign held with Holm-adjusted
+$p<0.05$ at $q=0.10$ and at $q=0.20$, and C4, a non-inferiority test, if the lower
+bound of the 95\% bootstrap confidence interval of the ratio of means exceeded
+0.75 at each rate. C3 and C4 were evaluable only where the informative cue
+lowered metabolic error, as it did at each rate.
 \end{flushleft}
 \label{table2}
 \end{table}
@@ -805,7 +914,7 @@ record, and the result of every pre-registered test with rank-based $p$ values.
 \paragraph*{S3 Table.}
 \label{S3_Table}
 {\bf Results for every arm of every experiment.} Means and standard deviations for
-all 528 runs. Per-run values are in the repository.
+all 660 runs and the 252 continuations of the signal-link decomposition. Per-run values are in the repository.
 
 \paragraph*{S4 Text.}
 \label{S4_Text}

@@ -1,0 +1,44 @@
+CELLS
+  fluc_info   r=100 n=12  S  13.85  S_sig   7.32  S_int   6.53  links   73.6  genes  18.73  err 0.0294
+  fluc_info   r=200 n=12  S  12.82  S_sig   6.85  S_int   5.96  links   71.4  genes  18.95  err 0.0315
+  fluc_none   r=100 n=12  S   1.34  S_sig   0.00  S_int   1.34  links   12.4  genes  20.26  err 0.0624
+  fluc_none   r=200 n=12  S   1.31  S_sig   0.00  S_int   1.31  links   13.3  genes  22.60  err 0.0643
+  fluc_yoked  r=100 n=12  S   5.60  S_sig   3.76  S_int   1.84  links   38.5  genes  18.66  err 0.0586
+  fluc_yoked  r=200 n=12  S   5.19  S_sig   3.99  S_int   1.20  links   35.7  genes  20.55  err 0.0625
+  froz_info   r=100 n=12  S   4.81  S_sig   0.72  S_int   4.09  links   64.6  genes  26.34  err 0.0084
+  froz_info   r=200 n=12  S   4.79  S_sig   0.91  S_int   3.88  links   73.4  genes  27.49  err 0.0084
+  froz_none   r=100 n=12  S   7.88  S_sig   0.00  S_int   7.88  links   68.7  genes  27.04  err 0.0079
+  froz_yoked  r=100 n=12  S   4.56  S_sig   0.53  S_int   4.03  links   81.9  genes  28.24  err 0.0074
+  froz_yoked  r=200 n=12  S   6.17  S_sig   0.53  S_int   5.64  links   74.0  genes  26.93  err 0.0086
+
+MANIPULATION CHECK  err(fluc_info) < err(fluc_yoked)
+  r=100  0.0294 vs 0.0586  p=0.00002  -> HOLDS
+  r=200  0.0315 vs 0.0625  p=0.00001  -> HOLDS
+
+PRIMARY TESTS on S_int (Holm across 6)
+  id     r  A                  B                    mean A   mean B         p    p_holm    p_rank
+  C1   100  fluc_none r100     froz_none r100        1.339    7.880   0.00001   0.00006   0.00002
+  C1   200  fluc_none r200     froz_none r100        1.308    7.880   0.00001   0.00006   0.00001
+  C2   100  fluc_yoked r100    froz_yoked r100       1.841    4.032   0.01112   0.01112   0.00526
+  C2   200  fluc_yoked r200    froz_yoked r200       1.201    5.642   0.00001   0.00006   0.00001
+  C3   100  fluc_info r100     fluc_yoked r100       6.532    1.841   0.00010   0.00020   0.00028
+  C3   200  fluc_info r200     fluc_yoked r200       5.962    1.201   0.00003   0.00009   0.00003
+
+C4  non-inferiority  S_int(fluc_info)/S_int(froz_info), margin 0.75
+  r=100  ratio 1.598  95% CI [1.131, 2.284]
+  r=200  ratio 1.535  95% CI [1.109, 2.140]
+
+VERDICTS
+  C1  SUPPORTED    evaluable rates [100, 200], predicted sign 2/2, Holm-significant 2
+  C2  SUPPORTED    evaluable rates [100, 200], predicted sign 2/2, Holm-significant 2
+  C3  SUPPORTED    evaluable rates [100, 200], predicted sign 2/2, Holm-significant 2
+  C4  SUPPORTED    evaluable rates [100, 200]
+
+SECONDARY (no verdicts)
+  r=100  signal share of S, fluc_info: 0.53
+  r=100  P1 on S     fluc_info 13.848 vs froz_info 4.809  ratio 2.88  p=0.00001
+  r=100  P1 on S_int fluc_info 6.532 vs froz_info 4.088  ratio 1.60  p=0.01578
+  r=200  signal share of S, fluc_info: 0.53
+  r=200  P1 on S     fluc_info 12.815 vs froz_info 4.790  ratio 2.68  p=0.00002
+  r=200  P1 on S_int fluc_info 5.962 vs froz_info 3.884  ratio 1.53  p=0.02938
+EXIT=0

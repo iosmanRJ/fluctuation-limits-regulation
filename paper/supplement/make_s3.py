@@ -101,5 +101,43 @@ t.append("Frozen & %d & %s & %s & %s & %s\\\\" % (len(v), ms(f("S"), "%.2f"), ms
 t.append(r"\bottomrule\end{tabular}\end{table}")
 out.append("\n".join(t))
 
+# ---- Table E: signal-link decomposition (exploratory continuations) --------
+C = load("decomp_runs.csv")
+t = [r"\begin{table}[!ht]\small",
+     r"\caption{\textbf{R-Aevol, signal-link decomposition} (exploratory; 252 runs continued from their saved generation-30{,}000 populations to 32{,}000, population 1024 unless stated). $S_\mathrm{sig}$ is the part of the regulatory strength exerted by signal proteins, $S_\mathrm{int}$ the genome-encoded part.}",
+     r"\begin{tabular}{@{}llcccccc@{}}\toprule",
+     r"Experiment & Cell & $n$ & $S$ & $S_\mathrm{sig}$ & $S_\mathrm{int}$ & Signal links & Genome links\\\midrule"]
+cells = [("v2", a, q, 1024) for q in (0.05, 0.1, 0.2) for a in ("fluc_info", "fluc_yoked", "fluc_none", "froz_info")] \
+      + [("v2", "froz_yoked", 0.1, 1024), ("v2", "froz_none", 0.1, 1024)] \
+      + [("v2", a, 0.1, 512) for a in ("fluc_info", "fluc_yoked", "froz_info")] \
+      + [("v1", a, 0.1, 1024) for a in ("fluc_info", "froz_info", "fluc_yoked", "froz_yoked")]
+for exp, a, q, pop in cells:
+    v = [r for r in C if r["experiment"] == exp and r["arm"] == a and abs(float(r["rate"]) - q) < 1e-9 and int(r["pop"]) == pop]
+    f = lambda k: [float(r[k]) for r in v]
+    lab = "%s, $q=%.2f$%s" % (ARM[a], q, "" if pop == 1024 else ", population 512")
+    t.append("%s & %s & %d & %s & %s & %s & %s & %s\\\\" % ("Sweep" if exp == "v2" else "Exploratory", lab, len(v),
+             ms(f("S")), ms(f("S_sig")), ms(f("S_int")), ms(f("links_sig"), "%.1f"), ms(f("links_int"), "%.1f")))
+t.append(r"\bottomrule\end{tabular}\end{table}")
+out.append("\n".join(t))
+
+# ---- Table F: pre-registered confirmation -------------------------------
+F = load("confirm_runs.csv")
+t = [r"\begin{table}[!ht]\small",
+     r"\caption{\textbf{R-Aevol, pre-registered confirmation} (132 runs with the instrumented platform from generation 0, population 1024, 30{,}000 generations; means over generations 25{,}001--30{,}000).}",
+     r"\begin{tabular}{@{}lccccccc@{}}\toprule",
+     r"Cell & $n$ & $S$ & $S_\mathrm{sig}$ & $S_\mathrm{int}$ & Links & Genes & Metabolic error\\\midrule"]
+for q in (0.1, 0.2):
+    for a in ("fluc_info", "fluc_yoked", "fluc_none", "froz_info", "froz_yoked"):
+        v = [r for r in F if r["arm"] == a and abs(float(r["rate"]) - q) < 1e-9]
+        f = lambda k: [float(r[k]) for r in v]
+        t.append("%s, $q=%.2f$ & %d & %s & %s & %s & %s & %s & %s\\\\" % (ARM[a], q, len(v), ms(f("S")), ms(f("S_sig")), ms(f("S_int")),
+                 ms(f("links"), "%.1f"), ms(f("genes")), ms(f("err"), "%.4f")))
+v = [r for r in F if r["arm"] == "froz_none"]
+f = lambda k: [float(r[k]) for r in v]
+t.append("%s & %d & %s & %s & %s & %s & %s & %s\\\\" % (ARM["froz_none"], len(v), ms(f("S")), ms(f("S_sig")), ms(f("S_int")),
+         ms(f("links"), "%.1f"), ms(f("genes")), ms(f("err"), "%.4f")))
+t.append(r"\bottomrule\end{tabular}\end{table}")
+out.append("\n".join(t))
+
 open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "s3_tables.tex"), "w").write("\n\n".join(out) + "\n")
 print("wrote s3_tables.tex")

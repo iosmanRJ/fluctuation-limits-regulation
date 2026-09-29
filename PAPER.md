@@ -971,3 +971,53 @@ Verdict rules and outcome interpretations as in the script's docstring. The
 analysis script was tested on synthetic positive and negative cases before this
 commit. No OSF registration (as for §11.4 and §11.8, the timestamp is the git
 commit).
+
+### 11.20 Confirmation result: C1–C4 all SUPPORTED (2026-09-29)
+
+The chain (`chain_confirm.sh`) started 09:37 and finished 23:46 on 2026-09-29.
+All 132 runs reached generation 30,000 with exit status 0. The checksum of
+`analyse_confirm.py` matched the committed prefix 92c07d172bf66f6d, and the
+analysis ran once. Output: `replication/raevol/results_confirm_preregistered.txt`;
+per-run values: `paper/data/confirm_runs.csv` (`export_confirm.py`, which reuses
+the pre-registered `summarise`). The launcher printed one harmless zsh
+"no matches found: DONE_*" from the `rm -f DONE_*` line; all 132 runs started
+and completed.
+
+Manipulation check held at both rates (err 0.029 vs 0.059, 0.032 vs 0.063;
+p ≤ 2e-5). S_int (genome-encoded strength), means of 12 runs:
+
+| | q = 0.10 | q = 0.20 | test |
+|---|---|---|---|
+| C1 fluc_none vs froz_none | 1.34 vs 7.88 | 1.31 vs 7.88 | Holm p = 6e-5, 6e-5; d = −3.6, −3.6 |
+| C2 fluc_yoked vs froz_yoked | 1.84 vs 4.03 | 1.20 vs 5.64 | Holm p = 0.011, 6e-5; d = −1.2, −2.9 |
+| C3 fluc_info vs fluc_yoked | 6.53 vs 1.84 | 5.96 vs 1.20 | Holm p = 2e-4, 9e-5; d = 2.1, 2.3 |
+| C4 fluc_info / froz_info | 1.60 [1.13, 2.28] | 1.53 [1.11, 2.14] | margin 0.75 |
+
+Rank-based p values give the same verdicts. Secondary (no verdicts): the signal
+share of S in fluc_info is 0.53 at each rate; P1 on S_int (fluc_info > froz_info)
+p = 0.016 and 0.029, so the internal network is 1.5–1.6× STRONGER than frozen
+with signals, where the exploratory continuations showed this only at q = 0.20.
+Frozen no-cue S_int (7.88) exceeds frozen with signals (3.88–5.64), as in the
+exploratory data: "at least frozen strength" holds against the frozen reference
+with the same signals, not against a signal-free frozen environment. The paper
+says so explicitly.
+
+Under the pre-registered interpretation (all supported) the headline stands:
+without information fluctuation erodes the genome-encoded network, and with
+information it keeps its frozen-environment strength. The title stays.
+
+Paper changes: new Results subsection "A pre-registered confirmation" with
+Table 3; C1–C4 rows and their decision rules in Table 2; Methods paragraph
+"Confirmation."; pre-registration paragraph; abstract (290 words), author summary
+(188), Introduction, Discussion, Limitations (effect sizes now "1.5–3.9 in the
+sweep and 1.2–3.6 in the confirmation"), Conclusion; S2 §7, §8 (and checksum),
+§9; S3 confirmation table; S4 prediction record. SI counts: 660 runs (288 + 60 +
+132 R-Aevol, 180 EvoSim) and 252 continuations.
+
+Same session, from reading Jorritsma & van den Berg 2026 in full (author
+manuscript, KU Leuven Lirias): the novelty sentence now names their
+zero-reliability uniform cue; the Discussion describes their link-strength
+results and a new paragraph sets out two contrasts (their networks ignore
+uninformative cues while our yoked populations keep strong signal links; their
+uninformative-cue networks evolve strong internal links while ours lose them);
+Limitations cites them for replicate numbers; S5 rows updated.
