@@ -1220,3 +1220,31 @@ tested on synthetic positive (LOST, GROW) and null (PERSIST, NO GROWTH) cases.
 It implements the rules above; `chain_switch.sh` runs it once after the last
 run, only if the checksum matches.
 
+
+### 11.25 Growth, not erosion: manuscript changes (2026-09-30, cc2cece)
+
+Checked run by run before changing the text (`paper/data/trajectories.csv`,
+500-generation blocks, all 432 runs of v1, v2 at population 1024, grain and the
+confirmation):
+- 120 cue-free fluctuating runs: S 1.42 (generations 1–2,000), 1.72
+  (2,001–10,000), 1.41 (25,001–30,000); end vs start −0.6%, p = 0.96; the dip from
+  mid-run is 18% (p = 0.0005, 78/120 fell). On a log scale the final frozen −
+  fluctuating gap is 55% frozen growth after generation 2,000, 44% a difference
+  already present by then, 1% change under fluctuation (cell range of the last
+  share −47% to +31%). "Erodes" was therefore wrong and is replaced throughout;
+  the title waits for the switch experiment (§11.24).
+- Late growth: 48 cue-free frozen runs +3.6% between 20,001–25,000 and
+  25,001–30,000 (p = 0.006); 96 frozen runs incl. informative/yoked
+  genome-encoded +2.8% (p = 0.005); per cell from −1% (v1, n.s.) to +8% (grain);
+  cue-free fluctuating runs unchanged (p = 0.40). Stated in Limitations as "not
+  levelled off", not as steady growth.
+- Composition, ten cue-free cells: S ratio 3.67–7.95 = TF ratio 1.96–3.67
+  (46–63% of the log difference) × links per TF 1.51–2.24 (26–46%) × strength per
+  link 0.96–1.39. Regulator proteins per functional gene 0.61–0.65 frozen vs
+  0.28–0.44 fluctuating. nb_TF = genome-encoded proteins with at least one
+  non-zero affinity (Stats_7.cpp; is_TF_ set in ExpManager_7.cpp), so the split
+  is an accounting identity: it says HOW the network is smaller, not why.
+New: section "Frozen networks grew, and networks under uninformative fluctuation
+did not", Fig 5 (trajectories; grain is now Fig 6), Methods "Trajectories",
+Limitations sentence. Abstract 298 words, summary 191. Other figures unchanged
+pixel for pixel (fig_traj runs last, so the shared random stream is untouched).
