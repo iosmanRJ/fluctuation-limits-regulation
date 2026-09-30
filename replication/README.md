@@ -26,6 +26,9 @@ Build notes for Apple Silicon are in the project memory (`raevol-replication`).
 | `launch_confirm.sh`, `chain_confirm.sh` | launch the 132 confirmation runs under `caffeinate`, then verify the checksum of `analyse_confirm.py` and run it once |
 | `results_confirm_preregistered.txt` | its single analysis run: C1–C4 all SUPPORTED (PAPER.md §11.20) |
 | `export_confirm.py` | writes `paper/data/confirm_runs.csv` with the pre-registered `summarise` |
+| `export_trajectories.py` | per-run means over 500-generation blocks for every run of v1, v2 (population 1024), grain and the confirmation → `paper/data/trajectories.csv` (Fig 5) |
+| `exploratory_pooled.py`, `exploratory_trajectories*.py` | EXPLORATORY: composition of the network, power, pooled estimates, trajectory summaries (PAPER.md §11.23) |
+| `gen_params_switch.py`, `launch_switch.sh`, `analyse_switch.py`, `chain_switch.sh` | **pre-registered** environment-switch experiment (PAPER.md §11.24, commit `313d744`; analysis `0e50dab`): clonal populations of the generation-30,000 best genomes moved between frozen and cue-free fluctuating environments for 10,000 generations |
 | `export_raevol.py`, `export_grain.py` | write `paper/data/raevol_runs.csv` and `grain_runs.csv`, one row per run, with the pre-registered summary function (plus `tfs`, mean `nb_TF`, not pre-registered) |
 
 The yoked control uses four environments against the informative arm's two,
