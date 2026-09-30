@@ -84,8 +84,8 @@ simulations were run and tested at three switching rates, were all supported.
 With an informative cue, fluctuation increased total regulatory strength 1.8- to
 2.7-fold relative to a frozen environment, and informative cues produced 2.3 to
 2.9 times the regulatory strength of yoked cues but no more genes. Without a cue,
-fluctuating populations had about a fifth of the frozen regulatory strength and
-fewer genes, whether an environment lasted half a lifetime or about 250
+fluctuating populations had a fifth to a quarter of the frozen regulatory
+strength and fewer genes, whether an environment lasted half a lifetime or about 250
 generations. Separating the links of the signal proteins from the genome-encoded network
 showed that the signals' own links made up about half of the regulatory strength
 of fluctuating informative-cue populations. A second pre-registered experiment
@@ -343,7 +343,7 @@ arm.}
 Since this interpretation came from inspecting the data, we tested it with new
 seeds. Four predictions, with their measures, statistical tests and decision
 rules, were committed to version control before any of the new simulations were
-run (Table~\ref{table2}; Materials and methods). The switching probability took
+run (Table~\ref{tab_predictions}; Materials and methods). The switching probability took
 three values over a fourfold range ($q=0.05$, 0.10 and 0.20) at a population size
 of 1024, with 12 new seeds per condition, and the main contrasts were repeated at
 a population size of 512. For the two predictions that depend on cue use we also
@@ -353,7 +353,41 @@ it. The check was met at $q=0.10$ and $q=0.20$ ($p<10^{-4}$) but not at $q=0.05$
 ($p=0.088$), so under the pre-registered rule these two predictions were
 evaluated at the two faster rates.
 
-All four predictions were supported (Table~\ref{table2}, Fig~\ref{fig4}). With
+\begin{table}[!ht]
+\centering
+\caption{{\bf Pre-registered predictions and verdicts.}}
+\small
+\begin{tabular}{@{}p{0.07\linewidth}p{0.6\linewidth}p{0.25\linewidth}@{}}
+\toprule
+Id & Prediction & Verdict \\
+\midrule
+P1 & Fluctuation with an informative cue raises total regulatory strength over frozen & supported ($q=0.10$, 0.20) \\
+P2 & An informative cue raises it over a yoked cue & supported ($q=0.10$, 0.20) \\
+P3 & Fluctuation without a cue lowers it below frozen & supported (all rates) \\
+P4 & Fluctuation with an informative cue lowers the number of functional genes & supported (all rates) \\
+
+G1, G3 & Coarse-grained cue-free fluctuation gives more genes (G1) and stronger regulation (G3) than fine-grained & inconclusive \\
+G2, G4 & Coarse-grained cue-free fluctuation gives more genes (G2) and stronger regulation (G4) than frozen & refuted \\
+C1 & Without a cue, fluctuation weakens the genome-encoded network below frozen & supported ($q=0.10$, 0.20) \\
+C2 & With a yoked cue, fluctuation weakens it below frozen with the same signals & supported ($q=0.10$, 0.20) \\
+C3 & An informative cue keeps it stronger than a yoked cue & supported ($q=0.10$, 0.20) \\
+C4 & With an informative cue it is not more than 25\% weaker than frozen & supported ($q=0.10$, 0.20) \\
+\bottomrule
+\end{tabular}
+\begin{flushleft}\footnotesize
+P1--P4 were supported if the predicted sign held at every evaluable rate and the Holm-adjusted $p<0.05$ at two or more, refuted if the opposite sign was significant at any rate or no rate was Holm-significant, and inconclusive otherwise. P1 and P2 are evaluable only at rates
+where the informative cue measurably lowers metabolic error relative to the yoked
+cue. G1--G4 are single tests, supported if the predicted sign holds with Holm-adjusted $p<0.05$, refuted if the opposite sign holds with $p<0.05$, and inconclusive otherwise.
+C1--C3 were to be supported if the predicted sign held with Holm-adjusted
+$p<0.05$ at $q=0.10$ and at $q=0.20$, and C4, a non-inferiority test, if the lower
+bound of the 95\% bootstrap confidence interval of the ratio of means exceeded
+0.75 at each rate. C3 and C4 were evaluable only where the informative cue
+lowered metabolic error, as it did at each rate.
+\end{flushleft}
+\label{tab_predictions}
+\end{table}
+
+All four predictions were supported (Table~\ref{tab_predictions}, Fig~\ref{fig4}). With
 an informative cue, fluctuation increased total regulatory strength relative to
 the frozen environment 1.8-fold at $q=0.10$ and 2.7-fold at $q=0.20$ (P1;
 Holm-adjusted $p=0.005$ and $p\approx10^{-4}$). Without a cue, fluctuation
@@ -361,8 +395,8 @@ lowered regulatory strength about fivefold at all three rates (1.1 to 1.2
 compared with 6.3; P3; Holm-adjusted $p\approx10^{-4}$ at each rate). The
 informative-cue cells at the slowest rate, which were excluded from the verdict,
 showed the same direction (11.0 compared with 5.9). In one of those populations
-every regulatory connection was lost for the whole analysis window, and no other
-population in the sweep lost them completely.
+every regulatory connection was lost for the whole analysis window, which
+happened in no other population of the sweep.
 
 \begin{figure}[!ht]
 \centering
@@ -426,7 +460,7 @@ strength tested by P1 is therefore mainly the cue being wired into the network.
 The yoked cue differed. Its signal proteins also carried strong links, which made
 up 68 to 80\% of the total, but the genome-encoded network was as weak as in
 populations without a cue (0.9 to 2.1 against 1.1 to 1.3; $p=0.11$, $0.06$ and
-$0.67$), less than half its strength in any frozen arm (4.4 to 6.4). On the
+$0.67$), less than half its strength in any frozen arm of the sweep (4.4 to 6.4). On the
 genome-encoded network alone, the informative cue produced 2.5, 3.7 and 7.2 times
 the strength of the yoked cue ($p\le 0.007$), larger ratios than for total
 strength, and the difference held at a population size of 512 and in the
@@ -451,12 +485,12 @@ no-cue arms were run at $q=0.10$; the frozen no-cue arm does not depend on $q$.}
 \subsection*{A pre-registered confirmation}
 
 Because the decomposition was exploratory, we tested its pattern in a second
-pre-registered experiment (Table~\ref{table2}; Materials and methods). The
+pre-registered experiment (Table~\ref{tab_predictions}; Materials and methods). The
 instrumented version of the platform recorded the signal proteins' influences
 from the first generation, with 12 new seeds in each of 11 cells at $q=0.10$ and
 $0.20$. The manipulation check held at each rate ($p<10^{-4}$), and all four
 predictions about the genome-encoded network were supported
-(Table~\ref{table3}). Without a cue, fluctuation reduced the network to about a
+(Table~\ref{tab_confirm}). Without a cue, fluctuation reduced the network to about a
 sixth of its frozen strength (1.3 against 7.9 at each rate; C1). With a yoked cue
 it fell to 1.8 and 1.2, against 4.0 and 5.6 in frozen populations with the same
 signals (C2). The informative cue kept it 3.5 and 5.0 times as strong as the
@@ -502,7 +536,7 @@ C3 are two-sided permutation tests with Holm correction across their six tests;
 C4 is a non-inferiority test on the ratio of means with a margin of 0.75 and a
 bootstrap confidence interval.
 \end{flushleft}
-\label{table3}
+\label{tab_confirm}
 \end{table}
 
 \subsection*{Fluctuation reduces genome size}
@@ -532,7 +566,7 @@ Link counts and regulatory strength did not change together
 informative cue had no more regulatory links than the corresponding frozen
 populations (0.60, 0.78 and 0.83 times as many at the three rates; $p=0.02$,
 0.13 and 0.52), although their total regulatory strength was 1.8 to 2.7 times
-higher. The decomposition shows why. Frozen populations carried many weak links
+higher. The decomposition shows why. The frozen populations carried many weak links
 from the signal proteins (47 to 52 links with a combined strength of 0.7 to 1.8),
 whereas fluctuating informative-cue populations carried fewer and much stronger
 ones (18 to 22 links with a combined strength of 5.8 to 7.2). In the
@@ -563,7 +597,7 @@ produce larger genomes and stronger regulation than fine-grained fluctuation
 and Kawata. How each possible outcome would be interpreted was fixed in advance
 (Materials and methods).
 
-The results did not support this prediction (Table~\ref{table2}, Fig~\ref{fig6}).
+The results did not support this prediction (Table~\ref{tab_predictions}, Fig~\ref{fig6}).
 Under cue-free fluctuation, genome size and regulatory strength showed no
 detectable dependence on grain. At the coarsest grain, populations carried 19.2 genes and had a
 regulatory strength of 2.0, against 19.5 and 2.3 at the finest (G1 and G3,
@@ -604,11 +638,11 @@ network unless organisms could identify the current environment. Without a cue,
 or with a yoked cue that supplied the same signal proteins at the same rates, the
 network fell to a fraction of its strength in a frozen environment. With an
 informative cue it kept that strength, and the cue itself was wired into it, so
-that total regulatory strength rose. The pre-registered tests concerned total
-strength. They were supported across switching rates and at two population
-sizes, and the erosion without a cue held across a 500-fold range of
-environmental grain, in tests whose predictions and analyses were fixed before
-the data were generated. The separation of signal-protein links from the
+that total regulatory strength rose. The first pre-registered tests concerned
+total strength. They were supported across switching rates, their contrasts held
+at a second population size, and the erosion without a cue held across a
+500-fold range of environmental grain, in tests whose predictions and analyses
+were fixed before the data were generated. The separation of signal-protein links from the
 genome-encoded network, found in an exploratory analysis and confirmed in a
 second pre-registered experiment, changes the interpretation of the first
 prediction. Most of the rise in total regulatory strength under fluctuation with
@@ -638,7 +672,7 @@ unresponsive to uninformative cues, whereas our yoked-cue populations kept stron
 links from the uninformative signals, which made up most of their regulatory
 strength. And their networks evolved strong internal links when cues carried no
 information, whereas ours lost them. Their environment changed only between
-generations, their network had four genes and a fixed topology, and they
+generations, their network had four nodes and a fixed topology, and they
 compared cue reliabilities under fluctuation, without a constant environment as
 reference, so the two results need not conflict. The difference nevertheless
 deserves a direct test.
@@ -723,7 +757,7 @@ We used the \texttt{aevol-7} branch of Aevol (commit \texttt{33277374},
 \url{https://gitlab.inria.fr/aevol/aevol}) compiled with regulation enabled
 (\texttt{-Dwith-raevol=ON}) and with per-generation statistics
 (\texttt{-Dwithout-stats=OFF}). Building on Apple Silicon required correcting a
-hard-coded path to the OpenMP library (S2~Text). The parameters (Table~\ref{table1})
+hard-coded path to the OpenMP library (S2~Text). The parameters (Table~\ref{tab_params})
 are taken from the example configurations distributed with the platform
 (\texttt{basic\_regul}, \texttt{dynamic\_env} and \texttt{complex\_env}). The
 mutation and rearrangement rates are those of \texttt{complex\_env}, ten times
@@ -817,7 +851,7 @@ Signal concentration & 0.9 \\
 Generations & 30{,}000 \\
 \bottomrule
 \end{tabular}
-\label{table1}
+\label{tab_params}
 \end{table}
 
 \subsection*{Statistics}
@@ -853,40 +887,6 @@ runs. Its analysis script, tested beforehand on synthetic data, fixed the tests,
 the decision rules and what each outcome would mean for the paper, including a
 change of title if the informative cue did not maintain the network. The script
 was run once, after its checksum was verified, when the last run finished.
-
-\begin{table}[!ht]
-\centering
-\caption{{\bf Pre-registered predictions and verdicts.}}
-\small
-\begin{tabular}{@{}p{0.07\linewidth}p{0.6\linewidth}p{0.25\linewidth}@{}}
-\toprule
-Id & Prediction & Verdict \\
-\midrule
-P1 & Fluctuation with an informative cue raises total regulatory strength over frozen & supported ($q=0.10$, 0.20) \\
-P2 & An informative cue raises it over a yoked cue & supported ($q=0.10$, 0.20) \\
-P3 & Fluctuation without a cue lowers it below frozen & supported (all rates) \\
-P4 & Fluctuation with an informative cue lowers the number of functional genes & supported (all rates) \\
-
-G1, G3 & Coarse-grained cue-free fluctuation gives more genes (G1) and stronger regulation (G3) than fine-grained & inconclusive \\
-G2, G4 & Coarse-grained cue-free fluctuation gives more genes (G2) and stronger regulation (G4) than frozen & refuted \\
-C1 & Without a cue, fluctuation weakens the genome-encoded network below frozen & supported ($q=0.10$, 0.20) \\
-C2 & With a yoked cue, fluctuation weakens it below frozen with the same signals & supported ($q=0.10$, 0.20) \\
-C3 & An informative cue keeps it stronger than a yoked cue & supported ($q=0.10$, 0.20) \\
-C4 & With an informative cue it is not more than 25\% weaker than frozen & supported ($q=0.10$, 0.20) \\
-\bottomrule
-\end{tabular}
-\begin{flushleft}\footnotesize
-A prediction was supported if the predicted sign held at every evaluable rate and the Holm-adjusted $p<0.05$ at two or more, refuted if the opposite sign was significant at any rate or no rate was Holm-significant, and inconclusive otherwise. P1 and P2 are evaluable only at rates
-where the informative cue measurably lowers metabolic error relative to the yoked
-cue. G1--G4 are single tests, supported if the predicted sign holds with Holm-adjusted $p<0.05$, refuted if the opposite sign holds with $p<0.05$, and inconclusive otherwise.
-C1--C3 were to be supported if the predicted sign held with Holm-adjusted
-$p<0.05$ at $q=0.10$ and at $q=0.20$, and C4, a non-inferiority test, if the lower
-bound of the 95\% bootstrap confidence interval of the ratio of means exceeded
-0.75 at each rate. C3 and C4 were evaluable only where the informative cue
-lowered metabolic error, as it did at each rate.
-\end{flushleft}
-\label{table2}
-\end{table}
 
 \subsection*{Software and availability}
 The R-Aevol runs were made on a single 12-core machine. EvoSim (S1 and S6 Text)

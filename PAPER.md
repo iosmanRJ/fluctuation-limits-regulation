@@ -1021,3 +1021,48 @@ results and a new paragraph sets out two contrasts (their networks ignore
 uninformative cues while our yoked populations keep strong signal links; their
 uninformative-cue networks evolve strong internal links while ours lose them);
 Limitations cites them for replicate numbers; S5 rows updated.
+
+### 11.21 Fifth audit, after the confirmation (2026-09-30)
+
+Every number in the manuscript and in S2, S3 and S6 was recomputed from
+`paper/data/*.csv` (permutation tests, Cohen's d, ratios, boundary values to four
+decimals) or matched against the pre-registered output files. S3 regenerates
+byte-identically from `make_s3.py`. Citations: every key resolves; the replicate
+range "60 to 1,000" was checked against the sources (Tsuda & Kawata: "60–100
+replicated populations"; Lalejini et al.: 100 per treatment; Jorritsma & van den
+Berg: 1,000), as were the Jorritsma statements (uniform zero-reliability cue,
+four nodes, change only at the start of a generation, no constant environment,
+"unresponsive" to uninformative cues, strong regulatory-layer links). Their
+environment is ~N(0, 1/9) clipped to [-1, 1], so the uniform cue's values are
+indeed not matched to the informative cue's.
+
+Found and fixed:
+- **Table order.** Tables were first cited as 3, 1, 2 (LaTeX numbers by source
+  position; the predictions table sat in Methods). Moved it to the Results
+  paragraph that first cites it: now predictions = Table 1, confirmation =
+  Table 2, parameters = Table 3 (labels renamed tab_predictions, tab_confirm,
+  tab_params). References to "Table 2/3" in §11.20 use the old numbering.
+- **S6 "Fig AA/AB/AC/AD".** The restructure script turned "Fig 2A" into
+  "Fig AA"; now "Fig A, panel A" etc.
+- **S6 d = −1.4 → −1.3.** Double rounding: the Julia output printed −1.35, the
+  exact value is −1.3454.
+- **Discussion.** "The pre-registered tests concerned total strength" was stale
+  after the confirmation (whose tests concern the genome-encoded network) →
+  "The first pre-registered tests…"; and "supported … at two population sizes"
+  overstated the population-512 contrasts, which were secondary without
+  verdicts → "their contrasts held at a second population size".
+- **Abstract.** Cue-free strength "about a fifth" of frozen at every grain →
+  "a fifth to a quarter" (sweep 0.18–0.20; grain experiment 0.24 coarsest,
+  0.27 finest).
+- **Zero-link sentence.** "No other population lost them completely" was
+  ambiguous: cue-free populations had zero-link generations (up to 3.7% of the
+  window). Now "which happened in no other population of the sweep" (whole
+  window).
+- **Precision.** "Frozen populations carried many weak links (47 to 52…)" → "The
+  frozen populations" (the range is the frozen informative arm; frozen yoked had
+  59); "any frozen arm" → "any frozen arm of the sweep"; Jorritsma "four genes"
+  → "four nodes" (their wording); Table 1 footnote rule scoped to P1–P4.
+- **S5.** References renumbered in order of first citation (a script verified
+  that all 27 citations still point at the same works); Tsuda status wording.
+
+Abstract 292 words, author summary 188; manuscript 16 pages, supplement 26.
