@@ -361,8 +361,84 @@ def fig6():
     plt.close(fig)
 
 
+# ----------------------------------------------------------------------------
+# Trajectories -- the genome-encoded network over 30,000 generations
+# ----------------------------------------------------------------------------
+def fig_traj():
+    T = load("trajectories.csv")
+    runs = {}
+    for r in T:
+        runs.setdefault((r["experiment"], r["arm"], float(r["rate"]), r["seed"]), []).append(r)
+
+    def series(exp, arm, rate, col, internal=False):
+        """runs x blocks array of a column (internal: S - S_sig)."""
+        out = []
+        for k, rows in runs.items():
+            if k[0] == exp and k[1] == arm and abs(k[2] - rate) < 1e-9:
+                rows = sorted(rows, key=lambda r: int(r["block"]))
+                v = [float(r[col]) - (float(r["S_sig"]) if internal and arm != "fluc_none" and arm != "froz_none" else 0.0)
+                     for r in rows]
+                out.append(v)
+        return np.array(out)
+
+    x = (np.arange(1, 61) - 0.5) * 500
+    fig, axes = plt.subplots(1, 3, figsize=(7.5, 2.55), gridspec_kw={"wspace": 0.34})
+
+    def band(ax, Y, color, dashed, label=None, lw=1.3, ci=True):
+        m = Y.mean(0)
+        if ci:
+            b = rng.choice(len(Y), size=(2000, len(Y)), replace=True)
+            bm = Y[b].mean(1)
+            ax.fill_between(x, np.percentile(bm, 2.5, 0), np.percentile(bm, 97.5, 0),
+                            color=color, alpha=0.13, lw=0, zorder=2)
+        ax.plot(x, m, color=color, lw=lw, ls=(0, (3.5, 2)) if dashed else "-", label=label, zorder=3)
+
+    # A: confirmation, q = 0.10, every arm, genome-encoded strength
+    ax = axes[0]
+    for arm, cue, dashed in [("froz_none", "none", True), ("froz_info", "info", True), ("froz_yoked", "yoked", True),
+                             ("fluc_info", "info", False), ("fluc_yoked", "yoked", False), ("fluc_none", "none", False)]:
+        band(ax, series("confirm", arm, 0.10, "S", internal=True), CUE[cue], dashed)
+    ax.set_ylabel("Genome-encoded regulatory strength")
+    ax.set_title("Confirmation, $q=0.10$", loc="left")
+    panel_label(ax, "A")
+
+    # B: cue-free cells of every experiment, one line per cell
+    ax = axes[1]
+    for exp, rates in [("v1", [0.1]), ("v2", [0.05, 0.1, 0.2]), ("grain", [0.1, 0.01, 0.001, 0.0002]),
+                       ("confirm", [0.1, 0.2])]:
+        for q in rates:
+            band(ax, series(exp, "fluc_none", q, "S"), CUE["none"], False, lw=0.8, ci=False)
+        band(ax, series(exp, "froz_none", 0.1, "S"), CUE["none"], True, lw=0.8, ci=False)
+    ax.set_ylabel("Regulatory strength (no cue)")
+    ax.set_title("No cue, every experiment", loc="left")
+    panel_label(ax, "B")
+
+    # C: regulator proteins, confirmation, q = 0.10
+    ax = axes[2]
+    for arm, cue, dashed in [("froz_none", "none", True), ("fluc_info", "info", False), ("fluc_none", "none", False)]:
+        band(ax, series("confirm", arm, 0.10, "tfs"), CUE[cue], dashed)
+    ax.set_ylabel("Regulator proteins")
+    ax.set_title("Confirmation, $q=0.10$", loc="left")
+    panel_label(ax, "C")
+
+    for ax in axes:
+        ax.set_xlim(0, 30000); ax.set_ylim(bottom=0)
+        ax.set_xticks([0, 10000, 20000, 30000]); ax.set_xticklabels(["0", "10,000", "20,000", "30,000"])
+        ax.set_xlabel("Generation")
+    from matplotlib.lines import Line2D
+    h = [Line2D([], [], color=CUE["info"], lw=1.3, label="Informative cue"),
+         Line2D([], [], color=CUE["yoked"], lw=1.3, label="Yoked cue"),
+         Line2D([], [], color=CUE["none"], lw=1.3, label="No cue"),
+         Line2D([], [], color=MUTED, lw=1.3, label="Fluctuating (solid)"),
+         Line2D([], [], color=MUTED, lw=1.3, ls=(0, (3.5, 2)), label="Frozen (dashed)")]
+    fig.legend(handles=h, loc="lower center", ncol=5, frameon=False, bbox_to_anchor=(0.5, -0.19))
+    fig.savefig(os.path.join(OUT, "fig5_trajectories.pdf"))
+    plt.close(fig)
+
+
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     fig2()        # EvoSim; now shown in S6 Text
     fig3(); fig4(); fig_decomp(); fig6()
+    fig_traj()    # last, so the earlier figures' random draws are unchanged
     print("figures written to", OUT)

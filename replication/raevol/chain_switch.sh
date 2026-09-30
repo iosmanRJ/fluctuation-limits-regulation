@@ -5,7 +5,7 @@
 set -u
 EXPECT=$1
 R=/Users/ivanosman/raevol_exp
-echo "chain switch: waiting 2026-09-30 09:23:43"
+echo "chain switch: waiting $(date '+%F %T')"
 while pgrep -f launch_switch.sh > /dev/null; do sleep 60; done
 echo "chain switch: runs finished $(date '+%F %T')"
 GOT=$(shasum -a 256 $R/analyse_switch.py | cut -c1-16)
