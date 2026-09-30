@@ -28,6 +28,7 @@ Build notes for Apple Silicon are in the project memory (`raevol-replication`).
 | `export_confirm.py` | writes `paper/data/confirm_runs.csv` with the pre-registered `summarise` |
 | `export_trajectories.py` | per-run means over 500-generation blocks for every run of v1, v2 (population 1024), grain and the confirmation → `paper/data/trajectories.csv` (Fig 5) |
 | `exploratory_pooled.py`, `exploratory_trajectories*.py` | EXPLORATORY: composition of the network, power, pooled estimates, trajectory summaries (PAPER.md §11.23) |
+| `export_switch.py`, `results_switch_preregistered.txt` | per-run 500-generation blocks of the switch experiment → `paper/data/switch_trajectories.csv`; the single analysis run: W1 LOST, W2 GROW (PAPER.md §11.26) |
 | `gen_params_switch.py`, `launch_switch.sh`, `analyse_switch.py`, `chain_switch.sh` | **pre-registered** environment-switch experiment (PAPER.md §11.24, commit `313d744`; analysis `0e50dab`): clonal populations of the generation-30,000 best genomes moved between frozen and cue-free fluctuating environments for 10,000 generations |
 | `export_raevol.py`, `export_grain.py` | write `paper/data/raevol_runs.csv` and `grain_runs.csv`, one row per run, with the pre-registered summary function (plus `tfs`, mean `nb_TF`, not pre-registered) |
 

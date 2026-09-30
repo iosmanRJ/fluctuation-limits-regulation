@@ -357,7 +357,7 @@ def fig6():
          Line2D([], [], ls="", marker="D", ms=4.5, mfc=col, mec=INK, label="Mean, 95% CI"),
          Line2D([], [], color=MUTED, ls=(0, (4, 2)), lw=0.9, label="Frozen mean (band: 95% CI)")]
     fig.legend(handles=h, loc="lower center", ncol=3, frameon=False, bbox_to_anchor=(0.5, -0.13))
-    fig.savefig(os.path.join(OUT, "fig6_grain.pdf"))
+    fig.savefig(os.path.join(OUT, "fig7_grain.pdf"))
     plt.close(fig)
 
 
@@ -436,9 +436,47 @@ def fig_traj():
     plt.close(fig)
 
 
+# ----------------------------------------------------------------------------
+# Environment switch -- populations moved between frozen and fluctuating
+# ----------------------------------------------------------------------------
+def fig_switch():
+    T = load("switch_trajectories.csv")
+    runs = {}
+    for r in T:
+        runs.setdefault((r["cell"], r["rep"]), {})[int(r["block"])] = r
+    x = np.concatenate([[0.0], np.arange(1, 21) * 500 - 250])
+    STYLE = {  # colour = origin, line style = current environment (dashed frozen)
+        "FF": (INK2, True, "frozen, kept frozen"),
+        "FU": (INK2, False, "frozen \u2192 fluctuating"),
+        "UU": (CUE["none"], False, "fluctuating, kept fluctuating"),
+        "UF": (CUE["none"], True, "fluctuating \u2192 frozen"),
+    }
+    fig, axes = plt.subplots(1, 2, figsize=(7.5, 2.6), gridspec_kw={"wspace": 0.3})
+    for ax, col, ylab, lab in [(axes[0], "S", "Regulatory strength (no cue)", "A"),
+                               (axes[1], "tfs", "Regulator proteins", "B")]:
+        for cell in ("FF", "FU", "UU", "UF"):
+            color, dashed, name = STYLE[cell]
+            Y = np.array([[float(runs[k][b][col]) for b in range(0, 21)] for k in runs if k[0] == cell])
+            bi = rng.choice(len(Y), size=(2000, len(Y)), replace=True)
+            bm = Y[bi].mean(1)
+            ax.fill_between(x, np.percentile(bm, 2.5, 0), np.percentile(bm, 97.5, 0), color=color, alpha=0.13, lw=0, zorder=2)
+            ax.plot(x, Y.mean(0), color=color, lw=1.4, ls=(0, (3.5, 2)) if dashed else "-", label=name, zorder=3)
+        ax.axvline(0, color=AXIS, lw=0.8, zorder=1)
+        ax.set_xlim(-300, 10000); ax.set_ylim(bottom=0)
+        ax.set_xticks([0, 2500, 5000, 7500, 10000]); ax.set_xticklabels(["0", "2,500", "5,000", "7,500", "10,000"])
+        ax.set_xlabel("Generations after the move")
+        ax.set_ylabel(ylab)
+        panel_label(ax, lab)
+    h, l = axes[0].get_legend_handles_labels()
+    fig.legend(h, l, loc="lower center", ncol=4, frameon=False, bbox_to_anchor=(0.5, -0.17))
+    fig.savefig(os.path.join(OUT, "fig6_switch.pdf"))
+    plt.close(fig)
+
+
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     fig2()        # EvoSim; now shown in S6 Text
     fig3(); fig4(); fig_decomp(); fig6()
-    fig_traj()    # last, so the earlier figures' random draws are unchanged
+    fig_traj()    # these two last, so the earlier figures' random draws are unchanged
+    fig_switch()
     print("figures written to", OUT)

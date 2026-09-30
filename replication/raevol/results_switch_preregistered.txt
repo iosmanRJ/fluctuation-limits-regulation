@@ -1,0 +1,27 @@
+CELLS (mean over runs; START = generations 1-500, END = 8,001-10,000)
+  FF n=12  S   7.96 ->   8.49   TFs  16.9 ->  17.7   links   66.2 ->   74.4   genes  27.3 ->  27.3   err 0.0078 -> 0.0075
+  FU n=12  S   4.71 ->   1.79   TFs  13.2 ->   8.6   links   40.8 ->   19.4   genes  22.4 ->  20.2   err 0.0623 -> 0.0623
+  UU n=12  S   1.51 ->   1.28   TFs   7.5 ->   6.7   links   14.5 ->   11.9   genes  20.6 ->  19.9   err 0.0627 -> 0.0622
+  UF n=12  S   2.52 ->   5.25   TFs  10.3 ->  15.6   links   20.9 ->   46.6   genes  24.7 ->  27.3   err 0.0244 -> 0.0093
+
+PRIMARY (S_END, two-sided permutation, Holm across 2)
+  W1 FU vs FF: 1.787 vs 8.494  p=0.00001  Holm p=0.00002  ratio FU/FF 0.210 [0.168, 0.264]
+  W2 UF vs UU: 5.248 vs 1.284  p=0.00001  Holm p=0.00002
+
+VERDICTS
+  W1 LOST: existing networks are lost under uninformative fluctuation
+  W2 GROW: networks grow once fluctuation stops
+
+SECONDARY (no verdicts)
+  fraction of FU network lost, 1 - S_END/S_START: 0.621
+  FF S_END - S_START: +0.529  (permutation p within cell, sign-flip: 0.0554)
+  FU S_END - S_START: -2.924  (permutation p within cell, sign-flip: 0.0004)
+  UU S_END - S_START: -0.230  (permutation p within cell, sign-flip: 0.3948)
+  UF S_END - S_START: +2.730  (permutation p within cell, sign-flip: 0.0004)
+
+TRAJECTORIES (S per 1,000 generations, cell means)
+  FF   8.01  8.29  8.32  8.30  8.31  8.37  8.56  8.61  8.62  8.36
+  FU   4.32  3.08  2.53  2.27  2.08  2.13  1.92  1.76  1.86  1.72
+  UU   1.53  1.54  1.45  1.38  0.99  1.17  1.46  1.45  1.28  1.29
+  UF   2.84  3.69  4.21  4.52  4.67  4.76  5.08  5.11  5.15  5.34
+EXIT=0

@@ -139,5 +139,22 @@ t.append("%s & %d & %s & %s & %s & %s & %s & %s\\\\" % (ARM["froz_none"], len(v)
 t.append(r"\bottomrule\end{tabular}\end{table}")
 out.append("\n".join(t))
 
+# ---- Table G: pre-registered environment switch -------------------------
+W = load("switch_trajectories.csv")
+t = [r"\begin{table}[!ht]\small",
+     r"\caption{\textbf{R-Aevol, pre-registered environment switch} (48 runs, 12 per cell, each founded by the best genome of a cue-free confirmation population at $q=0.10$, generation 30{,}000, and run for 10{,}000 generations; source over generations 25{,}001--30{,}000, start over 1--500, end over 8{,}001--10{,}000; no signals, so $S$ is the genome-encoded network).}",
+     r"\begin{tabular}{@{}lccccccc@{}}\toprule",
+     r"Cell & $n$ & $S$ source & $S$ start & $S$ end & Regulators end & Genes end & Metabolic error end\\\midrule"]
+CELLNAME = {"FF": "Frozen, kept frozen", "FU": "Frozen, moved to fluctuation", "UU": "Fluctuating, kept fluctuating", "UF": "Fluctuating, moved to frozen"}
+for c in ("FF", "FU", "UU", "UF"):
+    reps = sorted({r["rep"] for r in W if r["cell"] == c}, key=int)
+    def per_run(block_set, k):
+        return [sum(float(r[k]) for r in W if r["cell"] == c and r["rep"] == s and int(r["block"]) in block_set) / len(block_set) for s in reps]
+    end = {17, 18, 19, 20}
+    t.append("%s & %d & %s & %s & %s & %s & %s & %s\\\\" % (CELLNAME[c], len(reps), ms(per_run({0}, "S")), ms(per_run({1}, "S")),
+             ms(per_run(end, "S")), ms(per_run(end, "tfs"), "%.1f"), ms(per_run(end, "genes"), "%.1f"), ms(per_run(end, "err"), "%.4f")))
+t.append(r"\bottomrule\end{tabular}\end{table}")
+out.append("\n".join(t))
+
 open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "s3_tables.tex"), "w").write("\n\n".join(out) + "\n")
 print("wrote s3_tables.tex")

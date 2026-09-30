@@ -199,13 +199,17 @@ Pre-registered sweep, primary (168) & 4 arms at $q=0.05, 0.10, 0.20$; frozen no-
 Pre-registered sweep, secondary (48) & fluctuating informative, yoked and no-cue, frozen informative; $q=0.10$; population 512 & $200000 + 1000\,c + s$\\
 Grain (60) & fluctuating no-cue at $q=0.1, 0.01, 0.001, 0.0002$; frozen no-cue & $300000 + 1000\,c + s$\\
 Confirmation (132) & fluctuating informative, yoked and no-cue, frozen informative and yoked at $q=0.10, 0.20$; frozen no-cue; population 1024; instrumented platform & $400000 + 1000\,c + s$\\
+Environment switch (48) & clonal populations of the generation-30{,}000 best genomes of the cue-free confirmation cells at $q=0.10$, kept or moved (frozen and cue-free fluctuating, $q=0.10$); 10{,}000 generations; instrumented platform & $500000 + 1000\,c + s$\\
 \bottomrule
 \end{tabular}
 \end{center}
 The indices $a$ and $c$ number the arm or cell in the order written by the generator
 script and $s$ the replicate. Runs were launched seed-major, so that stopping a
 batch early would still leave a balanced design. Every run reached 30{,}000
-generations with exit status 0.
+generations (10{,}000 in the switch experiment) with exit status 0. The switch
+runs were founded with \texttt{aevol\_post\_extract -t 30000 -S} on a copy of
+the source run's saved population and \texttt{aevol\_create -C}, after removing
+the header line that the extraction writes before the sequence.
 
 \section*{8. Pre-registration record}
 \begin{center}
@@ -219,6 +223,8 @@ EvoSim confirmation P5 & \texttt{4bc16c3} & viability-pilot rule, analysis scrip
 P5 outcome & \texttt{56fe3a0} & no grid met the rule; not run\\
 Grain G1--G4 & \texttt{fa00777} & \texttt{gen\_params\_grain.py}, \texttt{analyse\_grain.py}\\
 Confirmation C1--C4 & \texttt{59ff365} & \texttt{gen\_params\_confirm.py}, \texttt{analyse\_confirm.py} (SHA-256 prefix \texttt{92c07d172bf66f6d}), tested on synthetic data before the commit\\
+Switch W1, W2 & \texttt{313d744} & design, tests and the interpretation of each outcome, before the runs\\
+Switch analysis & \texttt{0e50dab} & \texttt{analyse\_switch.py} (SHA-256 prefix \texttt{486417ea5c3be8a0}), tested on synthetic data; committed after the launch, before any output was inspected\\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -226,7 +232,8 @@ Before each analysis ran, the SHA-256 checksum of the analysis script on the
 simulation machine was compared with the committed version (\texttt{analyse\_v2.py}
 prefix \texttt{d0609140a970de48}; \texttt{analyse\_grain.py} prefix
 \texttt{89a8613289731999}; \texttt{analyse\_confirm.py} prefix
-\texttt{92c07d172bf66f6d}). Each analysis was run once, on complete data. The
+\texttt{92c07d172bf66f6d}; \texttt{analyse\_switch.py} prefix
+\texttt{486417ea5c3be8a0}). Each analysis was run once, on complete data. The
 simulation machine's idle-sleep setting suspended runs during the first night of
 the sweep; this lengthened wall time but cannot change results, which are
 determined by the seed. From that point runs were protected by
@@ -295,6 +302,23 @@ C3 & $q=0.20$ & 5.96 & 1.20 & $<10^{-4}$ & $<10^{-4}$ & $<10^{-4}$\\
 C1: fluctuating no-cue (A) against frozen no-cue (B). C2: fluctuating yoked
 against frozen yoked at the same rate. C3: fluctuating informative against
 fluctuating yoked.
+
+The environment switch (regulatory strength over generations 8{,}001--10{,}000;
+Holm across the two tests) gave the following, copied from
+\texttt{replication/raevol/results\_switch\_preregistered.txt}. For W1 the
+ratio of means was 0.210 (95\% CI 0.168--0.264), so W1 reads as loss, and W2 as
+growth.
+\begin{center}
+\small
+\begin{tabular}{@{}llrrll@{}}
+\toprule
+Test & Cells & Mean A & Mean B & $p$ & Holm $p$\\
+\midrule
+W1 & frozen moved to fluctuation (A) against kept frozen (B) & 1.79 & 8.49 & $<10^{-4}$ & $<10^{-4}$\\
+W2 & fluctuating moved to frozen (A) against kept fluctuating (B) & 5.25 & 1.28 & $<10^{-4}$ & $<10^{-4}$\\
+\bottomrule
+\end{tabular}
+\end{center}
 
 \section*{10. Signal-protein links (exploratory)}
 To separate the influences of the signal proteins from those of genome-encoded

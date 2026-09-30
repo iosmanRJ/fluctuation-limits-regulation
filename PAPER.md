@@ -1248,3 +1248,38 @@ New: section "Frozen networks grew, and networks under uninformative fluctuation
 did not", Fig 5 (trajectories; grain is now Fig 6), Methods "Trajectories",
 Limitations sentence. Abstract 298 words, summary 191. Other figures unchanged
 pixel for pixel (fig_traj runs last, so the shared random stream is untouched).
+
+### 11.26 Environment-switch RESULT: W1 lost, W2 grows (2026-09-30)
+
+48 runs launched 09:15, all reached generation 10,000 (exit 0) by 10:40; the chain
+verified the checksum (486417ea5c3be8a0) and ran the analysis once at 10:41.
+Output: `replication/raevol/results_switch_preregistered.txt`; per-run blocks:
+`paper/data/switch_trajectories.csv` (`export_switch.py`, block 0 = source over
+25,001–30,000).
+
+| cell | S source | S start (1–500) | S end (8,001–10,000) | regulators end | genes end |
+|---|---|---|---|---|---|
+| FF frozen kept | 7.88 | 7.96 | 8.49 | 17.7 | 27.3 |
+| FU frozen → fluctuating | 7.88 | 4.71 | 1.79 | 8.6 | 20.2 |
+| UU fluctuating kept | 1.34 | 1.51 | 1.28 | 6.7 | 19.9 |
+| UF fluctuating → frozen | 1.34 | 2.52 | 5.25 | 15.6 | 27.3 |
+
+W1 FU/FF 0.210 [0.168, 0.264], Holm p = 2e-5 → LOST. W2 UF vs UU Holm p = 2e-5
+→ GROW. Secondary: FU lost 77% of the source strength, 52% of the loss within 500
+generations and 84% by generation 2,000; UF grew 3.9-fold to 62% of FF, below
+the 7.0 that frozen networks built from one gene reach in 10,000 generations; UF
+change between 6,001–8,000 and 8,001–10,000 +0.16, p = 0.27 (so NOT "still
+growing"). Pre-registered interpretation: uninformative fluctuation removes
+existing networks as well as keeping new ones from growing, and the limit is set
+by the current environment, not by the genome's history.
+
+Manuscript: title "Environmental fluctuation limits gene regulation unless it can
+be tracked" (limit = the pre-registered W2 wording; covers both no-growth and
+loss); new section "Moving populations between environments" with Fig 6
+(fig6_switch.pdf; grain renamed fig7_grain.pdf, now Fig 7); W1, W2 rows in
+Table 1 with the rule; Methods "Environment switch."; pre-registration paragraph
+(analysis committed after launch, before outputs); Discussion (limit set by the
+current environment; speed of loss suggests selection, untested); Limitations
+(clonal founding); Conclusion; abstract 299 words, summary 199; SI: 708 runs,
+S2 runs/record/checksum/W results, S3 Table G, S4 record. Other figures
+unchanged pixel for pixel.
