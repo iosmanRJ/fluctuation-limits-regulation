@@ -1,0 +1,26 @@
+cell mean per window: S_int / genes / TFs
+cell                           0-500          500-1000              1-2k              2-5k             5-10k            10-20k            20-30k
+fluc_info q=0.10       1.84/17.6/6.8     2.09/17.1/7.9     2.67/16.9/8.3     3.94/16.8/9.1    4.74/17.4/10.2    5.57/18.1/10.5    6.30/18.7/11.1
+fluc_info q=0.20       1.96/16.8/5.6     2.91/17.8/6.7     3.62/17.5/8.1     4.33/17.8/9.4     4.98/18.3/9.7    5.30/19.0/10.4    5.82/18.9/10.6
+fluc_none q=0.10       1.12/15.8/4.5     1.33/17.7/6.2     1.54/18.2/7.0     1.92/19.2/8.1     1.49/19.3/7.3     1.31/19.6/6.8     1.18/20.2/6.6
+fluc_none q=0.20       0.89/18.6/5.0     1.30/20.0/6.9     1.31/20.3/7.5     1.55/20.2/8.0     1.56/20.4/8.2     1.57/21.7/8.3     1.32/22.3/7.4
+fluc_yoked q=0.10      0.65/15.0/3.7     1.24/16.7/5.8     1.24/17.0/5.8     1.29/16.9/6.3     1.46/17.2/6.7     1.56/17.3/6.7     1.78/18.0/6.2
+fluc_yoked q=0.20      0.74/15.7/3.5     0.94/17.1/5.0     0.98/17.2/5.1     0.98/17.9/5.7     0.91/18.2/5.6     1.00/19.5/5.5     1.09/20.4/5.7
+froz_info q=0.10       2.24/19.3/6.1     1.32/22.1/8.2     1.90/22.2/9.1    2.63/23.5/10.2    3.54/24.5/11.8    3.81/25.2/12.2    4.11/26.1/12.2
+froz_info q=0.20       0.55/18.3/4.1     0.97/20.8/5.6     1.22/22.4/6.8     1.97/24.3/9.3    2.82/26.0/10.3    3.31/26.8/11.7    3.84/27.4/11.6
+froz_none q=0.10       1.66/19.5/7.3    2.80/22.0/10.8    3.72/21.8/11.8    4.90/23.2/13.3    6.55/24.4/15.2    7.27/25.7/16.0    7.66/26.7/16.6
+froz_yoked q=0.10      0.72/18.7/5.6     1.13/20.6/7.0     1.51/22.1/8.0    2.43/23.5/10.1    3.13/25.2/12.0    3.54/26.3/12.3    3.93/28.0/13.5
+froz_yoked q=0.20      1.90/18.0/6.2     1.80/20.6/8.3     2.51/21.5/9.9    3.51/23.1/10.9    4.59/24.2/12.2    5.11/25.2/12.8    5.64/26.5/14.0
+
+peak 1,000-generation block of S_int vs final block (29-30k), per cell
+fluc_info q=0.10   mean peak 7.33  mean final 6.69  ratio final/peak 0.91  runs peaking before 10k: 0/12
+fluc_info q=0.20   mean peak 7.25  mean final 6.19  ratio final/peak 0.85  runs peaking before 10k: 4/12
+fluc_none q=0.10   mean peak 2.74  mean final 1.57  ratio final/peak 0.57  runs peaking before 10k: 5/12
+fluc_none q=0.20   mean peak 2.51  mean final 1.23  ratio final/peak 0.49  runs peaking before 10k: 5/12
+fluc_yoked q=0.10  mean peak 2.76  mean final 1.96  ratio final/peak 0.71  runs peaking before 10k: 3/12
+fluc_yoked q=0.20  mean peak 1.86  mean final 1.31  ratio final/peak 0.70  runs peaking before 10k: 4/12
+froz_info q=0.10   mean peak 4.97  mean final 3.99  ratio final/peak 0.80  runs peaking before 10k: 4/12
+froz_info q=0.20   mean peak 4.52  mean final 3.71  ratio final/peak 0.82  runs peaking before 10k: 2/12
+froz_none q=0.10   mean peak 8.78  mean final 7.75  ratio final/peak 0.88  runs peaking before 10k: 1/12
+froz_yoked q=0.10  mean peak 4.61  mean final 4.15  ratio final/peak 0.90  runs peaking before 10k: 2/12
+froz_yoked q=0.20  mean peak 6.61  mean final 5.65  ratio final/peak 0.85  runs peaking before 10k: 2/12

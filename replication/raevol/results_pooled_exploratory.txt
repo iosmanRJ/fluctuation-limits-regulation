@@ -1,0 +1,57 @@
+cell                 genes   tfs  links_int  S_int  S_int/tf  S_int/link_int  S_int/gene
+froz_none   q=0.1     27.6  16.5     61.6    6.44    0.389       0.105      0.234
+froz_info   q=0.05    26.7  15.1     44.8    4.84    0.321       0.108      0.181
+froz_info   q=0.1     28.6  13.9     41.6    5.42    0.391       0.130      0.189
+froz_info   q=0.2     26.0  13.7     34.0    4.44    0.325       0.131      0.171
+froz_yoked  q=0.1     28.3  14.0     45.1    4.89    0.348       0.108      0.173
+fluc_none   q=0.05    17.8   6.4     12.9    1.28    0.199       0.099      0.072
+fluc_none   q=0.1     19.4   6.7     12.0    1.08    0.161       0.090      0.055
+fluc_none   q=0.2     22.3   6.1     10.4    1.05    0.171       0.101      0.047
+fluc_yoked  q=0.05    16.3   6.2     16.0    2.15    0.348       0.134      0.132
+fluc_yoked  q=0.1     19.4   7.9     16.7    1.59    0.200       0.095      0.082
+fluc_yoked  q=0.2     21.3   7.3     13.7    0.95    0.131       0.069      0.045
+fluc_info   q=0.05    16.3  10.8     40.2    5.45    0.506       0.135      0.335
+fluc_info   q=0.1     17.7  10.5     47.7    5.87    0.558       0.123      0.331
+fluc_info   q=0.2     18.0  11.6     50.8    6.79    0.583       0.134      0.377
+
+log S_int on 'uninformative fluctuation' (no cue or yoked):
+  unadjusted effect: x0.21
+  adjusting for log TFs: x0.46   (TF elasticity 1.08)
+  adjusting for log TFs and log genes: x0.45
+
+within-cell correlation of S_int with metabolic error (negative = stronger network, better match):
+  froz_none   q=0.1   r = -0.22
+  froz_info   q=0.05  r = +0.16
+  froz_info   q=0.1   r = +0.31
+  froz_info   q=0.2   r = -0.27
+  froz_yoked  q=0.1   r = -0.28
+  fluc_none   q=0.05  r = +0.36
+  fluc_none   q=0.1   r = +0.13
+  fluc_none   q=0.2   r = +0.35
+  fluc_yoked  q=0.05  r = -0.58
+  fluc_yoked  q=0.1   r = -0.10
+  fluc_yoked  q=0.2   r = -0.27
+  fluc_info   q=0.05  r = -0.51
+  fluc_info   q=0.1   r = -0.05
+  fluc_info   q=0.2   r = -0.15
+power of a two-sided test at alpha 0.05 (per test, before Holm):
+  d=0.5: n=12 0.21  n=24 0.39  n=36 0.55
+  d=0.8: n=12 0.47  n=24 0.77  n=36 0.92
+  d=1.0: n=12 0.65  n=24 0.93  n=36 0.99
+  d=1.2: n=12 0.80  n=24 0.98  n=36 1.00
+  d=1.5: n=12 0.94  n=24 1.00  n=36 1.00
+  d=2.0: n=12 1.00  n=24 1.00  n=36 1.00
+
+secondary claim: genome-encoded strength, informative-cue fluctuating vs frozen informative
+  q=0.10 decomp v1  6.35 vs 4.66 ratio 1.36 d 0.55
+  q=0.10 decomp v2  5.87 vs 5.42 ratio 1.08 d 0.21
+  q=0.10 confirm    6.53 vs 4.09 ratio 1.60 d 1.08
+  q=0.10 POOLED (n=36 per arm): ratio 1.32 [1.08, 1.63], p=0.0129
+  q=0.20 decomp v2  6.79 vs 4.44 ratio 1.53 d 1.23
+  q=0.20 confirm    5.96 vs 3.88 ratio 1.53 d 0.94
+  q=0.20 POOLED (n=24 per arm): ratio 1.53 [1.24, 1.92], p=0.0005
+
+'information does not raise genome size': informative minus yoked, genes (fluctuating)
+  pooled over 6 experiments x rates (n=72 per arm): -0.83 genes [-1.87, +0.16], p=0.123
+  grain coarse minus fine, genes: -0.21 [-1.75, +1.40]
+  grain coarse minus fine, S: -0.25 [-1.16, +0.61]

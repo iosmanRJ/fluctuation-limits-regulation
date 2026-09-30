@@ -1105,3 +1105,61 @@ only at q = 0.20. Added to the counts section (exploratory).
   range +2.64 to +10.15; switchers 0.645 vs 0.229).
 - S4: "the 180-run batch in the main text" → "in S6 Text" (stale after the
   restructure).
+
+### 11.23 Would a knockout or more replicates help? (EXPLORATORY, 2026-09-30)
+
+Scripts and outputs: `replication/raevol/exploratory_pooled.py` →
+`results_pooled_exploratory.txt`; `exploratory_trajectories.py` →
+`results_trajectories_confirm.txt`; `exploratory_trajectories_nocue.py` →
+`results_trajectories_nocue.txt`. None of this is in the manuscript yet.
+
+**Trajectories change the framing.** Every run starts from one gene. Frozen
+genome-encoded networks grow throughout the 30,000 generations and are STILL
+GROWING at the end in every frozen cell of every experiment (e.g. confirmation
+froz_none 1.7 → 2.8 → 3.7 → 4.9 → 6.6 → 7.3 → 7.7 over windows ending 0.5k, 1k,
+2k, 5k, 10k, 20k, 30k; v2 5.95 → 6.24 and grain 7.41 → 8.09 over the last two
+windows). Cue-free fluctuating networks stay at ~1–2.3 in all 11 cue-free cells;
+some show a small early hump and decline (v2 q = 0.05 peak 1.75 → 1.20; grain
+q = 0.01 1.78 → 1.02), others a slow rise (grain q = 0.1 1.24 → 2.28). So
+"fluctuation erodes the network" is mostly wrong: uninformative fluctuation keeps
+the network from GROWING; any loss is small and from a low peak. The measured gap
+is a snapshot of a divergence still widening at generation 30,000.
+
+**Composition (decomposition data).** Uninformative fluctuation halves the number
+of regulator proteins (6–8 vs 14–17 frozen). Adjusting log S_int for log nb_TF
+moves the effect from ×0.21 to ×0.46, i.e. half of the log-effect is fewer
+regulators; the rest is fewer links per regulator. Strength per genome-encoded
+link is similar in every arm (0.07–0.13): the network is smaller, not weaker.
+Within frozen cells S_int does not correlate consistently with metabolic error
+(r −0.28 to +0.31, n = 12): no sign that stronger networks match better.
+
+**Knockout, as proposed: low information.** The upstream tool
+`aevol_post_ancestor_network_knockout_7` does not knock anything out: it loops
+`for (auto affinity : rna->affinity_list)` (a copy) and zeroes the copy, so every
+link would appear to cost nothing; it also needs a lineage file (our runs have
+RECORD_TREE false). A fixed variant reading the generation-30,000 backups is
+feasible (clone, zero factors by reference, recompute_network, average over
+environment sequences). But a frozen knockout cost is near-certain whether the
+network was selected or accumulated neutrally and became entrenched, and the
+fluctuating networks are 5× smaller, so the frozen > fluctuating comparison is
+predetermined and cannot answer "why".
+
+**More replicates: not needed.** Power at n = 12 is ≥ 0.94 for |d| ≥ 1.5 (all
+headline effects). Pooling the independent experiments already answers the
+imprecise claims: genome-encoded strength informative-fluctuating / frozen
+informative 1.32 [1.08, 1.63] at q = 0.10 (n = 36 per arm; the confirmation's
+1.60 was high) and 1.53 [1.24, 1.92] at q = 0.20 (n = 24); information on genes
+−0.83 [−1.87, +0.16] (n = 72 per arm: excludes any increase above 0.2 genes);
+grain coarse − fine −0.21 genes [−1.75, +1.40], −0.25 strength [−1.16, +0.61],
+against a frozen gap of ~6.3 in each. Adding runs post hoc would also be optional
+stopping unless pre-registered as a new experiment.
+
+**A mechanism experiment that could answer "why".** Environment switch: resume
+frozen generation-30,000 populations in cue-free fluctuation, and fluctuating ones
+in a frozen environment, with a no-switch control, for ~10,000 generations with
+the instrumented binary. Rapid loss after the switch = regulation selected
+against under fluctuation; slow decline or persistence = not favoured, entrenched.
+The reverse switch tests whether growth resumes at the frozen rate. A knockout
+adds information only inside this design (frozen networks evaluated under
+fluctuation: liability or not). Needs a way to change a backup's environment
+(`aevol_modify`, unverified for R-Aevol environments).
