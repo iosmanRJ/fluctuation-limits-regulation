@@ -1213,3 +1213,10 @@ nb_link, genes and err per cell; S_START against S_END within cells; UF growth
 compared with frozen growth from one gene in the confirmation (first 10,000
 generations). Everything else is exploratory. No OSF registration; the
 timestamp is this commit.
+
+Analysis script committed after the launch (09:15) and before any output was
+inspected: `replication/raevol/analyse_switch.py` (SHA-256 prefix 486417ea5c3be8a0),
+tested on synthetic positive (LOST, GROW) and null (PERSIST, NO GROWTH) cases.
+It implements the rules above; `chain_switch.sh` runs it once after the last
+run, only if the checksum matches.
+
