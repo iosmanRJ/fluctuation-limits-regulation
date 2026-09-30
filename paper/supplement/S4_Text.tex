@@ -8,7 +8,7 @@ check that exposed each one. The complete record, including every retracted
 analysis, is in the project's \texttt{README.md} and \texttt{PAPER.md}.
 
 \section*{1. Earlier EvoSim results and their status}
-These results came from experiments with smaller populations (mostly between 2{,}000 and 3{,}000 organisms) than the 180-run batch in the main text.
+These results came from experiments with smaller populations (mostly between 2{,}000 and 3{,}000 organisms) than the 180-run batch in S6~Text.
 
 \begin{longtable}{@{}p{0.27\linewidth}p{0.36\linewidth}p{0.3\linewidth}@{}}
 \toprule
@@ -16,8 +16,8 @@ Earlier result & Evidence & Status after this study\\
 \midrule
 \endhead
 Fluctuation increases the number of network nodes &
-7 of 7 frozen--fluctuating comparisons positive and significant; mean $+6.3$
-nodes (range $+2.6$ to $+10.2$) &
+7 of 7 frozen--fluctuating comparisons positive and significant; mean $+6.32$
+nodes (range $+2.64$ to $+10.15$) &
 Reproduces published results~[1,2]. R-Aevol shows the opposite (P4), at every
 grain tested (G1--G4), so this is a difference between the models.\\
 Fluctuation increases connection density &
@@ -36,21 +36,22 @@ R-Aevol (P2), a measure not taken in the EvoSim regime in which organisms read
 the cue.\\
 Wiring cost makes fluctuation lethal &
 In the sparsest regime tested, 0 of 60 frozen and 37 and 33 of 60 fluctuating
-populations went extinct (Fisher $p=3.6\times10^{-13}$) &
+populations went extinct (two-sided Fisher exact $p=4\times10^{-15}$ and $5\times10^{-13}$) &
 Consistent with the viability pilot for P5: fluctuating populations survived 2,
 2 and 5 of 6 times at grids 80, 96 and 112, against 6 of 6 frozen.\\
 Task difficulty does not set genome size &
 Four manipulations of the task, all null (detection floors 2.2 to 4.2 nodes) &
 Stands.\\
 Organisms read the cue when development is reversible &
-With living organisms re-developed every few steps, switchers 0.65 against 0.23,
+With living organisms re-developed every few steps, switchers 0.645 against 0.229,
 and the best-paying channel matched in 1.5 against 1.0 of 6 states
 (informative against scrambled, 100 populations per arm); genome size unchanged
 ($p=0.84$, 95\% CI $-2.1$ to $+2.6$ nodes) &
 Stands. The strength measure has not been taken in this regime.\\
 Long-run outcome &
-8 runs of 25 million steps (about 630{,}000 generations): node number reached the
-minimum (12 at the time) by generation 14{,}000 and stayed there &
+8 runs of 25 million steps (about 630{,}000 generations): node number fell to the
+minimum (12 at the time) or within two nodes of it by generation 14{,}000 and
+stayed there, and six of the eight runs ended exactly at the minimum &
 Stands; the present version has a minimum of 13 because a sensor node was
 added.\\
 \bottomrule

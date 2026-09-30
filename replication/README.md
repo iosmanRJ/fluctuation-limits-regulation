@@ -12,8 +12,8 @@ Build notes for Apple Silicon are in the project memory (`raevol-replication`).
 | file | role |
 |---|---|
 | `gen_params_v1.py` | exploratory design: 6 arms × 12 seeds, switch rate 0.10 |
-| `strength_v1.py` | exploratory analysis that found the count/strength divergence |
-| `results_v1_analysis.txt` | v1 output, first-pass analysis |
+| `analyse_v1.py` | first-pass analysis of the exploratory runs (`analyse_v1.py <runs> 5000`; `analyse.py` on the Mac mini) → `results_v1_analysis.txt` |
+| `strength_v1.py` | exploratory analysis that found the count/strength divergence → `results_v1_strength.txt` (re-run 2026-09-30) |
 | `gen_params_v2.py` | **pre-registered** sweep: 3 switch rates, 2 population sizes, new seeds |
 | `analyse_v2.py` | **pre-registered** measures, tests and decision rules — do not edit after launch |
 | `launch_v2.sh` | launcher: primary cells first, seed-major, `DONE_<exit>` markers |
@@ -39,3 +39,18 @@ strength *density*; see the header of `analyse.jl` before deriving anything
 from it. The pre-registered confirmation is P5 in PAPER.md §11.5.
 `export_evosim.jl` writes `paper/data/evosim_runs.csv`; `gen_time.jl` gives
 steps per generation (fluctuating 23.6–24.3, frozen 30.7).
+
+## Verification (2026-09-30)
+
+Every per-run file in `paper/data/` was re-exported from the raw run
+directories on the Mac mini with the committed export scripts and is
+byte-identical to the committed copy (`raevol_runs`, `grain_runs`,
+`decomp_runs`, `confirm_runs`, `evosim_runs`). Every analysis was re-run from the
+raw data and reproduces its committed output (`results_v2_preregistered`,
+`results_grain_preregistered`, `results_confirm_preregistered`,
+`results_decomp_exploratory`, `results_v1_analysis`, and the two EvoSim results files, which differ only by
+the launcher's `ANALYSIS_DONE` marker). The scripts on the Mac mini match the
+committed ones (`export_grain.py` differs only in its docstring), and the
+EvoSim source there is the committed code before a comment-only edit.
+`make_figures.py` redraws every figure pixel-identically from `paper/data/`.
+

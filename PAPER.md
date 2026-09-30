@@ -1066,3 +1066,42 @@ Found and fixed:
   that all 27 citations still point at the same works); Tsuda status wording.
 
 Abstract 292 words, author summary 188; manuscript 16 pages, supplement 26.
+
+### 11.22 Everything checked against the raw data (2026-09-30)
+
+**Provenance.** Every committed script matches its Mac mini copy (SHA-256), except
+`export_grain.py` (docstring only). The EvoSim source on the Mac mini is the
+committed code before a comment-only edit (9681d30). All five per-run files in
+`paper/data/` re-export byte-identically from the raw run directories, and all
+seven analyses re-run from raw data reproduce their committed outputs
+(v2, grain, confirmation, decomposition, v1, EvoSim survivors/all; the EvoSim
+files differ only by the launcher's ANALYSIS_DONE line). `make_figures.py`
+redraws all five figures pixel-identically. Gap found: `results_v1_analysis.txt`
+was produced by `~/raevol_exp/analyse.py`, which was never committed; it is now
+`replication/raevol/analyse_v1.py` (reproduces the file byte for byte with
+window 5000), and `strength_v1.py`'s output is committed as
+`results_v1_strength.txt`.
+
+**Claims against the newest runs (confirmation).** P1–P4 all repeat in the 132
+confirmation runs (P1 2.9×/2.7×, P2 2.5×, P3 0.17, P4 −7.6/−8.5 genes, all
+p ≤ 2e-4); information does not raise gene number; error levels as stated;
+total link counts do not rise (1.14×, 0.97×; n.s.); frozen signal links are ~15×
+weaker per link; signal links make up 73–74% of the P1 rise. New: the
+genome-encoded network's link count rose with its strength at q = 0.10 and 0.20
+(51 vs 32, 50 vs 30; p = 0.04, 0.003), where the continuations had shown it
+only at q = 0.20. Added to the counts section (exploratory).
+
+**Corrections.**
+- Abstract: cue-free strength "a fifth to a quarter" of frozen → "an eighth to a
+  quarter" (all cue-free cells: 0.13 at intermediate grains to 0.27).
+- S4: Fisher p = 3.6e-13 for the extinction result (§1.3 above) is not
+  reproducible from any table of these counts. Two-sided Fisher exact per arm:
+  37/60 vs 0/60 p = 3.8e-15; 33/60 vs 0/60 p = 4.8e-13 (one-sided 1.9e-15,
+  2.4e-13; pooled 70/120 p = 2e-17). S4 now reports 4e-15 and 5e-13.
+- S4: long run "reached the minimum and stayed there" → six of eight runs ended
+  at the minimum, the others within two nodes (final ng 13, 14, 12, 12, 14, 12,
+  12, 12).
+- S4: values quoted at recorded precision instead of re-rounded (+6.32 nodes,
+  range +2.64 to +10.15; switchers 0.645 vs 0.229).
+- S4: "the 180-run batch in the main text" → "in S6 Text" (stale after the
+  restructure).
