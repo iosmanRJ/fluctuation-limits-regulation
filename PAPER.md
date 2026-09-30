@@ -1163,3 +1163,53 @@ The reverse switch tests whether growth resumes at the frozen rate. A knockout
 adds information only inside this design (frozen networks evaluated under
 fluctuation: liability or not). Needs a way to change a backup's environment
 (`aevol_modify`, unverified for R-Aevol environments).
+
+### 11.24 Pre-registration: environment-switch experiment (2026-09-30)
+
+Written and committed BEFORE the runs. Question: is the gap between frozen and
+cue-free fluctuating networks a LOSS (fluctuation removes networks that exist) or
+a failure to GROW (fluctuation keeps networks from being built), and is the limit
+set by the current environment or by the genome's history?
+
+Design (`replication/raevol/gen_params_switch.py`, `launch_switch.sh`): source
+populations are the cue-free confirmation cells (q = 0.10, population 1024); the
+best individual of each run at generation 30,000 founds a clonal population of
+1024 (`aevol_post_extract` → `aevol_create -C`), created and run with the
+instrumented binary for 10,000 generations; all other settings as in the sweep.
+Cells (12 runs each, run s from source replicate s; SEED 500000 + 1000c + s):
+- FF frozen → frozen (same target), control
+- FU frozen → cue-free fluctuation q = 0.10, switch
+- UU fluctuating → fluctuation q = 0.10, control
+- UF fluctuating → frozen (target A for odd s, B for even s), switch
+Pilot (throwaway, 20 generations): generation-0 statistics of FF_s1 equal the
+source's generation-30,000 best exactly (err 0.00755227, 33 genes, 78 links).
+
+Measures per run (per generation, stats_simd_best.csv; no signals, so S is the
+genome-encoded network): S = nb_link × avg_influence (0 without links), nb_TF,
+nb_link, nb_functional_genes, metabolic_error. START = mean over generations
+1–500, END = mean over generations 8,001–10,000.
+
+Primary tests on S_END, two-sided permutation (100,000), Holm across the two:
+- W1 loss: FU against FF.
+- W2 growth: UF against UU.
+Also for W1 the ratio S_END(FU)/S_END(FF) with a 10,000-resample bootstrap CI.
+
+Interpretation, fixed now:
+- W1 FU < FF (Holm p < 0.05): networks that exist are lost under uninformative
+  fluctuation within 10,000 generations; erosion is a real process and the
+  paper may say fluctuation erodes existing networks as well as keeping new ones
+  from growing. The fraction lost is 1 − S_END(FU)/S_START(FU).
+- W1 not significant AND lower CI bound of FU/FF > 0.75: existing networks
+  persist; the gap in the main experiments is a failure to grow, and "erodes" is
+  dropped.
+- W1 otherwise: inconclusive about loss; the paper describes only the absence of
+  growth.
+- W2 UF > UU (Holm p < 0.05): networks grow once fluctuation stops; the limit is
+  set by the current environment, not by the genome's history.
+- W2 not significant: within 10,000 generations the genomes' history constrains
+  growth (reported as such, not as evidence that it never grows).
+Secondary, no verdicts: trajectories (500-generation blocks) of S, nb_TF,
+nb_link, genes and err per cell; S_START against S_END within cells; UF growth
+compared with frozen growth from one gene in the confirmation (first 10,000
+generations). Everything else is exploratory. No OSF registration; the
+timestamp is this commit.
