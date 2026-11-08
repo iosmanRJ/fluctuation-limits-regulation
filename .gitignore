@@ -13,3 +13,6 @@ Manifest.toml
 .DS_Store
 .vscode/
 *.swp
+
+# Publisher PDFs collected for reading; copyrighted, never commit
+/relevant_papers/
