@@ -49,31 +49,37 @@ is the pattern of our design. Our grain experiment found that grain does not
 reconcile the two results. The remaining candidate explanations are the novel
 optima of the random walk and differences in the genotype--phenotype map.\\
 Fluctuating environments favour larger genomes & Published; matches earlier EvoSim results & Bentkowski et al. 2015 [11]. R-Aevol shows the opposite.\\
+Environmental change speeds up the evolution of regulatory complexity without
+raising its final level & Published, different measure & Chapel and de Boer 2026
+[12]: fixed numbers of genes and regulators and no cue; complexity is how evenly
+the regulators share control of each gene, and populations evolving without
+selection reach the same level. Regulatory strength and network size, which our
+results concern, are not measured.\\
 Genome size is limited by selection for mutational robustness and falls with
-population size and mutation rate & Established in Aevol & Knibbe et al. 2007 [12];
-Luiselli et al. 2024 [13]. Consistent with the small genomes in large EvoSim
+population size and mutation rate & Established in Aevol & Knibbe et al. 2007 [13];
+Luiselli et al. 2024 [14]. Consistent with the small genomes in large EvoSim
 populations.\\
 Sensing and non-sensing populations evolve differently in fluctuating
-environments & Published, different measures & Lalejini et al. 2021 [14]
+environments & Published, different measures & Lalejini et al. 2021 [15]
 (Avida), measuring trait loss and the accumulation of deleterious mutations. Network architecture was not measured.\\
 Network models with and without a cue input compared & Published & Ng and Kinjo
-2023 [15] and 2024 [16]; plasticity-led evolution appears only with the cue input, and network
+2023 [16] and 2024 [17]; plasticity-led evolution appears only with the cue input, and network
 density is fixed by the mutation operator. Removing the cue changes its presence
 and its information together, the confound the yoked control removes.\\
 Regulatory complexity is measured by counting genes or edges & Common practice &
 Tsuda and Kawata 2010 [10] (gene numbers, degree distributions); Espinosa-Soto
-2018 [17] (binary edges, weights not discussed).\\
+2018 [18] (binary edges, weights not discussed).\\
 Network size and connectivity can grow without selection for them & Established &
-Soyer and Bonhoeffer 2006 [18].\\
+Soyer and Bonhoeffer 2006 [19].\\
 The number of transcription factors scales faster than genome size and is
 higher in free-living bacteria & Established; two interpretations &
 Comparative genomics links it to lifestyle and environmental variety (van
-Nimwegen 2003 [19]; Cases, de Lorenzo and Ouzounis 2003 [20]). R-Aevol
+Nimwegen 2003 [20]; Cases, de Lorenzo and Ouzounis 2003 [21]). R-Aevol
 simulations reproduce the scaling and attribute it to mutation and
-rearrangement rates instead of lifestyle (Beslon et al. 2010 [21]).\\
+rearrangement rates instead of lifestyle (Beslon et al. 2010 [22]).\\
 Summed edge strength as a network measure & Standard method & Iwasaki, Tsuda and
-Kawata 2013 [22].\\
-The yoked control & Established in the study of learning & Church 1964 [23]
+Kawata 2013 [23].\\
+The yoked control & Established in the study of learning & Church 1964 [24]
 describes a bias that arises when individual subjects are paired; our arms are
 not paired, so it does not apply.\\
 \midrule
@@ -108,6 +114,7 @@ reliabilities under fluctuation only.\\
 \item Pollack D, Nozoe T, Kussell E. Gene regulation, phenotypic memory, and selection in fluctuating environments. bioRxiv [Preprint]. 2025. doi:10.1101/2025.06.23.661119.
 \item Tsuda ME, Kawata M. Evolution of gene regulatory networks by fluctuating selection and intrinsic constraints. PLoS Comput Biol. 2010;6(8):e1000873.
 \item Bentkowski P, van Oosterhout C, Mock T. A model of genome size evolution for prokaryotes in stable and fluctuating environments. Genome Biol Evol. 2015;7(8):2344--51.
+\item Chapel M, de Boer CG. Evolutionary simulations reveal role for genomic recombination in the evolution of gene regulatory network complexity and robustness. Genome Biol Evol. 2026;18(8):evag196. doi:10.1093/gbe/evag196.
 \item Knibbe C, Coulon A, Mazet O, Fayard JM, Beslon G. A long-term evolutionary pressure on the amount of noncoding DNA. Mol Biol Evol. 2007;24(10):2344--53.
 \item Luiselli J, Rouzaud-Cornabas J, Lartillot N, Beslon G. Genome streamlining: effect of mutation rate and population size on genome size reduction. Genome Biol Evol. 2024;16(12):evae250.
 \item Lalejini A, Ferguson AJ, Grant NA, Ofria C. Adaptive phenotypic plasticity stabilizes evolution in fluctuating environments. Front Ecol Evol. 2021;9:715381.

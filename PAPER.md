@@ -1283,3 +1283,22 @@ current environment; speed of loss suggests selection, untested); Limitations
 (clonal founding); Conclusion; abstract 299 words, summary 199; SI: 708 runs,
 S2 runs/record/checksum/W results, S3 Table G, S4 record. Other figures
 unchanged pixel for pixel.
+
+### 11.27 Literature check after a break; one citation added (2026-11-08)
+
+Searched for work published since 2026-09-30 that could affect novelty. One
+relevant new paper: Chapel & de Boer 2026, Genome Biol Evol 18(8):evag196 (read
+in full via PMC). Fixed numbers of genes (200) and TFs (20), no cue; complexity =
+1 − Gini of TF binding probabilities per gene (evenness, not size or strength);
+repeated shifts of 10% of target optima from generation 50,000; complexity
+plateaus at ~0.55 in every condition; environmental change only speeds the
+approach; neutral populations reach the same plateau faster. Does not overlap
+our result; supports "models disagree" and "the answer depends on the measure".
+Added to the Introduction (after Malcom 2011) and as an S5 row (S5 references
+renumbered in citation order; all 27 earlier citations verified unchanged).
+Also checked: Jorritsma & van den Berg final citation Evolution 80(1):230–239
+(as cited); Pollack et al. still a bioRxiv preprint; van den Berg group 2026
+output (evolvability review in Trends Genet, Jorritsma thesis on biofilms,
+Luiselli, Beslon & van den Berg in Genetics on robustness) contains no follow-up
+on cues or network size. The Mac mini did not respond (raw run directories live
+only there; archive before the Zenodo deposit).
