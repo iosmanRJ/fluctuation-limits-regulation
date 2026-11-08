@@ -16,3 +16,6 @@ Manifest.toml
 
 # Publisher PDFs collected for reading; copyrighted, never commit
 /relevant_papers/
+
+# Local writing helpers; not part of the published repository
+/paper/tools/

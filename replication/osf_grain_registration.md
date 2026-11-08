@@ -3,7 +3,7 @@
 > **NOT SUBMITTED — and must not be submitted now.** The grain results were
 > produced on 2026-09-28 at 00:38, before any OSF registration was made. A
 > registration filed after that point would not be a pre-registration. The
-> grain experiment's pre-registration is git commit `fa00777` (local timestamps
+> grain experiment's pre-registration is git commit `aafb136` (local timestamps
 > only), and the manuscript says so. Kept for the record only.
 
 
@@ -22,7 +22,7 @@ experiment.
 2026-09-27 at 18:24 and are in progress. No outcome data have been inspected.
 The analysis script runs automatically, once, when the last run finishes. The
 design, analysis code and decision rules were committed to version control
-before any run (git commit fa00777; SHA-256 prefixes: `analyse_grain.py`
+before any run (git commit aafb136; SHA-256 prefixes: `analyse_grain.py`
 89a8613289731999, `gen_params_grain.py` 2048f1443cc9367e, `analyse_v2.py`
 d0609140a970de48).
 

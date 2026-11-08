@@ -1003,7 +1003,7 @@ confidence intervals (10{,}000 resamples).
 
 \subsection*{Pre-registration and deviations}
 Predictions P1 to P4, their measures, tests and decision rules, and the analysis
-code were committed to version control (commit \texttt{f985ccd}) before the
+code were committed to version control (commit \texttt{e6173aa}) before the
 pre-registered sweep was started. The analysis was run once, on the complete
 data, with the committed code, whose checksum was verified beforehand. The only
 deviation was operational. The idle-sleep setting of the host machine suspended
@@ -1011,7 +1011,7 @@ the runs overnight, which lengthened the wall time but cannot have affected the
 results, because a suspended process resumes from the state in which it
 stopped. A pre-registered confirmation in EvoSim could not be run, because
 no candidate regime met its viability condition (S6~Text). The design, predictions and analysis code of the
-grain experiment were committed in the same way (commit \texttt{fa00777}) before
+grain experiment were committed in the same way (commit \texttt{aafb136}) before
 its runs began, and its analysis was run once, automatically, when the last run
 finished. Its interpretation was fixed at the same time. If coarse grain gave
 more genes (or stronger regulation) than fine grain and than the frozen
@@ -1020,16 +1020,16 @@ fine grain, Tsuda and Kawata's gain would probably need novel optima, which our
 design cannot produce. If it did not do so relative to fine grain, grain would
 not be the explanation and the difference would be reported as one between the
 models. The confirmation (C1 to C4) was pre-registered in the same way (commit
-\texttt{59ff365}), after the exploratory decomposition and before any of its
+\texttt{e15104a}), after the exploratory decomposition and before any of its
 runs. Its analysis script, tested beforehand on synthetic data, fixed the tests,
 the decision rules and what each outcome would mean for the paper, including a
 change of title if the informative cue did not maintain the network. The script
 was run once, after its checksum was verified, when the last run finished. The
 environment-switch experiment was pre-registered in the same way. Its design and
 the interpretation of each outcome were committed before the runs (commit
-\texttt{313d744}), and its analysis script, tested on synthetic data, was
+\texttt{5bd4fee}), and its analysis script, tested on synthetic data, was
 committed after the launch but before any output was inspected (commit
-\texttt{0e50dab}); it ran once when the last run finished.
+\texttt{baeddca}); it ran once when the last run finished.
 
 \subsection*{Software and availability}
 The R-Aevol runs were made on a single 12-core machine. EvoSim (S1 and S6 Text)

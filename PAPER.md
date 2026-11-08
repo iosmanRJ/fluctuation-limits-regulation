@@ -585,7 +585,7 @@ runs repeatedly overnight — wall time roughly doubled, results unaffected
 09:18 the sweep ran under `caffeinate`, with no further sleep events.
 
 **Addendum 2026-09-28 (grain experiment).** No OSF registration was made before
-its results existed, so its pre-registration is the git commit `fa00777` alone,
+its results existed, so its pre-registration is the git commit `aafb136` alone,
 with local timestamps. Its analysis ran once, automatically, with the committed
 code (checksum verified). No deviations.
 
@@ -1071,7 +1071,7 @@ Abstract 292 words, author summary 188; manuscript 16 pages, supplement 26.
 
 **Provenance.** Every committed script matches its Mac mini copy (SHA-256), except
 `export_grain.py` (docstring only). The EvoSim source on the Mac mini is the
-committed code before a comment-only edit (9681d30). All five per-run files in
+committed code before a comment-only edit (8eed8de). All five per-run files in
 `paper/data/` re-export byte-identically from the raw run directories, and all
 seven analyses re-run from raw data reproduce their committed outputs
 (v2, grain, confirmation, decomposition, v1, EvoSim survivors/all; the EvoSim
@@ -1221,7 +1221,7 @@ It implements the rules above; `chain_switch.sh` runs it once after the last
 run, only if the checksum matches.
 
 
-### 11.25 Growth, not erosion: manuscript changes (2026-09-30, cc2cece)
+### 11.25 Growth, not erosion: manuscript changes (2026-09-30, d63f1cc)
 
 Checked run by run before changing the text (`paper/data/trajectories.csv`,
 500-generation blocks, all 432 runs of v1, v2 at population 1024, grain and the

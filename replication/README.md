@@ -18,18 +18,18 @@ Build notes for Apple Silicon are in the project memory (`raevol-replication`).
 | `analyse_v2.py` | **pre-registered** measures, tests and decision rules — do not edit after launch |
 | `launch_v2.sh` | launcher: primary cells first, seed-major, `DONE_<exit>` markers |
 | `results_v2_preregistered.txt` | output of the single pre-registered run of `analyse_v2.py`: P1–P4 all SUPPORTED (PAPER.md §11.7) |
-| `gen_params_grain.py`, `analyse_grain.py` | **pre-registered** grain experiment (G1–G4), committed as `fa00777` before any run |
+| `gen_params_grain.py`, `analyse_grain.py` | **pre-registered** grain experiment (G1–G4), committed as `aafb136` before any run |
 | `results_grain_preregistered.txt` | its single analysis run: G1, G3 inconclusive; G2, G4 refuted (PAPER.md §11.10) |
 | `instrument_signal_links.py` | patches a COPY of the aevol-7 source so the best-individual stats also report links and summed influence of SIGNAL proteins (two columns appended at the end of each row) |
 | `decomp_launch.sh`, `decomp_extract.py`, `decomp_analyse.py` | EXPLORATORY decomposition: continue every run from its generation-30,000 population to 32,000 with the instrumented binary, summarise per run (`paper/data/decomp_runs.csv`), and test contrasts on the genome-encoded part → `results_decomp_exploratory.txt`. Resuming is not bit-reproducible, hence continuation rather than re-run; validated against the original window (r = 0.995) |
-| `gen_params_confirm.py`, `analyse_confirm.py` | **pre-registered** confirmation of the decomposition (C1–C4 on the genome-encoded strength), committed as `59ff365` before any run; runs use the instrumented binary from generation 0 |
+| `gen_params_confirm.py`, `analyse_confirm.py` | **pre-registered** confirmation of the decomposition (C1–C4 on the genome-encoded strength), committed as `e15104a` before any run; runs use the instrumented binary from generation 0 |
 | `launch_confirm.sh`, `chain_confirm.sh` | launch the 132 confirmation runs under `caffeinate`, then verify the checksum of `analyse_confirm.py` and run it once |
 | `results_confirm_preregistered.txt` | its single analysis run: C1–C4 all SUPPORTED (PAPER.md §11.20) |
 | `export_confirm.py` | writes `paper/data/confirm_runs.csv` with the pre-registered `summarise` |
 | `export_trajectories.py` | per-run means over 500-generation blocks for every run of v1, v2 (population 1024), grain and the confirmation → `paper/data/trajectories.csv` (Fig 5) |
 | `exploratory_pooled.py`, `exploratory_trajectories*.py` | EXPLORATORY: composition of the network, power, pooled estimates, trajectory summaries (PAPER.md §11.23) |
 | `export_switch.py`, `results_switch_preregistered.txt` | per-run 500-generation blocks of the switch experiment → `paper/data/switch_trajectories.csv`; the single analysis run: W1 LOST, W2 GROW (PAPER.md §11.26) |
-| `gen_params_switch.py`, `launch_switch.sh`, `analyse_switch.py`, `chain_switch.sh` | **pre-registered** environment-switch experiment (PAPER.md §11.24, commit `313d744`; analysis `0e50dab`): clonal populations of the generation-30,000 best genomes moved between frozen and cue-free fluctuating environments for 10,000 generations |
+| `gen_params_switch.py`, `launch_switch.sh`, `analyse_switch.py`, `chain_switch.sh` | **pre-registered** environment-switch experiment (PAPER.md §11.24, commit `5bd4fee`; analysis `baeddca`): clonal populations of the generation-30,000 best genomes moved between frozen and cue-free fluctuating environments for 10,000 generations |
 | `export_raevol.py`, `export_grain.py` | write `paper/data/raevol_runs.csv` and `grain_runs.csv`, one row per run, with the pre-registered summary function (plus `tfs`, mean `nb_TF`, not pre-registered) |
 
 The yoked control uses four environments against the informative arm's two,
@@ -58,3 +58,12 @@ committed ones (`export_grain.py` differs only in its docstring), and the
 EvoSim source there is the committed code before a comment-only edit.
 `make_figures.py` redraws every figure pixel-identically from `paper/data/`.
 
+
+## Commit IDs
+
+Commit IDs changed once, when the history was rewritten before publication;
+commit dates and the contents of every pre-registered file are unchanged. The
+manuscript, supplements and these notes use the current IDs. The analysis scripts
+are frozen at the checksums reported in S2 Text, so `raevol/analyse_switch.py`
+still names its pre-registration commit by the earlier ID `313d744`, which is
+now `5bd4fee`.

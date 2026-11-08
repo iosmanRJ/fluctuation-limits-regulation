@@ -3,7 +3,7 @@
 **Short title:** Sensed fluctuation strengthens gene regulation
 
 **Target:** PLOS Computational Biology, Research Article.
-**Status:** second draft, 2026-09-27. Replaces the first draft (git `9e00da9`),
+**Status:** second draft, 2026-09-27. Replaces the first draft (git `37b010b`),
 whose two central claims did not survive independent replication. Sections
 marked ⟨PENDING⟩ wait on the grain experiment (pre-registered, running; results
 expected 2026-09-28). References marked [verify] need checking against the
@@ -525,15 +525,15 @@ sizes are Cohen's d.
 ### Pre-registration and deviations
 
 Predictions P1–P4, their measures, tests and decision rules, and the analysis
-code were committed to version control (commit f985ccd) before the
+code were committed to version control (commit e6173aa) before the
 pre-registered sweep was launched; the analysis was run once, on complete data,
 with the committed code (verified by checksum). The decision rules are given in
 Table 2. The only deviation was operational: the host machine's idle sleep
 suspended runs overnight, which lengthened wall time but cannot affect results,
 since runs are deterministic given their seed. The EvoSim confirmation (commit
-4bc16c3) required fluctuating and frozen populations to survive in a
+cbca829) required fluctuating and frozen populations to survive in a
 viability pilot; none of the three candidate regimes qualified and it was not
-run (commit 56fe3a0). The grain experiment (commit fa00777) ⟨PENDING: OSF
+run (commit 15d0418). The grain experiment (commit aafb136) ⟨PENDING: OSF
 registration if made; outcome⟩.
 
 > **Table 2. Pre-registered predictions and verdicts.**
