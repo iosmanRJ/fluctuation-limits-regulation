@@ -78,7 +78,9 @@ The commit timestamps are local and cannot be verified independently.
 
 This repository is archived on Zenodo, doi:
 [10.5281/zenodo.24054019](https://doi.org/10.5281/zenodo.24054019) (all
-versions; version 1.0 was used for the paper). `paper/data/` holds the per-run
+versions; version 1.0, doi:
+[10.5281/zenodo.24054065](https://doi.org/10.5281/zenodo.24054065), was used
+for the paper). `paper/data/` holds the per-run
 summaries behind every result. The raw per-generation outputs of all runs
 (several GB) will be deposited on Zenodo separately and linked here.
 
