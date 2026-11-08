@@ -1,0 +1,20 @@
+{
+  "title": "Code and data for \"Environmental fluctuation limits gene regulation unless it can be tracked\"",
+  "upload_type": "software",
+  "description": "Simulation code, per-run data, pre-registered analysis scripts and their outputs, and manuscript sources for the paper \"Environmental fluctuation limits gene regulation unless it can be tracked\" (Osman, in preparation). The study uses R-Aevol, in which gene regulation arises from transcription factors encoded in a DNA-like sequence, to separate environmental fluctuation from the information available for tracking it (informative, absent and yoked cues), and EvoSim, the Julia simulator in which the study began.",
+  "creators": [
+    {"name": "Osman, Ivan", "affiliation": "Infobip"}
+  ],
+  "license": "mit",
+  "access_right": "open",
+  "keywords": [
+    "evolution",
+    "gene regulatory networks",
+    "environmental fluctuation",
+    "phenotypic plasticity",
+    "cue reliability",
+    "Aevol",
+    "digital evolution",
+    "pre-registration"
+  ]
+}
